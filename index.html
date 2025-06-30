@@ -6,25 +6,32 @@
     <title>TVC Auto AI Pro - Professional Dealership Terminal</title>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
     <style>
+        /* Updated Color Scheme based on truevestments.com */
         :root {
-            --bg-primary: #0b0e13;
-            --bg-secondary: #111419;
-            --bg-tertiary: #1a1d23;
-            --bg-quaternary: #242831;
-            --accent-primary: #00d4ff;
-            --accent-secondary: #0066ff;
-            --accent-tertiary: #00ff88;
-            --text-primary: #ffffff;
-            --text-secondary: #b4b8c4;
-            --text-muted: #6b7280;
-            --border-color: #2a2d35;
-            --border-accent: #3a3d45;
-            --success: #00ff88;
-            --warning: #ffb800;
-            --error: #ff4757;
-            --chart-green: #26a69a;
-            --chart-red: #ef5350;
-            --chart-blue: #42a5f5;
+            --bg-primary: #1a1a1a; /* Darker background, similar to sections on truevestments */
+            --bg-secondary: #2c2c2c; /* Card/panel background */
+            --bg-tertiary: #3a3a3a; /* Lighter card/form background */
+            --bg-quaternary: #4a4a4a; /* Even lighter elements */
+
+            --accent-primary: #00875e; /* Green from truevestments.com */
+            --accent-secondary: #006649; /* Darker green for buttons/active state */
+            --accent-tertiary: #00b377; /* Lighter green for highlights */
+
+            --text-primary: #ffffff; /* White text */
+            --text-secondary: #cccccc; /* Lighter gray text */
+            --text-muted: #888888; /* Muted gray text */
+            
+            --border-color: #444444; /* Darker border */
+            --border-accent: #555555; /* Lighter border */
+
+            --success: #00b377; /* Green for positive status/success */
+            --warning: #ffaa00; /* Amber for warnings */
+            --error: #ff4757; /* Red for errors */
+
+            /* Chart colors (can be adjusted for truevestments aesthetic if needed) */
+            --chart-green: #00b377;
+            --chart-red: #ff4757;
+            --chart-blue: #00875e; /* Using primary accent for blue-like tone */
         }
 
         * {
@@ -153,12 +160,12 @@
         }
 
         .btn-primary {
-            background: var(--accent-secondary);
+            background: var(--accent-primary); /* Changed to primary accent */
             color: white;
         }
 
         .btn-primary:hover {
-            background: #0052cc;
+            background: var(--accent-secondary); /* Darker green on hover */
         }
 
         .btn-secondary {
@@ -214,7 +221,7 @@
         }
 
         .nav-item.active {
-            background: var(--accent-secondary);
+            background: var(--accent-secondary); /* Darker green for active nav */
             color: white;
         }
 
@@ -332,7 +339,7 @@
         }
 
         .trend-up {
-            background: rgba(0, 255, 136, 0.15);
+            background: rgba(0, 179, 119, 0.15); /* Using lighter success green */
             color: var(--success);
         }
 
@@ -426,21 +433,21 @@
         }
 
         .status-qualified {
-            background: rgba(0, 255, 136, 0.15);
+            background: rgba(0, 179, 119, 0.15); /* Using lighter success green */
             color: var(--success);
-            border: 1px solid rgba(0, 255, 136, 0.3);
+            border: 1px solid rgba(0, 179, 119, 0.3);
         }
 
-        .status-follow, .status-new { /* Added status-new */
-            background: rgba(255, 184, 0, 0.15);
+        .status-follow, .status-new {
+            background: rgba(255, 170, 0, 0.15); /* Using warning orange */
             color: var(--warning);
-            border: 1px solid rgba(255, 184, 0, 0.3);
+            border: 1px solid rgba(255, 170, 0, 0.3);
         }
         
         .status-available {
-            background: rgba(0, 255, 136, 0.15);
+            background: rgba(0, 179, 119, 0.15);
             color: var(--success);
-            border: 1px solid rgba(0, 255, 136, 0.3);
+            border: 1px solid rgba(0, 179, 119, 0.3);
         }
 
         .status-sold {
@@ -449,10 +456,10 @@
             border: 1px solid rgba(255, 71, 87, 0.3);
         }
 
-        .status-reserved, .status-incoming { /* Added status-incoming */
-            background: rgba(255, 184, 0, 0.15);
+        .status-reserved, .status-incoming {
+            background: rgba(255, 170, 0, 0.15);
             color: var(--warning);
-            border: 1px solid rgba(255, 184, 0, 0.3);
+            border: 1px solid rgba(255, 170, 0, 0.3);
         }
 
         /* Charts and Widgets */
@@ -1006,6 +1013,41 @@
                     </div>
                 </div>
 
+                <div id="revenueDetails" class="page-content">
+                    <div class="data-table-container">
+                        <div class="table-header">
+                            <div class="table-title">Detailed Revenue Breakdown</div>
+                            <button class="btn btn-secondary" onclick="alert('Exporting Revenue Report...');">📊 Export Report</button>
+                        </div>
+                        <table class="data-table">
+                            <thead>
+                                <tr>
+                                    <th>Category</th>
+                                    <th>Sub-Category</th>
+                                    <th>Amount</th>
+                                    <th>Trend</th>
+                                    <th>Last 30 Days</th>
+                                </tr>
+                            </thead>
+                            <tbody id="revenueBreakdownTable">
+                                </tbody>
+                        </table>
+                    </div>
+
+                    <div class="widget-grid" style="grid-template-columns: 1fr;">
+                        <div class="chart-widget">
+                            <div class="widget-header">
+                                <div class="widget-title">Revenue by Category</div>
+                                <div style="font-size: 11px; color: var(--text-muted);">Visual representation (Placeholder)</div>
+                            </div>
+                            <div class="chart-placeholder">
+                                <div class="chart-line" style="background: linear-gradient(90deg, var(--accent-primary) 0%, var(--accent-tertiary) 100%);"></div>
+                                📊 Chart: Sales vs. Service Revenue
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
                 <div id="photos" class="page-content">
                     <div class="camera-container">
                         <div class="widget-header" style="margin: 0 0 16px 0;">
@@ -1058,7 +1100,7 @@
                         </div>
                         <div id="photoGallery" class="vehicle-photos" style="padding: 16px;">
                             <div style="grid-column: 1 / -1; text-align: center; color: var(--text-muted); padding: 40px;">
-                                No photos captured yet. Use the camera above to start taking vehicle photos.
+                                No photos captured yet. Use the camera or upload button above to start adding vehicle photos.
                             </div>
                         </div>
                     </div>
@@ -1173,6 +1215,13 @@
                             <div class="widget-title">Add New Vehicle</div>
                         </div>
                         <div class="form-group">
+                            <label class="form-label" for="newVehicleVIN">VIN (17 characters)</label>
+                            <div style="display: flex; gap: 8px;">
+                                <input type="text" id="newVehicleVIN" class="form-input" placeholder="Enter VIN" maxlength="17" oninput="this.value = this.value.toUpperCase()">
+                                <button class="btn btn-primary" style="white-space: nowrap;" onclick="decodeAndPopulateVIN()">Decode VIN</button>
+                            </div>
+                        </div>
+                        <div class="form-group">
                             <label class="form-label" for="newVehicleMake">Make</label>
                             <input type="text" id="newVehicleMake" class="form-input" placeholder="e.g., Toyota">
                         </div>
@@ -1185,8 +1234,16 @@
                             <input type="number" id="newVehicleYear" class="form-input" placeholder="e.g., 2024" min="1900" max="2099">
                         </div>
                         <div class="form-group">
-                            <label class="form-label" for="newVehicleVIN">VIN (17 characters)</label>
-                            <input type="text" id="newVehicleVIN" class="form-input" placeholder="Enter VIN" maxlength="17" oninput="this.value = this.value.toUpperCase()">
+                            <label class="form-label" for="newVehicleBodyType">Body Type</label>
+                            <input type="text" id="newVehicleBodyType" class="form-input" placeholder="e.g., Sedan">
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label" for="newVehicleEngine">Engine</label>
+                            <input type="text" id="newVehicleEngine" class="form-input" placeholder="e.g., 2.5L I4">
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label" for="newVehicleManufacturer">Manufacturer</label>
+                            <input type="text" id="newVehicleManufacturer" class="form-input" placeholder="e.g., Toyota Motor Corporation">
                         </div>
                         <div class="form-group">
                             <label class="form-label" for="newVehiclePrice">Price ($)</label>
@@ -1387,6 +1444,15 @@
             saleTime: { value: 14, change: -7, prevValue: 21, unit: 'd', isCurrency: false }
         };
 
+        // NEW: Detailed Revenue Data
+        let revenueDetails = [
+            { id: 1, category: 'New Car Sales', amount: 300000, trend: 'up', change: '+15%', last30Days: 280000 },
+            { id: 2, category: 'Used Car Sales', amount: 150000, trend: 'up', change: '+10%', last30Days: 135000 },
+            { id: 3, category: 'Service & Parts', amount: 37000, trend: 'flat', change: '0%', last30Days: 37000 },
+            { id: 4, category: 'Financing & Insurance', amount: 12000, trend: 'up', change: '+20%', last30Days: 10000 },
+            { id: 5, category: 'Total Revenue', amount: 487000, trend: 'up', change: '+12%', last30Days: 435000 }
+        ];
+
         let customers = [
             { 
                 id: 1, 
@@ -1447,10 +1513,23 @@
             renderInventoryTable();
             populateVehicleSelect(); // Populate vehicle dropdown for photo manager
             updatePhotoDisplay(); // Initial render of photo gallery
+            renderRevenueBreakdownTable(); // NEW: Render revenue breakdown
+            setInitialAIConfig(); // NEW: Set Gemini as default AI
+            // Show dashboard by default when loaded
+            showPage('dashboard', document.querySelector('.nav-item[onclick*=\'dashboard\']'));
         });
 
         function formatCurrency(value) {
             return '$' + value.toLocaleString();
+        }
+
+        // NEW: Set initial AI config to Gemini
+        function setInitialAIConfig() {
+            const aiProviderSelect = document.getElementById('aiProvider');
+            if (aiProviderSelect) {
+                aiProviderSelect.value = 'gemini';
+                updateAIStatus(); // Update status based on default
+            }
         }
 
         function updateDashboardMetrics() {
@@ -1481,7 +1560,7 @@
             document.getElementById('dashboardLeadsTrend').className = dashboardMetrics.leads.change > 0 ? 'metric-trend trend-up' : 'metric-trend trend-down';
             document.getElementById('dashboardLeadsSubtitle').textContent = `${hotLeadsCount} hot • ${qualifiedLeadsCount} qualified • ${followUpLeadsCount} follow-up`;
 
-            const availableInventoryCount = inventory.filter(v => v.status === 'available' || v.status === 'reserved').length;
+            const availableInventoryCount = inventory.filter(v => v.status === 'available' || v.status === 'reserved' || v.status === 'incoming').length;
             document.getElementById('dashboardInventory').textContent = formatCurrency(inventory.reduce((sum, v) => sum + v.price, 0));
             document.getElementById('dashboardInventoryTrend').textContent = `${dashboardMetrics.inventory.change * 100 > 0 ? '+' : ''}${dashboardMetrics.inventory.change * 100}%`;
             document.getElementById('dashboardInventoryTrend').className = dashboardMetrics.inventory.change > 0 ? 'metric-trend trend-up' : 'metric-trend trend-down';
@@ -1531,7 +1610,8 @@
                 photos: 'Photo Manager',
                 vin: 'VIN Intelligence',
                 analytics: 'Performance Analytics',
-                chat: 'AI Terminal'
+                chat: 'AI Terminal',
+                revenueDetails: 'Detailed Revenue' // NEW: Added revenueDetails title
             };
             
             if (titles[pageId]) {
@@ -1548,6 +1628,8 @@
             } else if (pageId === 'inventory') {
                 renderInventoryTable(); // Re-render inventory table
                 closeVehicleForm(); // Hide form initially
+            } else if (pageId === 'revenueDetails') { // NEW: Handle revenue details page
+                renderRevenueBreakdownTable();
             }
         }
 
@@ -1565,24 +1647,29 @@
             renderCustomerTable();
             renderInventoryTable();
             updatePhotoDisplay();
+            renderRevenueBreakdownTable(); // NEW: Refresh revenue breakdown
             addActivity('🔄', 'Data refreshed from source', 'Just now');
             alert('Dashboard and data refreshed!');
         }
 
+        // NEW: showMetricDetails function to link to revenueDetails page
         function showMetricDetails(metricKey) {
-            // Simulate drilling down or showing more detail for a metric
-            let message = '';
             if (metricKey === 'revenue') {
-                message = `Detailed Revenue: Total ${formatCurrency(dashboardMetrics.revenue.value)} current month. Breakdown: New Car Sales: $300K, Used Car Sales: $150K, Service: $37K.`;
-            } else if (metricKey === 'leads') {
-                message = `Active Leads Breakdown: Hot Leads: ${customers.filter(c => c.status === 'hot').length}, Qualified Leads: ${customers.filter(c => c.status === 'qualified').length}, Follow-Up Leads: ${customers.filter(c => c.status === 'follow').length}. Total Customers in pipeline: ${customers.length}.`;
-            } else if (metricKey === 'inventory') {
-                message = `Inventory Overview: ${inventory.filter(v => v.status === 'available').length} Available, ${inventory.filter(v => v.status === 'reserved').length} Reserved, ${inventory.filter(v => v.status === 'sold').length} Sold. Total value: ${formatCurrency(inventory.reduce((sum, v) => sum + v.price, 0))}.`;
-            } else if (metricKey === 'saleTime') {
-                message = `Average Sale Time: ${dashboardMetrics.saleTime.value} days. This is ${Math.abs(dashboardMetrics.saleTime.change)} days faster than last period. Efficiency is improving!`;
+                showPage('revenueDetails', document.querySelector('.nav-item[onclick*=\'analytics\']')); // Link to Analytics or new Revenue page
+                addChatMessage('assistant', 'Navigating to detailed revenue breakdown.');
+            } else {
+                // Existing simulated messages for other metrics
+                let message = '';
+                if (metricKey === 'leads') {
+                    message = `Active Leads Breakdown: Hot Leads: ${customers.filter(c => c.status === 'hot').length}, Qualified Leads: ${customers.filter(c => c.status === 'qualified').length}, Follow-Up Leads: ${customers.filter(c => c.status === 'follow').length}. Total Customers in pipeline: ${customers.length}.`;
+                } else if (metricKey === 'inventory') {
+                    message = `Inventory Overview: ${inventory.filter(v => v.status === 'available').length} Available, ${inventory.filter(v => v.status === 'reserved').length} Reserved, ${inventory.filter(v => v.status === 'sold').length} Sold. Total value: ${formatCurrency(inventory.reduce((sum, v) => sum + v.price, 0))}.`;
+                } else if (metricKey === 'saleTime') {
+                    message = `Average Sale Time: ${dashboardMetrics.saleTime.value} days. This is ${Math.abs(dashboardMetrics.saleTime.change)} days faster than last period. Efficiency is improving!`;
+                }
+                addChatMessage('assistant', message);
+                showPage('chat', document.querySelector('.nav-item[onclick*=\'chat\']'));
             }
-            addChatMessage('assistant', message);
-            showPage('chat', document.querySelector('.nav-item[onclick*=\'chat\']'));
         }
 
         // --- Voice Control ---
@@ -1621,15 +1708,18 @@
                 else if (command.includes('photo')) { showPage('photos', document.querySelector('.nav-item[onclick*=\'photos\']')); executed = true; }
                 else if (command.includes('vin')) { showPage('vin', document.querySelector('.nav-item[onclick*=\'vin\']')); executed = true; }
                 else if (command.includes('analytics')) { showPage('analytics', document.querySelector('.nav-item[onclick*=\'analytics\']')); executed = true; }
-                else if (command.includes('chat') || command.includes('terminal')) { showPage('chat', document.querySelector('.nav-item[onclick*=\'chat\']')); executed = true; }
+                else if (command.includes('chat') || command.includes('terminal') || command.includes('AI')) { showPage('chat', document.querySelector('.nav-item[onclick*=\'chat\']')); executed = true; }
                 else if (command.includes('add customer') && document.getElementById('customers').classList.contains('active')) { openCustomerForm(); executed = true; }
                 else if (command.includes('add vehicle') && document.getElementById('inventory').classList.contains('active')) { openVehicleForm(); executed = true; }
                 else if (command.includes('scan vin') && document.getElementById('vin').classList.contains('active')) { scanVIN(); executed = true; }
+                else if (command.includes('decode vin') && document.getElementById('inventory').classList.contains('active')) { decodeAndPopulateVIN(); executed = true; } // For add vehicle VIN
                 else if (command.includes('start camera') && document.getElementById('photos').classList.contains('active')) { startCamera(); executed = true; }
                 else if (command.includes('capture photo') && document.getElementById('photos').classList.contains('active')) { capturePhoto(); executed = true; }
                 else if (command.includes('stop camera') && document.getElementById('photos').classList.contains('active')) { stopCamera(); executed = true; }
                 else if (command.includes('refresh data')) { refreshData(); executed = true; }
                 else if (command.includes('export data')) { exportData(); executed = true; }
+                else if (command.includes('revenue breakdown') || command.includes('revenue details')) { showPage('revenueDetails', document.querySelector('.nav-item[onclick*=\'analytics\']')); executed = true; }
+
 
                 if (executed) {
                     addChatMessage('assistant', `✅ Command executed: ${command}`);
@@ -1789,17 +1879,65 @@
 
         function openVehicleForm() {
             document.getElementById('addVehicleForm').style.display = 'block';
-            // Clear form fields
+            // Clear form fields for new entry
+            document.getElementById('newVehicleVIN').value = '';
             document.getElementById('newVehicleMake').value = '';
             document.getElementById('newVehicleModel').value = '';
             document.getElementById('newVehicleYear').value = '';
-            document.getElementById('newVehicleVIN').value = '';
+            document.getElementById('newVehicleBodyType').value = '';
+            document.getElementById('newVehicleEngine').value = '';
+            document.getElementById('newVehicleManufacturer').value = '';
             document.getElementById('newVehiclePrice').value = '';
             document.getElementById('newVehicleStatus').value = 'available';
         }
 
         function closeVehicleForm() {
             document.getElementById('addVehicleForm').style.display = 'none';
+        }
+
+        // NEW: Function to decode VIN and populate form
+        async function decodeAndPopulateVIN() {
+            const vinInput = document.getElementById('newVehicleVIN').value.toUpperCase().trim();
+            if (vinInput.length !== 17 || !/^[A-HJ-NPR-Z0-9]{17}$/.test(vinInput)) {
+                alert('Please enter a valid 17-character VIN to decode.');
+                return;
+            }
+
+            // Temporarily disable decode button and show loading
+            const decodeBtn = document.querySelector('#addVehicleForm .btn-primary[onclick="decodeAndPopulateVIN()"]');
+            const originalBtnText = decodeBtn.innerHTML;
+            decodeBtn.disabled = true;
+            decodeBtn.innerHTML = 'Decoding...';
+
+            try {
+                const response = await fetch(`https://vpic.nhtsa.dot.gov/api/vehicles/decodevin/${vinInput}?format=json`);
+                const data = await response.json();
+
+                if (data.Results && data.Results.length > 0 && data.Results[0].ErrorCode !== '0') {
+                    const getVal = (variable) => data.Results.find(r => r.Variable === variable)?.Value || '';
+
+                    document.getElementById('newVehicleMake').value = getVal('Make');
+                    document.getElementById('newVehicleModel').value = getVal('Model');
+                    document.getElementById('newVehicleYear').value = getVal('Model Year');
+                    document.getElementById('newVehicleBodyType').value = getVal('Body Class');
+                    document.getElementById('newVehicleEngine').value = getVal('Engine Model');
+                    document.getElementById('newVehicleManufacturer').value = getVal('Manufacturer Name');
+                    
+                    alert('VIN decoded and form fields populated!');
+                    addActivity('✅', `VIN decoded for new vehicle: ${vinInput}`, 'Just now');
+
+                } else {
+                    alert('VIN decode failed or invalid VIN from NHTSA. Please check the VIN or enter details manually.');
+                    addActivity('❌', `VIN decode failed for: ${vinInput}`, 'Just now');
+                }
+            } catch (error) {
+                console.error('Error decoding VIN for add vehicle:', error);
+                alert('Error connecting to VIN decode service. Please try again or enter details manually.');
+                addActivity('⚠️', `VIN decode API error: ${error.message}`, 'Just now');
+            } finally {
+                decodeBtn.disabled = false;
+                decodeBtn.innerHTML = originalBtnText;
+            }
         }
 
         function addVehicle() {
@@ -1809,17 +1947,22 @@
             const vin = document.getElementById('newVehicleVIN').value.trim();
             const price = parseInt(document.getElementById('newVehiclePrice').value);
             const status = document.getElementById('newVehicleStatus').value;
+            const bodyType = document.getElementById('newVehicleBodyType').value.trim(); // NEW
+            const engine = document.getElementById('newVehicleEngine').value.trim(); // NEW
+            const manufacturer = document.getElementById('newVehicleManufacturer').value.trim(); // NEW
+
 
             if (make && model && year && vin.length === 17 && !isNaN(price)) {
                 const newVehicle = {
                     id: Date.now(), // Simple unique ID
                     vehicle: `${year} ${make} ${model}`,
-                    sub: 'Details TBD', // Could expand this with more inputs
+                    sub: `${bodyType} • ${engine || 'N/A'}`, // Use decoded body type and engine
                     vin: vin,
                     status: status,
                     price: price,
                     days: 0, // New vehicles start with 0 days in stock
-                    photoCount: 0
+                    photoCount: 0,
+                    manufacturer: manufacturer // Store manufacturer as well
                 };
                 inventory.push(newVehicle);
                 renderInventoryTable();
@@ -1827,7 +1970,7 @@
                 addActivity('🚗', `New vehicle added: ${year} ${make} ${model}`, 'Just now');
                 alert(`Vehicle ${make} ${model} added successfully!`);
             } else {
-                alert('Please fill in all required vehicle fields correctly (Make, Model, Year, 17-char VIN, Price).');
+                alert('Please fill in all required vehicle fields correctly (Make, Model, Year, 17-char VIN, Price). VIN must be 17 characters.');
             }
         }
 
@@ -1882,7 +2025,7 @@
                 } else if (type === 'inventory') {
                     inventory = inventory.filter(v => v.id !== itemId);
                     // Also delete related photos and update photo counts
-                    vehiclePhotos = vehiclePhotos.filter(photo => photo.vehicleIndex !== itemId);
+                    vehiclePhotos = vehiclePhotos.filter(photo => photo.vehicleId !== itemId);
                     updatePhotoDisplay(); // Refresh photo display
                     renderInventoryTable();
                     addActivity('🗑️', `Vehicle removed from inventory`, 'Just now');
@@ -1896,8 +2039,8 @@
             const select = document.getElementById('vehicleSelect');
             select.innerHTML = '<option value="">Choose vehicle...</option>'; // Clear and add placeholder
 
-            inventory.forEach((veh, index) => {
-                // Only show available/reserved vehicles, not sold ones for new photos
+            inventory.forEach((veh) => { // Use original vehicle object, no need for index
+                // Only show available/reserved/incoming vehicles, not sold ones for new photos
                 if (veh.status === 'available' || veh.status === 'reserved' || veh.status === 'incoming') {
                     const option = document.createElement('option');
                     option.value = veh.id; // Use actual vehicle ID
@@ -2072,26 +2215,9 @@
             document.getElementById('photoBadge').textContent = vehiclePhotos.length; // Update badge
         }
 
-        function deletePhoto(photoId) {
-            if (confirm('Delete this photo?')) {
-                const photoToDelete = vehiclePhotos.find(p => p.id === photoId);
-                if (photoToDelete) {
-                    // Decrement photoCount on the associated vehicle
-                    const associatedVehicle = inventory.find(v => v.id === photoToDelete.vehicleId);
-                    if (associatedVehicle) {
-                        associatedVehicle.photoCount--;
-                        renderInventoryTable(); // Update inventory table
-                    }
-                }
-                vehiclePhotos = vehiclePhotos.filter(photo => photo.id !== photoId);
-                updatePhotoDisplay();
-                addActivity('🗑️', 'Photo deleted', 'Just now');
-            }
-        }
-
-        // --- VIN Scanner ---
+        // --- VIN Scanner (Standalone) ---
         async function scanVIN() {
-            const vinInput = document.getElementById('vinInput').value.toUpperCase();
+            const vinInput = document.getElementById('vinInput').value.toUpperCase().trim();
             const resultDiv = document.getElementById('vinResult');
             const dataDiv = document.getElementById('vinData');
             
@@ -2173,12 +2299,17 @@
             const statusDot = document.getElementById('aiStatusDot');
             const statusText = document.getElementById('aiStatusText');
             
-            if (provider && apiKey.length > 10) { // Simple validation for key length
+            if (provider === 'gemini' && apiKey.length > 10) { // Simple validation for key length
                 statusDot.classList.add('connected');
                 statusText.textContent = `AI Status: Connected to ${provider.toUpperCase()}`;
                 currentAIProvider = provider;
                 aiApiKey = apiKey;
-            } else {
+            } else if (provider && apiKey.length > 10) { // Other providers, connected
+                statusDot.classList.add('connected');
+                statusText.textContent = `AI Status: Connected to ${provider.toUpperCase()}`;
+                currentAIProvider = provider;
+                aiApiKey = apiKey;
+            } else { // Disconnected or invalid
                 statusDot.classList.remove('connected');
                 statusText.textContent = 'AI Status: Disconnected';
                 currentAIProvider = null;
@@ -2192,7 +2323,7 @@
                 return;
             }
             
-            addChatMessage('system', 'Testing AI connection...');
+            addChatMessage('system', `Testing AI connection to ${currentAIProvider.toUpperCase()}...`);
             
             setTimeout(() => {
                 addChatMessage('assistant', `✅ Successfully connected to ${currentAIProvider.toUpperCase()} API (simulated).`);
@@ -2229,8 +2360,9 @@
         function generateResponse(message) {
             const lowerCaseMessage = message.toLowerCase();
 
-            if (lowerCaseMessage.includes('improve') || lowerCaseMessage.includes('enhancement')) {
-                return `🚀 <strong>SYSTEM IMPROVEMENT SUGGESTIONS</strong><br><br>Based on current usage patterns:<br>1. Advanced Photo AI - Automatic damage detection<br>2. Customer Prediction - ML-based lead scoring<br>3. Inventory Optimization - Predictive analytics<br>4. Mobile App - Native iOS/Android<br>5. Integration Hub - Connect with DMS systems<br><br>Which improvement interests you most?`;
+            if (lowerCaseMessage.includes('improve') || lowerCaseMessage.includes('enhancement') || lowerCaseMessage.includes('workflow')) {
+                 return `🚀 <strong>${currentAIProvider ? currentAIProvider.toUpperCase() : 'AI'} System Improvements & Workflow Automation:</strong><br><br>As your dedicated AI, I can help you with:<br>1.  **Automated Workflows:** Design sequences for lead follow-up, inventory updates, or customer service. E.g., "Set up a workflow to email new leads a brochure."<br>2.  **Performance Optimization:** Suggest strategies for improving sales funnels or reducing inventory days.<br>3.  **Predictive Analytics:** Offer insights into future market trends or customer behavior.<br>4.  **Content Generation:** Draft marketing emails, social media posts, or vehicle descriptions.<br>
+                To get started, tell me: "Help me automate lead nurturing" or "Suggest ways to improve our inventory turnover."`;
             }
             
             if (lowerCaseMessage.includes('photo') || lowerCaseMessage.includes('camera')) {
@@ -2258,8 +2390,8 @@
                 return `👥 <strong>CUSTOMER INTELLIGENCE</strong><br><br>Pipeline Analysis:<br>• Hot Leads: ${hotLeads}<br>• Qualified Leads: ${qualifiedLeads}<br>• Follow Up: ${followUpLeads}<br>• New Inquiries: ${newInquiries}<br><br>Total Customers: ${customers.length}<br>Total Potential Value: ${formatCurrency(totalPotentialValue)}<br><br>🎯 Action Required: Prioritize hot leads for immediate contact.`;
             }
 
-            if (lowerCaseMessage.includes('sales performance') || lowerCaseMessage.includes('revenue data')) {
-                return `📈 <strong>SALES PERFORMANCE</strong><br><br>Current Period:<br>• Revenue: ${formatCurrency(dashboardMetrics.revenue.value)} (${dashboardMetrics.revenue.change * 100 > 0 ? '+' : ''}${dashboardMetrics.revenue.change * 100}% MoM)<br>• Units Sold: ${inventory.filter(v => v.status === 'sold').length} (in session)<br>• Avg Sale Time: ${dashboardMetrics.saleTime.value} days<br><br>Trends:<br>• Lead quality improving (+0.5 score)<br>• Conversion rate stable at 24.8%<br>• Market share up 1.3%<br><br>🏆 Status: EXCEEDING SOME TARGETS`;
+            if (lowerCaseMessage.includes('sales performance') || lowerCaseMessage.includes('revenue data') || lowerCaseMessage.includes('revenue')) {
+                return `📈 <strong>SALES PERFORMANCE</strong><br><br>Current Period:<br>• Revenue: ${formatCurrency(dashboardMetrics.revenue.value)} (${dashboardMetrics.revenue.change * 100 > 0 ? '+' : ''}${dashboardMetrics.revenue.change * 100}% MoM)<br>• Units Sold: ${inventory.filter(v => v.status === 'sold').length} (in session)<br>• Avg Sale Time: ${dashboardMetrics.saleTime.value} days<br><br>Trends:<br>• Lead quality improving (+0.5 score)<br>• Conversion rate stable at 24.8%<br>• Market share up 1.3%<br><br>🏆 Status: EXCEEDING SOME TARGETS. Click on the 'Total Revenue' metric on the dashboard for a detailed breakdown.`;
             }
 
             if (lowerCaseMessage.includes('analytics overview') || lowerCaseMessage.includes('performance summary') || lowerCaseMessage.includes('analytics')) {
@@ -2267,16 +2399,16 @@
             }
 
             if (lowerCaseMessage.includes('vin decode') || lowerCaseMessage.includes('vin scanner')) {
-                return "🔍 <strong>VIN INTELLIGENCE</strong><br><br>NHTSA Database Status: CONNECTED<br>Query Capability: ACTIVE<br>To decode a VIN, navigate to the VIN Scanner page and enter the 17-character VIN. Or, you can say 'scan VIN' on that page.";
+                return "🔍 <strong>VIN INTELLIGENCE</strong><br><br>NHTSA Database Status: CONNECTED<br>Query Capability: ACTIVE<br>To decode a VIN, navigate to the VIN Scanner page and enter the 17-character VIN. Or, you can say 'scan VIN' on that page. You can also automatically decode VINs when adding new vehicles in Inventory Management.";
             }
             if (lowerCaseMessage.includes('hello') || lowerCaseMessage.includes('hi')) {
-                return `Hello! I'm your enhanced AI assistant for TVC Auto AI Pro. I can help with inventory analysis, customer insights, photo management, and system improvements. What would you like to explore?`;
+                return `Hello! I'm your enhanced AI assistant for TVC Auto AI Pro. I can help with inventory analysis, customer insights, photo management, system improvements, and workflow automation. How can I assist you today?`;
             }
             if (lowerCaseMessage.includes('recommendation') || lowerCaseMessage.includes('suggestions')) {
-                return "Based on current data:<br>1. Focus on converting 'Hot Leads' in the Customer Pipeline.<br>2. Evaluate older 'Reserved' and 'Incoming' inventory for quicker sales.<br>3. Leverage VIN decoding for incoming trade-ins to assess value quickly.<br>4. Utilize the Photo Manager to enrich vehicle listings.";
+                return "Based on current data:<br>1. Focus on converting 'Hot Leads' in the Customer Pipeline.<br>2. Evaluate older 'Reserved' and 'Incoming' inventory for quicker sales.<br>3. Leverage VIN decoding for incoming trade-ins to assess value quickly.<br>4. Utilize the Photo Manager to enrich vehicle listings.<br>5. Consider exploring AI-powered workflows for repetitive tasks.";
             }
 
-            return `I can help with dealership analytics, inventory management, customer insights, photo organization, and system improvements. Try asking about "inventory analysis", "customer pipeline", "photo management", or "system improvements"!`;
+            return `As ${currentAIProvider ? currentAIProvider.toUpperCase() : 'your AI assistant'}, I can help with dealership analytics, inventory management, customer insights, photo organization, and system improvements. Try asking about "inventory analysis", "customer pipeline", "photo management", or "workflow automation"!`;
         }
 
         function addChatMessage(type, message) {
@@ -2316,6 +2448,25 @@
             activityFeedContent.appendChild(activityItem);
             activityFeedContent.scrollTop = activityFeedContent.scrollHeight; // Auto-scroll
         }
+
+        // NEW: Revenue Breakdown Table Rendering
+        function renderRevenueBreakdownTable() {
+            const tbody = document.getElementById('revenueBreakdownTable');
+            tbody.innerHTML = '';
+
+            revenueDetails.forEach(item => {
+                const row = tbody.insertRow();
+                const trendClass = item.trend === 'up' ? 'positive' : item.trend === 'down' ? 'negative' : '';
+                row.innerHTML = `
+                    <td style="color: var(--text-primary); font-weight: 600;">${item.category}</td>
+                    <td style="color: var(--text-secondary);">${item.id === 5 ? 'Total' : 'N/A'}</td>
+                    <td style="color: var(--text-primary); font-weight: 600;">${formatCurrency(item.amount)}</td>
+                    <td class="${trendClass}">${item.change}</td>
+                    <td style="color: var(--text-secondary);">${formatCurrency(item.last30Days)}</td>
+                `;
+            });
+        }
+
     </script>
 </body>
 </html>
