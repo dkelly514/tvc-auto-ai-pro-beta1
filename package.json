@@ -1,0 +1,15 @@
+{
+  "name": "tvc-auto-ai-functions",
+  "version": "1.0.0",
+  "description": "Netlify Functions for TVC Auto AI Pro",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "@google/generative-ai": "^0.14.0"
+  }
+}
