@@ -6,16 +6,16 @@
     <title>TVC Auto AI Pro - Professional Dealership Terminal</title>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
     <style>
-        /* Updated Color Scheme based on truevestments.com */
+        /* Updated Color Scheme (Dark Gold Accents) based on truevestments.com */
         :root {
             --bg-primary: #1a1a1a; /* Darker background, similar to sections on truevestments */
             --bg-secondary: #2c2c2c; /* Card/panel background */
             --bg-tertiary: #3a3a3a; /* Lighter card/form background */
             --bg-quaternary: #4a4a4a; /* Even lighter elements */
 
-            --accent-primary: #00875e; /* Green from truevestments.com */
-            --accent-secondary: #006649; /* Darker green for buttons/active state */
-            --accent-tertiary: #00b377; /* Lighter green for highlights */
+            --accent-primary: #c99f02; /* Dark Gold from truevestments.com */
+            --accent-secondary: #a88301; /* Darker gold for buttons/active state */
+            --accent-tertiary: #e0b800; /* Lighter gold for highlights */
 
             --text-primary: #ffffff; /* White text */
             --text-secondary: #cccccc; /* Lighter gray text */
@@ -31,7 +31,7 @@
             /* Chart colors (can be adjusted for truevestments aesthetic if needed) */
             --chart-green: #00b377;
             --chart-red: #ff4757;
-            --chart-blue: #00875e; /* Using primary accent for blue-like tone */
+            --chart-blue: #c99f02; /* Using primary accent for blue-like tone */
         }
 
         * {
@@ -41,7 +41,7 @@
         }
 
         body {
-            font-family: 'Inter', -apple-system, BlinkMacSystemFont, system-ui, sans-serif;
+            font-family: 'Inter', -apple-system, BlinkMacMacSystemFont, system-ui, sans-serif;
             background: var(--bg-primary);
             color: var(--text-primary);
             line-height: 1.4;
@@ -165,7 +165,7 @@
         }
 
         .btn-primary:hover {
-            background: var(--accent-secondary); /* Darker green on hover */
+            background: var(--accent-secondary); /* Darker gold on hover */
         }
 
         .btn-secondary {
@@ -221,7 +221,7 @@
         }
 
         .nav-item.active {
-            background: var(--accent-secondary); /* Darker green for active nav */
+            background: var(--accent-secondary); /* Darker gold for active nav */
             color: white;
         }
 
@@ -438,7 +438,7 @@
             border: 1px solid rgba(0, 179, 119, 0.3);
         }
 
-        .status-follow, .status-new {
+        .status-follow, .status-new { /* Added status-new */
             background: rgba(255, 170, 0, 0.15); /* Using warning orange */
             color: var(--warning);
             border: 1px solid rgba(255, 170, 0, 0.3);
@@ -940,7 +940,7 @@
                         <div class="metric-card" onclick="showMetricDetails('saleTime')">
                             <div class="metric-header">
                                 <div class="metric-label">Avg Sale Time</div>
-                                <div class="metric-trend trend-up" id="dashboardSaleTimeTrend">-7d</div>
+                                <div class="metric-trend trend-up">-7d</div>
                             </div>
                             <div class="metric-value" id="dashboardSaleTime">14</div>
                             <div class="metric-subtitle" id="dashboardSaleTimeSubtitle">days (industry: 21d)</div>
@@ -954,7 +954,7 @@
                                 <div style="font-size: 11px; color: var(--text-muted);">Last 30 days</div>
                             </div>
                             <div class="chart-placeholder">
-                                <div class="chart-line"></div>
+                                <div class="chart-line" style="background: linear-gradient(90deg, var(--success) 0%, var(--accent-primary) 50%, var(--success) 100%);"></div>
                                 📈 Revenue trending upward (+12% month over month)
                             </div>
                         </div>
@@ -1290,7 +1290,7 @@
 
                 <div id="analytics" class="page-content">
                     <div class="dashboard-grid">
-                        <div class="metric-card">
+                        <div class="metric-card" onclick="showMetricDetails('revenueGrowthAnalytics')">
                             <div class="metric-header">
                                 <div class="metric-label">Revenue Growth</div>
                                 <div class="metric-trend trend-up">+18.2%</div>
@@ -1299,7 +1299,7 @@
                             <div class="metric-subtitle">YoY performance</div>
                         </div>
 
-                        <div class="metric-card">
+                        <div class="metric-card" onclick="showMetricDetails('leadConversionAnalytics')">
                             <div class="metric-header">
                                 <div class="metric-label">Lead Conversion</div>
                                 <div class="metric-trend trend-up">+5.2%</div>
@@ -1308,7 +1308,7 @@
                             <div class="metric-subtitle">Above industry avg</div>
                         </div>
 
-                        <div class="metric-card">
+                        <div class="metric-card" onclick="showMetricDetails('customerSatisfactionAnalytics')">
                             <div class="metric-header">
                                 <div class="metric-label">Customer Satisfaction</div>
                                 <div class="metric-trend trend-up">+2%</div>
@@ -1317,7 +1317,7 @@
                             <div class="metric-subtitle">Excellent rating</div>
                         </div>
 
-                        <div class="metric-card">
+                        <div class="metric-card" onclick="showMetricDetails('marketShareAnalytics')">
                             <div class="metric-header">
                                 <div class="metric-label">Market Share</div>
                                 <div class="metric-trend trend-up">+1.3%</div>
@@ -1330,6 +1330,7 @@
                     <div class="data-table-container">
                         <div class="table-header">
                             <div class="table-title">Performance Analytics</div>
+                            <button class="btn btn-secondary" onclick="showMetricDetails('performanceAnalyticsTable')">View Details</button>
                         </div>
                         <table class="data-table">
                             <thead>
@@ -1446,11 +1447,11 @@
 
         // NEW: Detailed Revenue Data
         let revenueDetails = [
-            { id: 1, category: 'New Car Sales', amount: 300000, trend: 'up', change: '+15%', last30Days: 280000 },
-            { id: 2, category: 'Used Car Sales', amount: 150000, trend: 'up', change: '+10%', last30Days: 135000 },
-            { id: 3, category: 'Service & Parts', amount: 37000, trend: 'flat', change: '0%', last30Days: 37000 },
-            { id: 4, category: 'Financing & Insurance', amount: 12000, trend: 'up', change: '+20%', last30Days: 10000 },
-            { id: 5, category: 'Total Revenue', amount: 487000, trend: 'up', change: '+12%', last30Days: 435000 }
+            { id: 1, category: 'New Car Sales', sub: 'New Models', amount: 300000, trend: 'up', change: '+15%', last30Days: 280000, source: 'Showroom, Online Leads' },
+            { id: 2, category: 'Used Car Sales', sub: 'Certified Used', amount: 150000, trend: 'up', change: '+10%', last30Days: 135000, source: 'Trade-ins, Auctions' },
+            { id: 3, category: 'Service & Parts', sub: 'Maintenance', amount: 37000, trend: 'flat', change: '0%', last30Days: 37000, source: 'Scheduled Appointments' },
+            { id: 4, category: 'Financing & Insurance', sub: 'Loan Origination', amount: 12000, trend: 'up', change: '+20%', last30Days: 10000, source: 'F&I Department' },
+            { id: 5, category: 'Total Revenue', sub: 'All Categories', amount: 487000, trend: 'up', change: '+12%', last30Days: 435000, source: 'Consolidated' }
         ];
 
         let customers = [
@@ -1499,9 +1500,9 @@
         ];
 
         let inventory = [
-            { id: 101, vehicle: '2024 Toyota Camry', sub: 'Sedan • Automatic', vin: '1HGBH41JXMN109186', status: 'available', price: 32000, days: 13, photoCount: 0 },
-            { id: 102, vehicle: '2024 Honda Accord', sub: 'Sedan • CVT', vin: '2HGBH41JXMN109187', status: 'sold', price: 35000, days: 8, photoCount: 0 },
-            { id: 103, vehicle: '2024 Ford F-150', sub: 'Pickup • Automatic', vin: '3HGBH41JXMN109188', status: 'reserved', price: 45000, days: 21, photoCount: 0 }
+            { id: 101, vehicle: '2024 Toyota Camry', sub: 'Sedan • Automatic', vin: '1HGBH41JXMN109186', status: 'available', price: 32000, days: 13, photoCount: 0, make: 'Toyota', model: 'Camry', year: '2024', bodyType: 'Sedan', engine: '2.5L I4', manufacturer: 'Toyota Motor Corporation' },
+            { id: 102, vehicle: '2024 Honda Accord', sub: 'Sedan • CVT', vin: '2HGBH41JXMN109187', status: 'sold', price: 35000, days: 8, photoCount: 0, make: 'Honda', model: 'Accord', year: '2024', bodyType: 'Sedan', engine: '1.5L Turbo', manufacturer: 'Honda Motor Co.' },
+            { id: 103, vehicle: '2024 Ford F-150', sub: 'Pickup • Automatic', vin: '3HGBH41JXMN109188', status: 'reserved', price: 45000, days: 21, photoCount: 0, make: 'Ford', model: 'F-150', year: '2024', bodyType: 'Pickup', engine: '3.5L EcoBoost', manufacturer: 'Ford Motor Company' }
         ];
 
         let vehiclePhotos = []; // Stores objects like { id, vehicleId, vehicleName, type, notes, dataUrl, timestamp }
@@ -1652,21 +1653,44 @@
             alert('Dashboard and data refreshed!');
         }
 
-        // NEW: showMetricDetails function to link to revenueDetails page
+        // Modified: showMetricDetails function to link to revenueDetails page and other analytics breakdowns
         function showMetricDetails(metricKey) {
-            if (metricKey === 'revenue') {
-                showPage('revenueDetails', document.querySelector('.nav-item[onclick*=\'analytics\']')); // Link to Analytics or new Revenue page
-                addChatMessage('assistant', 'Navigating to detailed revenue breakdown.');
-            } else {
-                // Existing simulated messages for other metrics
-                let message = '';
-                if (metricKey === 'leads') {
+            let message = '';
+            let navigateToChat = true;
+
+            switch(metricKey) {
+                case 'revenue': // From Dashboard metric card
+                    showPage('revenueDetails', document.querySelector('.nav-item[onclick*=\'analytics\']')); 
+                    message = 'Navigating to detailed revenue breakdown.';
+                    navigateToChat = false; // Don't go to chat, go to revenueDetails page
+                    break;
+                case 'revenueGrowthAnalytics': // From Analytics page metric card
+                    message = '📈 **Revenue Growth Analysis:** Your YoY revenue growth of +18.2% is driven primarily by new car sales (+15%) and strategic marketing campaigns. Maintain focus on high-value leads and explore expansion into new demographics for continued growth.';
+                    break;
+                case 'leadConversionAnalytics': // From Analytics page metric card
+                    message = '🎯 **Lead Conversion Insights:** At 24.8%, your lead conversion rate is excellent. Recent improvements (+5.2%) are linked to enhanced sales training and faster follow-up times. Consider A/B testing different sales scripts to further optimize.';
+                    break;
+                case 'customerSatisfactionAnalytics': // From Analytics page metric card
+                    message = '😊 **Customer Satisfaction Report:** A 96% satisfaction rate is outstanding! This reflects strong post-sale support and positive interactions. Continue gathering feedback to identify minor pain points and turn satisfied customers into advocates.';
+                    break;
+                case 'marketShareAnalytics': // From Analytics page metric card
+                    message = '📊 **Market Share Overview:** Your regional market share stands at 15.2%, with a steady increase of +1.3%. This indicates successful competitive strategies. Analyze competitor strengths and weaknesses to identify further capture opportunities.';
+                    break;
+                case 'performanceAnalyticsTable': // From Analytics page table button
+                    message = 'Detailed Performance Metrics: Your monthly revenue is $487,000 (+$52,000 month-over-month), with 14 units sold. Average sale price dipped slightly to $34,786, but lead quality improved to 8.7/10. Overall positive trend.';
+                    break;
+                case 'leads': // Existing dashboard metric
                     message = `Active Leads Breakdown: Hot Leads: ${customers.filter(c => c.status === 'hot').length}, Qualified Leads: ${customers.filter(c => c.status === 'qualified').length}, Follow-Up Leads: ${customers.filter(c => c.status === 'follow').length}. Total Customers in pipeline: ${customers.length}.`;
-                } else if (metricKey === 'inventory') {
+                    break;
+                case 'inventory': // Existing dashboard metric
                     message = `Inventory Overview: ${inventory.filter(v => v.status === 'available').length} Available, ${inventory.filter(v => v.status === 'reserved').length} Reserved, ${inventory.filter(v => v.status === 'sold').length} Sold. Total value: ${formatCurrency(inventory.reduce((sum, v) => sum + v.price, 0))}.`;
-                } else if (metricKey === 'saleTime') {
+                    break;
+                case 'saleTime': // Existing dashboard metric
                     message = `Average Sale Time: ${dashboardMetrics.saleTime.value} days. This is ${Math.abs(dashboardMetrics.saleTime.change)} days faster than last period. Efficiency is improving!`;
-                }
+                    break;
+            }
+            
+            if (message && navigateToChat) {
                 addChatMessage('assistant', message);
                 showPage('chat', document.querySelector('.nav-item[onclick*=\'chat\']'));
             }
@@ -1772,14 +1796,14 @@
                 row.innerHTML = `
                     <td style="color: var(--text-primary); font-weight: 600;">${customer.firstName} ${customer.lastName}</td>
                     <td style="color: var(--text-secondary);">
-                        ${customer.email}<br>
-                        <span style="font-size: 11px;">${customer.phone}</span>
+                        ${customer.email || 'N/A'}<br>
+                        <span style="font-size: 11px;">${customer.phone || 'N/A'}</span>
                     </td>
                     <td><span class="status-badge status-${customer.status}">${customer.status.charAt(0).toUpperCase() + customer.status.slice(1)} Lead</span></td>
                     <td style="color: var(--text-primary); font-weight: 600;">${formatCurrency(customer.value)}</td>
                     <td style="color: var(--text-secondary); font-size: 11px;">
                         ${customer.currentVehicles ? `Vehicles: ${customer.currentVehicles}<br>` : ''}
-                        Household: ${customer.householdMembers}<br>
+                        Household: ${customer.householdMembers || 'N/A'}<br>
                         ${customer.homeInsuranceInfo ? `Insurance: ${customer.homeInsuranceInfo}` : ''}
                     </td>
                     <td style="color: var(--text-secondary);">${customer.lastContact}</td>
@@ -1821,31 +1845,38 @@
             const householdMembers = parseInt(document.getElementById('newCustomerHousehold').value);
             const homeInsuranceInfo = document.getElementById('newCustomerHomeownerInsurance').value.trim();
             const status = document.getElementById('newCustomerStatus').value;
-            const value = parseInt(document.getElementById('newCustomerValue').value);
+            const valueInput = document.getElementById('newCustomerValue').value;
+            const value = valueInput ? parseInt(valueInput) : 0; // Allow 0 or empty for value
 
-            if (firstName && lastName && email && !isNaN(value)) {
-                const newCustomer = {
-                    id: Date.now(), // Simple unique ID
-                    firstName,
-                    lastName,
-                    email,
-                    phone,
-                    homeAddress,
-                    currentVehicles,
-                    householdMembers,
-                    homeInsuranceInfo,
-                    status,
-                    value,
-                    lastContact: 'Just now'
-                };
-                customers.push(newCustomer);
-                renderCustomerTable();
-                closeCustomerForm();
-                addActivity('👥', `New customer added: ${firstName} ${lastName}`, 'Just now');
-                alert(`Customer ${firstName} ${lastName} added successfully!`);
-            } else {
-                alert('Please fill in all required customer fields (First Name, Last Name, Email, Potential Value).');
+            // Soft validation: alert if key fields are missing, but allow submission
+            if (!firstName || !lastName || !email || !valueInput) {
+                const missingFields = [];
+                if (!firstName) missingFields.push('First Name');
+                if (!lastName) missingFields.push('Last Name');
+                if (!email) missingFields.push('Email');
+                if (!valueInput) missingFields.push('Potential Value');
+                alert(`Warning: The following fields are strongly recommended: ${missingFields.join(', ')}. Continuing without them.`);
             }
+
+            const newCustomer = {
+                id: Date.now(), // Simple unique ID
+                firstName: firstName || 'Unknown', // Default if empty
+                lastName: lastName || 'Unknown',
+                email: email || 'N/A',
+                phone: phone || 'N/A',
+                homeAddress: homeAddress || 'N/A',
+                currentVehicles: currentVehicles || 'N/A',
+                householdMembers: isNaN(householdMembers) ? 1 : householdMembers, // Default to 1 if not a number
+                homeInsuranceInfo: homeInsuranceInfo || 'N/A',
+                status: status || 'new',
+                value: value,
+                lastContact: 'Just now'
+            };
+            customers.push(newCustomer);
+            renderCustomerTable();
+            closeCustomerForm();
+            addActivity('👥', `New customer added: ${newCustomer.firstName} ${newCustomer.lastName}`, 'Just now');
+            alert(`Customer ${newCustomer.firstName} ${newCustomer.lastName} added successfully!`);
         }
         
         // --- Inventory Management ---
@@ -1861,7 +1892,7 @@
                         <span style="font-size: 11px; color: var(--text-muted);">${vehicle.sub}</span>
                     </td>
                     <td style="font-family: monospace; font-size: 11px; color: var(--text-secondary);">
-                        ${vehicle.vin}
+                        ${vehicle.vin || 'N/A'}
                     </td>
                     <td><span class="status-badge status-${vehicle.status}">${vehicle.status.charAt(0).toUpperCase() + vehicle.status.slice(1)}</span></td>
                     <td class="inventory-price" data-price="${vehicle.price}" style="color: var(--text-primary); font-weight: 600;">${formatCurrency(vehicle.price)}</td>
@@ -1945,33 +1976,45 @@
             const model = document.getElementById('newVehicleModel').value.trim();
             const year = document.getElementById('newVehicleYear').value.trim();
             const vin = document.getElementById('newVehicleVIN').value.trim();
-            const price = parseInt(document.getElementById('newVehiclePrice').value);
+            const priceInput = document.getElementById('newVehiclePrice').value;
+            const price = priceInput ? parseInt(priceInput) : 0; // Allow 0 or empty for price
             const status = document.getElementById('newVehicleStatus').value;
-            const bodyType = document.getElementById('newVehicleBodyType').value.trim(); // NEW
-            const engine = document.getElementById('newVehicleEngine').value.trim(); // NEW
-            const manufacturer = document.getElementById('newVehicleManufacturer').value.trim(); // NEW
+            const bodyType = document.getElementById('newVehicleBodyType').value.trim(); 
+            const engine = document.getElementById('newVehicleEngine').value.trim(); 
+            const manufacturer = document.getElementById('newVehicleManufacturer').value.trim(); 
 
-
-            if (make && model && year && vin.length === 17 && !isNaN(price)) {
-                const newVehicle = {
-                    id: Date.now(), // Simple unique ID
-                    vehicle: `${year} ${make} ${model}`,
-                    sub: `${bodyType} • ${engine || 'N/A'}`, // Use decoded body type and engine
-                    vin: vin,
-                    status: status,
-                    price: price,
-                    days: 0, // New vehicles start with 0 days in stock
-                    photoCount: 0,
-                    manufacturer: manufacturer // Store manufacturer as well
-                };
-                inventory.push(newVehicle);
-                renderInventoryTable();
-                closeVehicleForm();
-                addActivity('🚗', `New vehicle added: ${year} ${make} ${model}`, 'Just now');
-                alert(`Vehicle ${make} ${model} added successfully!`);
-            } else {
-                alert('Please fill in all required vehicle fields correctly (Make, Model, Year, 17-char VIN, Price). VIN must be 17 characters.');
+            // Soft validation: alert if key fields are missing, but allow submission
+            if (!make || !model || !year || !vin || !priceInput) {
+                const missingFields = [];
+                if (!make) missingFields.push('Make');
+                if (!model) missingFields.push('Model');
+                if (!year) missingFields.push('Year');
+                if (!vin) missingFields.push('VIN');
+                if (!priceInput) missingFields.push('Price');
+                alert(`Warning: The following fields are strongly recommended: ${missingFields.join(', ')}. Continuing without them.`);
             }
+
+            if (vin.length !== 17 && vin !== '') { // Still validate VIN length if provided
+                 alert('Warning: VIN must be 17 characters if provided. Continuing with current VIN.');
+            }
+
+
+            const newVehicle = {
+                id: Date.now(), // Simple unique ID
+                vehicle: `${year || 'N/A'} ${make || 'Unknown'} ${model || 'Vehicle'}`,
+                sub: `${bodyType || 'N/A'} • ${engine || 'N/A'}`, 
+                vin: vin || 'N/A',
+                status: status || 'available',
+                price: price,
+                days: 0, // New vehicles start with 0 days in stock
+                photoCount: 0,
+                manufacturer: manufacturer || 'N/A'
+            };
+            inventory.push(newVehicle);
+            renderInventoryTable();
+            closeVehicleForm();
+            addActivity('🚗', `New vehicle added: ${newVehicle.vehicle}`, 'Just now');
+            alert(`Vehicle ${newVehicle.vehicle} added successfully!`);
         }
 
         function filterInventoryTable() {
@@ -2208,11 +2251,28 @@
                         <div>${photo.type.charAt(0).toUpperCase() + photo.type.slice(1)} • ${photo.timestamp.split(',')[0]}</div>
                         ${photo.notes ? `<div style="margin-top: 2px; font-size: 9px;">${photo.notes}</div>` : ''}
                     </div>
-                    <button onclick="deletePhoto(${photo.id})" style="position: absolute; top: 4px; right: 4px; background: var(--error); color: white; border: none; border-radius: 50%; width: 20px; height: 20px; font-size: 10px; cursor: pointer;">×</button>
+                    <button onclick="deletePhoto(${photo.id})" style="position: absolute; top: 4px; right: 4px; background: var(--error); color: white; border: none; border-radius: 50%; width: 20px; height: 20px; font-size: 10px; cursor: pointer; display: flex; align-items: center; justify-content: center; line-height: 1;">×</button>
                 `;
                 gallery.appendChild(photoDiv);
             });
             document.getElementById('photoBadge').textContent = vehiclePhotos.length; // Update badge
+        }
+
+        function deletePhoto(photoId) {
+            if (confirm('Delete this photo?')) {
+                const photoToDelete = vehiclePhotos.find(p => p.id === photoId);
+                if (photoToDelete) {
+                    // Decrement photoCount on the associated vehicle
+                    const associatedVehicle = inventory.find(v => v.id === photoToDelete.vehicleId);
+                    if (associatedVehicle) {
+                        associatedVehicle.photoCount--;
+                        renderInventoryTable(); // Update inventory table
+                    }
+                }
+                vehiclePhotos = vehiclePhotos.filter(photo => photo.id !== photoId);
+                updatePhotoDisplay();
+                addActivity('🗑️', 'Photo deleted', 'Just now');
+            }
         }
 
         // --- VIN Scanner (Standalone) ---
@@ -2299,17 +2359,12 @@
             const statusDot = document.getElementById('aiStatusDot');
             const statusText = document.getElementById('aiStatusText');
             
-            if (provider === 'gemini' && apiKey.length > 10) { // Simple validation for key length
+            if (provider && apiKey.length > 10) { // Simple validation for key length
                 statusDot.classList.add('connected');
                 statusText.textContent = `AI Status: Connected to ${provider.toUpperCase()}`;
                 currentAIProvider = provider;
                 aiApiKey = apiKey;
-            } else if (provider && apiKey.length > 10) { // Other providers, connected
-                statusDot.classList.add('connected');
-                statusText.textContent = `AI Status: Connected to ${provider.toUpperCase()}`;
-                currentAIProvider = provider;
-                aiApiKey = apiKey;
-            } else { // Disconnected or invalid
+            } else {
                 statusDot.classList.remove('connected');
                 statusText.textContent = 'AI Status: Disconnected';
                 currentAIProvider = null;
@@ -2360,7 +2415,7 @@
         function generateResponse(message) {
             const lowerCaseMessage = message.toLowerCase();
 
-            if (lowerCaseMessage.includes('improve') || lowerCaseMessage.includes('enhancement') || lowerCaseMessage.includes('workflow')) {
+            if (lowerCaseMessage.includes('improve') || lowerCaseMessage.includes('enhancement') || lowerCaseMessage.includes('workflow') || lowerCaseMessage.includes('automate')) {
                  return `🚀 <strong>${currentAIProvider ? currentAIProvider.toUpperCase() : 'AI'} System Improvements & Workflow Automation:</strong><br><br>As your dedicated AI, I can help you with:<br>1.  **Automated Workflows:** Design sequences for lead follow-up, inventory updates, or customer service. E.g., "Set up a workflow to email new leads a brochure."<br>2.  **Performance Optimization:** Suggest strategies for improving sales funnels or reducing inventory days.<br>3.  **Predictive Analytics:** Offer insights into future market trends or customer behavior.<br>4.  **Content Generation:** Draft marketing emails, social media posts, or vehicle descriptions.<br>
                 To get started, tell me: "Help me automate lead nurturing" or "Suggest ways to improve our inventory turnover."`;
             }
@@ -2459,14 +2514,13 @@
                 const trendClass = item.trend === 'up' ? 'positive' : item.trend === 'down' ? 'negative' : '';
                 row.innerHTML = `
                     <td style="color: var(--text-primary); font-weight: 600;">${item.category}</td>
-                    <td style="color: var(--text-secondary);">${item.id === 5 ? 'Total' : 'N/A'}</td>
+                    <td style="color: var(--text-secondary);">${item.sub || 'N/A'}</td>
                     <td style="color: var(--text-primary); font-weight: 600;">${formatCurrency(item.amount)}</td>
                     <td class="${trendClass}">${item.change}</td>
                     <td style="color: var(--text-secondary);">${formatCurrency(item.last30Days)}</td>
                 `;
             });
         }
-
     </script>
 </body>
 </html>
