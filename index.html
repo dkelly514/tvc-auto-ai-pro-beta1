@@ -59,10 +59,9 @@
         @keyframes fadeInUp { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
 
         /* --- Scrollbar --- */
-        .sidebar::-webkit-scrollbar, .content-body::-webkit-scrollbar, .chat-messages::-webkit-scrollbar { width: 8px; }
-        .sidebar::-webkit-scrollbar-track, .content-body::-webkit-scrollbar-track, .chat-messages::-webkit-scrollbar-track { background: var(--bg-tertiary); border-radius: 4px; }
-        .sidebar::-webkit-scrollbar-thumb, .content-body::-webkit-scrollbar-thumb, .chat-messages::-webkit-scrollbar-thumb { background: var(--accent-primary); border-radius: 4px; }
-        .sidebar::-webkit-scrollbar-thumb:hover, .content-body::-webkit-scrollbar-thumb:hover, .chat-messages::-webkit-scrollbar-thumb:hover { background: var(--accent-bright); }
+        .sidebar::-webkit-scrollbar, .content-body::-webkit-scrollbar, .chat-messages::-webkit-scrollbar, .transcript-container::-webkit-scrollbar { width: 8px; }
+        .sidebar::-webkit-scrollbar-track, .content-body::-webkit-scrollbar-track, .chat-messages::-webkit-scrollbar-track, .transcript-container::-webkit-scrollbar-track { background: var(--bg-tertiary); border-radius: 4px; }
+        .sidebar::-webkit-scrollbar-thumb, .content-body::-webkit-scrollbar-thumb, .chat-messages::-webkit-scrollbar-thumb, .transcript-container::-webkit-scrollbar-thumb { background: var(--accent-primary); border-radius: 4px; }
         
         /* --- Top Bar & Logo --- */
         .logo-section { display: flex; align-items: center; gap: 14px; }
@@ -128,6 +127,7 @@
         .activity-title { font-size: 13px; font-weight: 600; color: var(--text-primary); }
         .activity-subtitle { font-size: 11px; color: var(--text-muted); }
         .activity-time { font-size: 11px; color: var(--text-muted); flex-shrink: 0; margin-left: auto;}
+        .chart-widget { background: var(--bg-glass); backdrop-filter: blur(10px); border: 1px solid var(--border-color); border-radius: 12px; padding: 20px; }
 
         /* --- AI Terminal & Chat --- */
         .ai-config-panel { background: linear-gradient(135deg, var(--bg-tertiary), var(--bg-quaternary)); border: 2px solid var(--accent-primary); border-radius: 12px; padding: 24px; margin-bottom: 24px; box-shadow: 0 0 30px var(--accent-glow); position: relative; overflow: hidden; }
@@ -167,6 +167,17 @@
         .score-medium { background: linear-gradient(135deg, rgba(255, 149, 0, 0.2), rgba(255, 149, 0, 0.1)); color: var(--warning); border: 1px solid rgba(255, 149, 0, 0.4); box-shadow: 0 2px 8px rgba(255, 149, 0, 0.2); }
         .score-low { background: linear-gradient(135deg, rgba(255, 61, 113, 0.2), rgba(255, 61, 113, 0.1)); color: var(--error); border: 1px solid rgba(255, 61, 113, 0.4); box-shadow: 0 2px 8px rgba(255, 61, 113, 0.2); }
         
+        /* --- Specific Page Components --- */
+        .camera-container { background: var(--bg-glass); border-radius: 12px; padding: 24px; margin-bottom: 24px; }
+        .video-preview { width: 100%; max-width: 320px; height: 240px; background: var(--bg-tertiary); border-radius: 12px; }
+        .vehicle-photos { display: grid; grid-template-columns: repeat(auto-fill, minmax(180px, 1fr)); gap: 16px; margin-top: 20px; }
+        .photo-item { position: relative; border-radius: 12px; overflow: hidden; aspect-ratio: 4/3; }
+        .photo-item img { width: 100%; height: 100%; object-fit: cover; }
+        .vin-result { background: var(--bg-tertiary); border: 2px solid var(--accent-primary); border-radius: 12px; padding: 20px; margin-top: 20px; box-shadow: 0 0 20px var(--accent-glow); }
+        .vin-result-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(160px, 1fr)); gap: 20px; }
+        .vin-field-label { font-size: 10px; color: var(--text-muted); text-transform: uppercase; letter-spacing: 1px; }
+        .vin-field-value { font-size: 15px; font-weight: 600; color: var(--text-primary); }
+
         /* --- Notification --- */
         .notification-toast { position: fixed; bottom: 20px; right: 20px; padding: 16px 20px; background: var(--bg-glass); backdrop-filter: blur(10px); border: 1px solid var(--border-accent); border-radius: 10px; box-shadow: var(--shadow-lg); color: var(--text-primary); font-size: 13px; font-weight: 600; display: flex; align-items: center; gap: 12px; transform: translateX(400px); z-index: 1000; }
         .notification-toast.show { transform: translateX(0); }
@@ -200,50 +211,32 @@
                     <div class="status-dot"></div>
                     <span>LIVE DATA</span>
                 </div>
-                <button class="btn btn-primary" onclick="showPage('chat', document.querySelector('.nav-item[onclick*=\'chat\']'))">
-                    🤖 AI Terminal
-                </button>
+                <button class="btn btn-secondary" id="voiceBtn" onclick="toggleVoice()">🎙️ Voice AI</button>
+                <button class="btn btn-primary" onclick="showPage('chat', document.querySelector('.nav-item[onclick*=\'chat\']'))">🤖 AI Terminal</button>
             </div>
         </div>
 
         <div class="sidebar">
             <div class="nav-section">
                 <div class="nav-title">Analytics</div>
-                <div class="nav-item active" onclick="showPage('dashboard', this)">
-                    <div class="nav-icon">📊</div>Dashboard
-                </div>
-                <div class="nav-item" onclick="showPage('analytics', this)">
-                    <div class="nav-icon">📈</div>Performance
-                </div>
+                <div class="nav-item active" onclick="showPage('dashboard', this)"><div class="nav-icon">📊</div>Dashboard</div>
+                <div class="nav-item" onclick="showPage('analytics', this)"><div class="nav-icon">📈</div>Performance</div>
             </div>
             <div class="nav-section">
                 <div class="nav-title">Operations</div>
-                <div class="nav-item" onclick="showPage('customers', this)">
-                    <div class="nav-icon">👥</div>Customers
-                    <div class="nav-badge" id="customerBadge">0</div>
-                </div>
-                <div class="nav-item" onclick="showPage('inventory', this)">
-                    <div class="nav-icon">🚗</div>Inventory
-                </div>
+                <div class="nav-item" onclick="showPage('customers', this)"><div class="nav-icon">👥</div>Customers<div class="nav-badge" id="customerBadge">0</div></div>
+                <div class="nav-item" onclick="showPage('inventory', this)"><div class="nav-icon">🚗</div>Inventory</div>
+                <div class="nav-item" onclick="showPage('photos', this)"><div class="nav-icon">📸</div>Photo Manager<div class="nav-badge" id="photoBadge">0</div></div>
             </div>
             <div class="nav-section">
                 <div class="nav-title">Communication</div>
-                <div class="nav-item" onclick="showPage('calls', this)">
-                    <div class="nav-icon">📞</div>Call Center
-                    <div class="nav-badge" id="callBadge">0</div>
-                </div>
-                <div class="nav-item" onclick="showPage('emails', this)">
-                    <div class="nav-icon">✉️</div>Email Hub
-                </div>
+                <div class="nav-item" onclick="showPage('calls', this)"><div class="nav-icon">📞</div>Call Center<div class="nav-badge" id="callBadge">0</div></div>
+                <div class="nav-item" onclick="showPage('emails', this)"><div class="nav-icon">✉️</div>Email Hub</div>
             </div>
             <div class="nav-section">
                 <div class="nav-title">Intelligence</div>
-                 <div class="nav-item" onclick="showPage('vin', this)">
-                    <div class="nav-icon">🔍</div>VIN Scanner
-                </div>
-                <div class="nav-item" onclick="showPage('chat', this)">
-                    <div class="nav-icon">🤖</div>AI Terminal
-                </div>
+                <div class="nav-item" onclick="showPage('vin', this)"><div class="nav-icon">🔍</div>VIN Scanner</div>
+                <div class="nav-item" onclick="showPage('chat', this)"><div class="nav-icon">🤖</div>AI Terminal</div>
             </div>
         </div>
         
@@ -260,24 +253,20 @@
                 <div id="dashboard" class="page-content active">
                      <div class="dashboard-grid">
                         <div class="metric-card" onclick="showMetricDetails('revenue')">
-                            <div class="metric-header"><div class="metric-label">Total Revenue</div><div class="metric-trend trend-up" id="dashboardRevenueTrend">+0%</div></div>
-                            <div class="metric-value" id="dashboardRevenue">$0K</div>
-                            <div class="metric-subtitle" id="dashboardRevenueSubtitle">vs $0K last month</div>
+                            <div class="metric-header"><div class="metric-label">Total Revenue</div><div class="metric-trend" id="dashboardRevenueTrend"></div></div>
+                            <div class="metric-value" id="dashboardRevenue"></div><div class="metric-subtitle" id="dashboardRevenueSubtitle"></div>
                         </div>
                         <div class="metric-card" onclick="showMetricDetails('leads')">
-                            <div class="metric-header"><div class="metric-label">Hot Leads</div><div class="metric-trend trend-up" id="dashboardLeadsTrend">+0</div></div>
-                            <div class="metric-value" id="dashboardLeads">0</div>
-                            <div class="metric-subtitle" id="dashboardLeadsSubtitle">0 new today</div>
+                            <div class="metric-header"><div class="metric-label">Hot Leads</div><div class="metric-trend" id="dashboardLeadsTrend"></div></div>
+                            <div class="metric-value" id="dashboardLeads"></div><div class="metric-subtitle" id="dashboardLeadsSubtitle"></div>
                         </div>
                         <div class="metric-card" onclick="showMetricDetails('calls')">
-                            <div class="metric-header"><div class="metric-label">Calls Today</div><div class="metric-trend trend-up" id="dashboardCallsTrend">+0</div></div>
-                            <div class="metric-value" id="dashboardCalls">0</div>
-                            <div class="metric-subtitle" id="dashboardCallsSubtitle">0 transcribed</div>
+                            <div class="metric-header"><div class="metric-label">Calls Today</div><div class="metric-trend" id="dashboardCallsTrend"></div></div>
+                            <div class="metric-value" id="dashboardCalls"></div><div class="metric-subtitle" id="dashboardCallsSubtitle"></div>
                         </div>
                         <div class="metric-card" onclick="showMetricDetails('saleTime')">
-                             <div class="metric-header"><div class="metric-label">Avg Sale Time</div><div class="metric-trend trend-down" id="dashboardSaleTimeTrend">+0d</div></div>
-                            <div class="metric-value" id="dashboardSaleTime">0d</div>
-                            <div class="metric-subtitle" id="dashboardSaleTimeSubtitle">vs industry average</div>
+                            <div class="metric-header"><div class="metric-label">Avg Sale Time</div><div class="metric-trend" id="dashboardSaleTimeTrend"></div></div>
+                            <div class="metric-value" id="dashboardSaleTime"></div><div class="metric-subtitle" id="dashboardSaleTimeSubtitle"></div>
                         </div>
                     </div>
                     <div class="widget-grid">
@@ -286,11 +275,24 @@
                     </div>
                 </div>
 
+                <div id="analytics" class="page-content">
+                    <div class="dashboard-grid">
+                        <div class="metric-card"><div class="metric-header"><div class="metric-label">Lead Conversion Rate</div></div><div class="metric-value" id="analyticsConversionRate">0%</div><div class="metric-subtitle">From initial contact to sale</div></div>
+                        <div class="metric-card"><div class="metric-header"><div class="metric-label">Avg. Lead Score</div></div><div class="metric-value" id="analyticsAvgScore">0/10</div><div class="metric-subtitle">Across all active customers</div></div>
+                        <div class="metric-card"><div class="metric-header"><div class="metric-label">Customer Satisfaction</div></div><div class="metric-value">96%</div><div class="metric-subtitle">Based on post-sale surveys</div></div>
+                        <div class="metric-card"><div class="metric-header"><div class="metric-label">Avg. Profit Per Unit</div></div><div class="metric-value">$4,210</div><div class="metric-subtitle">After all associated costs</div></div>
+                    </div>
+                    <div class="data-table-container">
+                        <div class="table-header"><div class="table-title">Detailed Performance Metrics</div></div>
+                        <table class="data-table"><thead><tr><th>Metric</th><th>Current Value</th><th>Previous Period</th><th>Change</th></tr></thead><tbody id="analyticsTableBody"></tbody></table>
+                    </div>
+                </div>
+
                 <div id="customers" class="page-content">
                     <div class="data-table-container">
                         <div class="table-header"><div class="table-title">Customer Pipeline</div><button class="btn btn-primary" onclick="openCustomerForm()">+ Add Customer</button></div>
                         <table class="data-table">
-                            <thead><tr><th>Customer</th><th>Contact</th><th>Status</th><th>AI Score</th><th>Value</th><th>Last Contact</th></tr></thead>
+                            <thead><tr><th>Customer</th><th>Contact Info</th><th>Status</th><th>AI Score</th><th>Value</th><th>Last Contact</th></tr></thead>
                             <tbody id="customerTableBody"></tbody>
                         </table>
                     </div>
@@ -301,12 +303,31 @@
                      <div class="data-table-container">
                         <div class="table-header"><div class="table-title">Vehicle Inventory</div><button class="btn btn-primary">+ Add Vehicle</button></div>
                         <table class="data-table">
-                            <thead><tr><th>Vehicle</th><th>VIN</th><th>Status</th><th>Price</th><th>Days in Stock</th><th>Actions</th></tr></thead>
+                            <thead><tr><th>Vehicle</th><th>VIN</th><th>Status</th><th>Price</th><th>Days in Stock</th><th>Photos</th></tr></thead>
                             <tbody id="inventoryTableBody"></tbody>
                         </table>
                     </div>
                 </div>
                 
+                <div id="photos" class="page-content">
+                    <div class="camera-container">
+                        <div class="widget-header" style="margin: 0 0 16px 0;"><div class="widget-title">Vehicle Photo Management</div></div>
+                        <div style="display: flex; gap: 24px; flex-wrap: wrap;">
+                            <div>
+                                <video id="cameraFeed" class="video-preview" autoplay playsinline style="display: none;"></video>
+                                <canvas id="photoCanvas" style="display: none;"></canvas>
+                                <div id="cameraPlaceholder" class="video-preview" style="display: flex; align-items: center; justify-content: center; color: var(--text-muted);">Camera feed offline</div>
+                            </div>
+                            <div style="flex: 1;">
+                                <div class="form-group"><label class="form-label">Select Vehicle</label><select id="vehicleSelect" class="form-select"></select></div>
+                                <div class="form-group"><label class="form-label">Photo Type</label><select id="photoType" class="form-select"><option>Exterior</option><option>Interior</option><option>Engine</option><option>Damage</option></select></div>
+                                <div class="camera-controls"><button class="btn btn-secondary" onclick="startCamera()">📷 Start Camera</button><button class="btn btn-primary" onclick="capturePhoto()" id="captureBtn" disabled>📸 Capture</button><button class="btn btn-secondary" onclick="stopCamera()">⏹️ Stop</button></div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="data-table-container"><div class="table-header"><div class="table-title">Photo Gallery</div></div><div id="photoGallery" class="vehicle-photos" style="padding: 20px;"></div></div>
+                </div>
+
                 <div id="calls" class="page-content">
                     <div class="data-table-container">
                         <div class="table-header"><div class="table-title">Call Center</div><button class="btn btn-primary" onclick="simulateNewCall()">📞 Simulate Incoming Call</button></div>
@@ -317,9 +338,29 @@
                     </div>
                 </div>
                 
-                <div id="emails" class="page-content"><div class="chart-widget"><h3>Email Hub Page</h3><p>Content for email campaigns and history goes here.</p></div></div>
-                <div id="analytics" class="page-content"><div class="chart-widget"><h3>Performance Analytics Page</h3><p>Detailed charts and performance metrics go here.</p></div></div>
-                <div id="vin" class="page-content"><div class="chart-widget"><h3>VIN Scanner Page</h3><p>VIN input and results go here.</p></div></div>
+                <div id="emails" class="page-content">
+                    <div class="widget-grid">
+                        <div class="data-table-container">
+                             <div class="table-header"><div class="table-title">Email History</div><button class="btn btn-primary">✉️ New Campaign</button></div>
+                             <table class="data-table"><thead><tr><th>Recipient</th><th>Subject</th><th>Status</th><th>Timestamp</th></tr></thead><tbody id="emailTableBody"></tbody></table>
+                        </div>
+                         <div class="email-template-editor">
+                            <div class="widget-header"><div class="widget-title">AI Email Templates</div></div>
+                            <div class="form-group"><label class="form-label">Template Type</label><select id="templateType" class="form-select" onchange="loadEmailTemplate()"><option value="initial">Initial Follow-up</option><option value="followup">Weekly Check-in</option></select></div>
+                            <div class="form-group"><label class="form-label">Subject</label><input type="text" id="emailSubject" class="form-input"></div>
+                            <div class="form-group"><label class="form-label">Body</label><textarea id="emailBody" class="form-textarea" rows="8"></textarea></div>
+                            <button class="btn btn-primary" onclick="saveEmailTemplate()">💾 Save Template</button>
+                        </div>
+                    </div>
+                </div>
+                
+                <div id="vin" class="page-content">
+                    <div class="form-container">
+                        <div class="widget-header" style="margin-bottom: 20px;"><div class="widget-title">VIN Intelligence Scanner</div></div>
+                        <div class="form-group"><label class="form-label">Vehicle Identification Number (17 Characters)</label><div style="display: flex; gap: 10px;"><input type="text" id="vinInput" class="form-input" placeholder="Enter VIN..." maxlength="17"><button class="btn btn-primary" onclick="scanVIN()">Scan</button></div></div>
+                        <div id="vinResult" class="vin-result" style="display: none;"></div>
+                    </div>
+                </div>
 
                 <div id="chat" class="page-content">
                      <div class="ai-config-panel">
@@ -333,7 +374,7 @@
                         </div>
                         <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px; position: relative; z-index: 1;">
                             <div class="form-group"><label class="form-label">AI API Key</label><input type="password" id="aiApiKey" class="form-input" placeholder="Enter your AI API key..." onchange="updateAIStatus()"></div>
-                            <div class="form-group"><label class="form-label">OpenPhone API Key</label><input type="password" id="openphoneApiKey" class="form-input" placeholder="Enter OpenPhone API key..."></div>
+                            <div class="form-group"><label class="form-label">OpenPhone API Key</label><input type="password" class="form-input" placeholder="Enter OpenPhone API key..."></div>
                         </div>
                         <div style="display: flex; gap: 10px; position: relative; z-index: 1;"><button class="btn btn-primary" onclick="testAIConnection()">🔗 Test AI</button><button class="btn btn-primary">📞 Test Phone</button><button class="btn btn-secondary" onclick="saveAIConfig()">💾 Save Config</button></div>
                     </div>
@@ -343,13 +384,12 @@
                         <div class="chat-input-container"><input type="text" id="chatInput" class="chat-input form-input" placeholder="Ask a question or give a command..." onkeypress="if(event.key==='Enter') sendMessage()"><button class="btn btn-primary" onclick="sendMessage()">Send</button></div>
                     </div>
                 </div>
-
             </div>
         </div>
     </div>
 
     <div id="notificationToast" class="notification-toast">
-        <div id="notificationMessage">Notification message</div>
+        <div id="notificationMessage"></div>
     </div>
     
 <script>
@@ -359,42 +399,50 @@
 // This object acts as our single source of truth, like a mini-database.
 const state = {
     user: { name: 'Operator' },
-    config: {
-        aiProvider: null,
-        aiApiKey: null
-    },
+    config: { aiProvider: null, aiApiKey: null },
     metrics: {
         revenue: { current: 487000, previous: 435000 },
         saleTime: { current: 14, previous: 21 },
         industrySaleTime: 21,
     },
     customers: [
-        { id: 101, name: 'John Smith', email: 'john.s@example.com', phone: '555-0101', status: 'hot', value: 65000, vehicleInterest: '2024 BMW X5', lastContact: new Date(Date.now() - 2 * 3600 * 1000), leadScore: 9 },
-        { id: 102, name: 'Sarah Johnson', email: 's.johnson@example.com', phone: '555-0102', status: 'qualified', value: 58000, vehicleInterest: 'Tesla Model Y', lastContact: new Date(Date.now() - 5 * 3600 * 1000), leadScore: 8 },
-        { id: 103, name: 'Mike Wilson', email: 'mike.w@example.com', phone: '555-0103', status: 'follow', value: 52000, vehicleInterest: 'Ford F-150 Lightning', lastContact: new Date(Date.now() - 24 * 3600 * 1000), leadScore: 6 },
+        { id: 101, firstName: 'John', lastName: 'Smith', email: 'john.s@example.com', phone: '555-0101', status: 'hot', value: 65000, vehicleInterest: '2024 BMW X5', lastContact: new Date(Date.now() - 2 * 3600 * 1000), leadScore: 9, address: '123 Main St', currentVehicle: '2018 Toyota Corolla', timeline: '2 weeks', budget: '$60k-$70k' },
+        { id: 102, firstName: 'Sarah', lastName: 'Johnson', email: 's.johnson@example.com', phone: '555-0102', status: 'qualified', value: 58000, vehicleInterest: 'Tesla Model Y', lastContact: new Date(Date.now() - 5 * 3600 * 1000), leadScore: 8, address: '456 Oak Ave', currentVehicle: '2019 Tesla Model 3', timeline: '1 month', budget: '$55k-$65k' },
+        { id: 103, firstName: 'Mike', lastName: 'Wilson', email: 'mike.w@example.com', phone: '555-0103', status: 'follow', value: 52000, vehicleInterest: 'Ford F-150 Lightning', lastContact: new Date(Date.now() - 24 * 3600 * 1000), leadScore: 6, address: '789 Pine Ln', currentVehicle: '2020 Ford Escape', timeline: '3 months', budget: '$50k-$60k' },
     ],
     inventory: [
-        { id: 201, vehicle: '2024 Toyota Camry', vin: '1HGBH41JXMN109186', status: 'available', price: 32000, daysInStock: 13 },
-        { id: 202, vehicle: '2024 Honda Accord', vin: '2HGBH41JXMN109187', status: 'sold', price: 35000, daysInStock: 8 },
-        { id: 203, vehicle: '2024 Ford F-150', vin: '3HGBH41JXMN109188', status: 'reserved', price: 45000, daysInStock: 42 },
+        { id: 201, vehicle: '2024 Toyota Camry', vin: '1HGBH41JXMN109186', status: 'available', price: 32000, daysInStock: 13, photoCount: 0 },
+        { id: 202, vehicle: '2024 Honda Accord', vin: '2HGBH41JXMN109187', status: 'sold', price: 35000, daysInStock: 8, photoCount: 5 },
+        { id: 203, vehicle: '2024 Ford F-150', vin: '3HGBH41JXMN109188', status: 'reserved', price: 45000, daysInStock: 42, photoCount: 3 },
     ],
     communications: [
         { id: 301, customerId: 101, type: 'Call', summary: 'Wants to test drive the BMW X5 this week. Pre-approved for $70k.', duration: 345, timestamp: new Date(Date.now() - 2 * 3600 * 1000), status: 'transcribed', leadScore: 9 },
         { id: 302, customerId: 102, type: 'Email', summary: 'Inquiring about trade-in process for a 2019 Highlander for a Tesla Model Y.', duration: 0, timestamp: new Date(Date.now() - 5 * 3600 * 1000), status: 'transcribed', leadScore: 8 },
     ],
+    emailHistory: [
+        { recipient: 'John Smith', subject: 'Your BMW X5 Inquiry', status: 'opened', timestamp: new Date(Date.now() - 2 * 3600 * 1000) },
+        { recipient: 'Sarah Johnson', subject: 'Tesla Model Y Trade-in', status: 'delivered', timestamp: new Date(Date.now() - 5 * 3600 * 1000) }
+    ],
+    emailTemplates: {
+        initial: { subject: 'Following up on your inquiry about the {vehicle}', body: 'Hi {firstName},\n\nThank you for your interest in the {vehicle}. I\'d be happy to schedule a test drive for you. What day works best?\n\nBest,\nTVC Auto' },
+        followup: { subject: 'Checking in on your vehicle search', body: 'Hi {firstName},\n\nJust wanted to follow up on your recent inquiry. Have you had any more thoughts on the {vehicle}?\n\nLet me know if I can help.\n\nBest,\nTVC Auto' }
+    },
+    vehiclePhotos: [],
     activityStream: [],
 };
+let isListening = false;
+let cameraStream = null;
 
 // --- 2. INITIALIZATION ---
 document.addEventListener('DOMContentLoaded', () => {
     console.log("TVC Auto AI Pro Initializing...");
+    buildFullCustomerForm();
     renderAll();
     addChatMessage('assistant', `🤖 <strong>Welcome, ${state.user.name}.</strong> AI Terminal is online. Configure your provider and ask me anything about your dealership operations.`);
-    addActivity('✅', 'System Initialized', `Welcome, ${state.user.name}`);
+    addActivity('✅', 'System Initialized', `Welcome, ${state.user.name}`, 'var(--success)');
 });
 
 // --- 3. CORE RENDER FUNCTIONS ---
-// A single function to update the entire UI from the state object.
 function renderAll() {
     renderDashboardMetrics();
     renderTopBarMetrics();
@@ -403,7 +451,14 @@ function renderAll() {
     renderCallTable();
     renderActivityStream();
     renderBadges();
+    renderAnalyticsPage();
+    renderEmailTable();
+    loadEmailTemplate();
+    populateVehicleSelect();
+    updatePhotoDisplay();
 }
+
+// ... (Rest of render functions are detailed and specific)
 
 function renderDashboardMetrics() {
     const { revenue, saleTime, industrySaleTime } = state.metrics;
@@ -412,23 +467,22 @@ function renderDashboardMetrics() {
     const hotLeads = state.customers.filter(c => c.status === 'hot');
     const callsToday = state.communications.filter(c => c.type === 'Call' && isToday(c.timestamp));
 
-    // Revenue Card
     document.getElementById('dashboardRevenue').textContent = `$${(revenue.current / 1000).toFixed(0)}K`;
     document.getElementById('dashboardRevenueTrend').textContent = `${revenueChange >= 0 ? '+' : ''}${(revenueChange * 100).toFixed(0)}%`;
+    document.getElementById('dashboardRevenueTrend').className = `metric-trend ${revenueChange >= 0 ? 'trend-up' : 'trend-down'}`;
     document.getElementById('dashboardRevenueSubtitle').textContent = `vs $${(revenue.previous / 1000).toFixed(0)}K last month`;
 
-    // Leads Card
-    document.getElementById('dashboardLeads').textContent = hotLeads.length;
     const newLeadsToday = hotLeads.filter(c => isToday(c.lastContact)).length;
+    document.getElementById('dashboardLeads').textContent = hotLeads.length;
     document.getElementById('dashboardLeadsTrend').textContent = `+${newLeadsToday}`;
+    document.getElementById('dashboardLeadsTrend').className = 'metric-trend trend-up';
     document.getElementById('dashboardLeadsSubtitle').textContent = `${newLeadsToday} new hot leads today`;
 
-    // Calls Card
     document.getElementById('dashboardCalls').textContent = callsToday.length;
     document.getElementById('dashboardCallsTrend').textContent = `+${callsToday.length}`;
-    document.getElementById('dashboardCallsSubtitle').textContent = `${state.communications.filter(c => c.type === 'Call').length} total calls logged`;
+    document.getElementById('dashboardCallsTrend').className = 'metric-trend trend-up';
+    document.getElementById('dashboardCallsSubtitle').textContent = `${state.communications.filter(c => c.type === 'Call' && c.status === 'transcribed').length} transcribed`;
     
-    // Sale Time Card
     document.getElementById('dashboardSaleTime').textContent = `${saleTime.current}d`;
     document.getElementById('dashboardSaleTimeTrend').textContent = `${saleTimeChange > 0 ? '+' : ''}${saleTimeChange}d`;
     document.getElementById('dashboardSaleTimeTrend').className = `metric-trend ${saleTimeChange <= 0 ? 'trend-up' : 'trend-down'}`;
@@ -448,11 +502,12 @@ function renderTopBarMetrics() {
 
 function renderCustomerTable() {
     const tbody = document.getElementById('customerTableBody');
+    if (!tbody) return;
     tbody.innerHTML = '';
     state.customers.forEach(c => {
         const row = tbody.insertRow();
         row.innerHTML = `
-            <td><b>${c.name}</b></td>
+            <td><b>${c.firstName} ${c.lastName}</b></td>
             <td>${c.email}<br>${c.phone}</td>
             <td><span class="status-badge status-${c.status}">${c.status}</span></td>
             <td><span class="lead-score ${getScoreClass(c.leadScore)}">${c.leadScore}/10</span></td>
@@ -464,29 +519,31 @@ function renderCustomerTable() {
 
 function renderInventoryTable() {
     const tbody = document.getElementById('inventoryTableBody');
+    if (!tbody) return;
     tbody.innerHTML = '';
     state.inventory.forEach(item => {
         const row = tbody.insertRow();
-        const stockClass = item.daysInStock > 30 ? 'negative' : 'positive';
+        const stockClass = item.daysInStock > 30 ? 'error' : 'success';
         row.innerHTML = `
             <td><b>${item.vehicle}</b></td>
             <td>${item.vin}</td>
             <td><span class="status-badge status-${item.status}">${item.status}</span></td>
             <td>$${item.price.toLocaleString()}</td>
-            <td style="color: var(--${stockClass === 'positive' ? 'success' : 'error'}); font-weight: 600;">${item.daysInStock} days</td>
-            <td><button class="btn btn-secondary btn-sm">Details</button></td>
+            <td style="color: var(--${stockClass}); font-weight: 600;">${item.daysInStock} days</td>
+            <td>${item.photoCount} Photos</td>
         `;
     });
 }
 
 function renderCallTable() {
     const tbody = document.getElementById('callTableBody');
+    if (!tbody) return;
     tbody.innerHTML = '';
     state.communications.filter(c => c.type === 'Call').forEach(c => {
         const customer = state.customers.find(cust => cust.id === c.customerId);
         const row = tbody.insertRow();
         row.innerHTML = `
-            <td><b>${customer ? customer.name : 'Unknown'}</b></td>
+            <td><b>${customer ? `${customer.firstName} ${customer.lastName}` : 'Unknown'}</b></td>
             <td>${c.summary}</td>
             <td><span class="lead-score ${getScoreClass(c.leadScore)}">${c.leadScore}/10</span></td>
             <td>${formatDuration(c.duration)}</td>
@@ -494,6 +551,37 @@ function renderCallTable() {
             <td><span class="status-badge status-${c.status}">${c.status}</span></td>
         `;
     });
+}
+
+function renderEmailTable() {
+    const tbody = document.getElementById('emailTableBody');
+    if (!tbody) return;
+    tbody.innerHTML = '';
+    state.emailHistory.forEach(e => {
+        const row = tbody.insertRow();
+        row.innerHTML = `
+            <td>${e.recipient}</td>
+            <td>${e.subject}</td>
+            <td><span class="status-badge status-${e.status}">${e.status}</span></td>
+            <td>${formatTimeAgo(e.timestamp)}</td>
+        `;
+    });
+}
+
+function renderAnalyticsPage() {
+    const totalLeads = state.customers.length;
+    const soldCount = state.inventory.filter(i => i.status === 'sold').length;
+    document.getElementById('analyticsConversionRate').textContent = `${((soldCount / totalLeads) * 100).toFixed(1)}%`;
+    const avgScore = state.customers.reduce((acc, c) => acc + c.leadScore, 0) / totalLeads;
+    document.getElementById('analyticsAvgScore').textContent = `${avgScore.toFixed(1)}/10`;
+
+    const tableBody = document.getElementById('analyticsTableBody');
+    if (!tableBody) return;
+    tableBody.innerHTML = `
+        <tr><td>Total Revenue</td><td>$${state.metrics.revenue.current.toLocaleString()}</td><td>$${state.metrics.revenue.previous.toLocaleString()}</td><td style="color: var(--success);">+${((state.metrics.revenue.current - state.metrics.revenue.previous) / state.metrics.revenue.previous * 100).toFixed(1)}%</td></tr>
+        <tr><td>Units Sold</td><td>${soldCount}</td><td>${soldCount - 2}</td><td style="color: var(--success);">+2</td></tr>
+        <tr><td>Avg. Sale Price</td><td>$${(state.metrics.revenue.current / soldCount).toFixed(0).toLocaleString()}</td><td>$36,250</td><td style="color: var(--error);">-2.7%</td></tr>
+    `;
 }
 
 function renderActivityStream() {
@@ -508,10 +596,7 @@ function renderActivityStream() {
         item.className = 'activity-item';
         item.innerHTML = `
             <div class="activity-indicator" style="background-color: ${act.color};"></div>
-            <div>
-                <div class="activity-title">${act.title}</div>
-                <div class="activity-subtitle">${act.subtitle}</div>
-            </div>
+            <div><div class="activity-title">${act.title}</div><div class="activity-subtitle">${act.subtitle}</div></div>
             <div class="activity-time">${formatTimeAgo(act.timestamp)}</div>
         `;
         feed.appendChild(item);
@@ -521,19 +606,98 @@ function renderActivityStream() {
 function renderBadges() {
     document.getElementById('customerBadge').textContent = state.customers.length;
     document.getElementById('callBadge').textContent = state.communications.filter(c => c.type === 'Call').length;
+    document.getElementById('photoBadge').textContent = state.vehiclePhotos.length;
 }
 
 // --- 4. CORE AI & FUNCTIONALITY ---
+
+// VOICE AI - RESTORED AND EXPANDED
+function toggleVoice() {
+    const voiceBtn = document.getElementById('voiceBtn');
+    if (!('webkitSpeechRecognition' in window)) {
+        showNotification('error', 'Voice recognition not supported in this browser.');
+        return;
+    }
+
+    const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+    const recognition = new SpeechRecognition();
+    recognition.continuous = false;
+    recognition.interimResults = false;
+    recognition.lang = 'en-US';
+
+    recognition.onstart = () => {
+        isListening = true;
+        voiceBtn.innerHTML = '🔴 Listening...';
+        voiceBtn.style.background = 'var(--error)';
+        showNotification('info', 'Voice AI is listening...');
+    };
+
+    recognition.onresult = (event) => {
+        const command = event.results[0][0].transcript.toLowerCase();
+        addChatMessage('user', `Voice Command: "${command}"`);
+        showNotification('success', `Command received: "${command}"`);
+        
+        let executed = false;
+        const navMap = {
+            'dashboard': 'dashboard', 'analytics': 'analytics', 'performance': 'analytics',
+            'customers': 'customers', 'clients': 'customers', 'inventory': 'inventory',
+            'vehicles': 'inventory', 'photos': 'photos', 'images': 'photos',
+            'calls': 'calls', 'call center': 'calls', 'emails': 'emails', 'email hub': 'emails',
+            'vin': 'vin', 'scanner': 'vin', 'chat': 'chat', 'terminal': 'chat', 'ai': 'chat'
+        };
+
+        for (const [key, pageId] of Object.entries(navMap)) {
+            if (command.includes(key)) {
+                const navItem = document.querySelector(`.nav-item[onclick*="'${pageId}'"]`);
+                showPage(pageId, navItem);
+                addChatMessage('system', `Navigating to ${pageId.charAt(0).toUpperCase() + pageId.slice(1)} page...`);
+                executed = true;
+                break;
+            }
+        }
+        
+        if (!executed) {
+            if (command.includes('simulate call')) { simulateNewCall(); executed = true; }
+            else if (command.includes('refresh')) { refreshData(); executed = true; }
+            else if (command.includes('add customer')) { showPage('customers', document.querySelector(`.nav-item[onclick*="'customers'"]`)); openCustomerForm(); executed = true; }
+            else if (command.includes('start camera')) { showPage('photos', document.querySelector(`.nav-item[onclick*="'photos'"]`)); startCamera(); executed = true; }
+        }
+
+        if (executed) {
+            addChatMessage('assistant', `✅ Command executed: ${command}`);
+        } else {
+            addChatMessage('assistant', `❓ Unrecognized command. Please try again.`);
+        }
+    };
+
+    recognition.onend = () => {
+        isListening = false;
+        voiceBtn.innerHTML = '🎙️ Voice AI';
+        voiceBtn.style.background = '';
+    };
+
+    recognition.onerror = (event) => {
+        showNotification('error', `Voice recognition error: ${event.error}`);
+    };
+
+    if (!isListening) {
+        recognition.start();
+    } else {
+        recognition.stop();
+    }
+}
+
+// ... other core functions
 function simulateNewCall() {
-    showNotification('info', 'Simulating incoming call...');
+    showNotification('info', 'Simulating incoming AI-processed call...');
     const sampleCalls = [
-        { customer: { id: 104, name: 'Emily White', email: 'em.w@example.com', phone: '555-0104' }, summary: 'Wants to know final price for the Toyota Camry including fees. Budget is firm at $34k.', leadScore: 8, duration: 210, value: 34000, vehicleInterest: '2024 Toyota Camry' },
-        { customer: { id: 105, name: 'David Green', email: 'd.green@example.com', phone: '555-0105' }, summary: 'Wants to trade in a 2020 Honda CR-V for the Ford F-150. Asks about financing.', leadScore: 7, duration: 450, value: 45000, vehicleInterest: '2024 Ford F-150' },
+        { customer: { id: Date.now(), firstName: 'Emily', lastName: 'White', email: 'em.w@example.com', phone: '555-0104' }, summary: 'Wants to know final price for the Toyota Camry including fees. Budget is firm at $34k.', leadScore: 8, duration: 210, value: 34000, vehicleInterest: '2024 Toyota Camry' },
+        { customer: { id: Date.now() + 1, firstName: 'David', lastName: 'Green', email: 'd.green@example.com', phone: '555-0105' }, summary: 'Wants to trade in a 2020 Honda CR-V for the Ford F-150. Asks about financing.', leadScore: 7, duration: 450, value: 45000, vehicleInterest: '2024 Ford F-150' },
     ];
     const newCallData = sampleCalls[Math.floor(Math.random() * sampleCalls.length)];
 
     setTimeout(() => {
-        let customer = state.customers.find(c => c.id === newCallData.customer.id);
+        let customer = state.customers.find(c => c.email === newCallData.customer.email);
         if (!customer) {
             customer = { ...newCallData.customer, status: 'new', lastContact: new Date(), value: newCallData.value, vehicleInterest: newCallData.vehicleInterest, leadScore: newCallData.leadScore };
             state.customers.push(customer);
@@ -543,21 +707,12 @@ function simulateNewCall() {
             customer.leadScore = newCallData.leadScore;
         }
 
-        const newComm = {
-            id: Date.now(),
-            customerId: customer.id,
-            type: 'Call',
-            summary: newCallData.summary,
-            duration: newCallData.duration,
-            timestamp: new Date(),
-            status: 'transcribed',
-            leadScore: newCallData.leadScore
-        };
+        const newComm = { id: Date.now(), customerId: customer.id, type: 'Call', summary: newCallData.summary, duration: newCallData.duration, timestamp: new Date(), status: 'transcribed', leadScore: newCallData.leadScore };
         state.communications.push(newComm);
 
         renderAll();
-        addActivity('📞', `AI Call Analysis: ${customer.name}`, `Lead Score: ${newCallData.leadScore}/10`, 'var(--info)');
-        showNotification('success', `New call from ${customer.name} processed successfully!`);
+        addActivity('📞', `AI Call Analysis: ${customer.firstName}`, `Lead Score: ${newCallData.leadScore}/10`, 'var(--info)');
+        showNotification('success', `New call from ${customer.firstName} processed!`);
         showPage('calls', document.querySelector('.nav-item[onclick*=\'calls\']'));
     }, 1500);
 }
@@ -573,22 +728,19 @@ function handleAICommand(command) {
     } else if (command.includes('lead') || command.includes('customer')) {
         const hotLeads = state.customers.filter(c => c.status === 'hot').sort((a,b) => b.lastContact - a.lastContact);
         if (hotLeads.length > 0) {
-            response = `**Top Hot Leads:**\n` + hotLeads.slice(0, 3).map(c => `- **${c.name}**: Interested in the ${c.vehicleInterest}, last contacted ${formatTimeAgo(c.lastContact)}. Score: ${c.leadScore}/10.`).join('\n');
-        } else {
-            response = "There are currently no 'hot' leads in the pipeline.";
-        }
+            response = `**Top Hot Leads:**\n` + hotLeads.slice(0, 3).map(c => `- **${c.firstName} ${c.lastName}**: Interested in the ${c.vehicleInterest}, last contacted ${formatTimeAgo(c.lastContact)}. Score: ${c.leadScore}/10.`).join('\n');
+        } else { response = "There are currently no 'hot' leads in the pipeline."; }
     } else if (command.includes('inventory') || command.includes('vehicle')) {
         const staleInventory = state.inventory.filter(i => i.status === 'available').sort((a, b) => b.daysInStock - a.daysInStock);
         if (staleInventory.length > 0) {
             response = `**Stale Inventory Analysis:**\n` + staleInventory.slice(0, 3).map(i => `- **${i.vehicle}**: In stock for ${i.daysInStock} days. Price: $${i.price.toLocaleString()}`).join('\n');
-        } else {
-            response = "No available inventory to analyze.";
-        }
+        } else { response = "No available inventory to analyze."; }
     } else if (command.includes('draft') && command.includes('email')) {
         const lastComm = state.communications[state.communications.length - 1];
         if (lastComm) {
             const customer = state.customers.find(c => c.id === lastComm.customerId);
-            response = `**Draft Email to ${customer.name}:**\n\n**Subject:** Following up on your inquiry\n\nHi ${customer.name.split(' ')[0]},\n\nThank you for your recent call. Based on our conversation about the ${customer.vehicleInterest}, I'd be happy to provide more information or schedule a test drive.\n\nWhat would be a good next step for you?\n\nBest,\n${state.user.name}`;
+            const template = state.emailTemplates.initial;
+            response = `**Draft Email to ${customer.firstName}:**\n\n**Subject:** ${template.subject.replace('{vehicle}', customer.vehicleInterest)}\n\n${template.body.replace('{firstName}', customer.firstName).replace('{vehicle}', customer.vehicleInterest)}`;
         }
     }
     return response;
@@ -600,7 +752,7 @@ function showPage(pageId, navElement) {
     document.getElementById(pageId)?.classList.add('active');
     document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
     navElement?.classList.add('active');
-    const titles = { dashboard: 'Executive Dashboard', customers: 'Customer Pipeline', inventory: 'Vehicle Inventory', calls: 'Call Center', emails: 'Email Hub', analytics: 'Performance Analytics', vin: 'VIN Scanner', chat: 'AI Terminal' };
+    const titles = { dashboard: 'Executive Dashboard', customers: 'Customer Pipeline', inventory: 'Vehicle Inventory', calls: 'Call Center', emails: 'Email Hub', analytics: 'Performance Analytics', vin: 'VIN Scanner', chat: 'AI Terminal', photos: 'Photo Manager' };
     document.getElementById('contentTitle').textContent = titles[pageId] || 'Dashboard';
 }
 
@@ -610,10 +762,7 @@ function sendMessage() {
     if (!message) return;
     addChatMessage('user', message);
     input.value = '';
-    setTimeout(() => {
-        const response = handleAICommand(message);
-        addChatMessage('assistant', response);
-    }, 800);
+    setTimeout(() => { addChatMessage('assistant', handleAICommand(message)); }, 800);
 }
 
 function addChatMessage(type, message) {
@@ -633,11 +782,7 @@ function addActivity(icon, title, subtitle, color = 'var(--accent-bright)') {
 
 function refreshData() {
     showNotification('info', 'Syncing with data source...');
-    setTimeout(() => {
-        renderAll();
-        addActivity('🔄', 'System Synchronized', 'All data modules have been updated.');
-        showNotification('success', 'Data refreshed successfully');
-    }, 1000);
+    setTimeout(() => { renderAll(); addActivity('🔄', 'System Synchronized', 'All data modules updated.', 'var(--success)'); showNotification('success', 'Data refreshed successfully'); }, 1000);
 }
 
 function selectAIProvider(provider, card) {
@@ -652,79 +797,200 @@ function updateAIStatus() {
     const statusDot = document.getElementById('aiStatusDot');
     const statusText = document.getElementById('aiStatusText');
     state.config.aiApiKey = apiKey;
-
     if (state.config.aiProvider && state.config.aiApiKey && state.config.aiApiKey.length > 10) {
         statusDot.classList.add('connected');
         statusText.textContent = `AI Status: Connected to ${state.config.aiProvider.toUpperCase()}`;
     } else if (state.config.aiProvider) {
         statusDot.classList.remove('connected');
         statusText.textContent = `AI Status: ${state.config.aiProvider.toUpperCase()} selected - API Key required`;
-    } else {
-        statusDot.classList.remove('connected');
-        statusText.textContent = 'AI Status: Select a provider';
-    }
+    } else { statusDot.classList.remove('connected'); statusText.textContent = 'AI Status: Select a provider'; }
 }
 
 function testAIConnection() {
-    if (!state.config.aiProvider || !state.config.aiApiKey || state.config.aiApiKey.length < 10) {
-        showNotification('error', 'Please select a provider and enter a valid API key.');
-        return;
-    }
+    if (!state.config.aiProvider || !state.config.aiApiKey || state.config.aiApiKey.length < 10) { showNotification('error', 'Please select a provider and enter a valid API key.'); return; }
     showNotification('info', `Pinging ${state.config.aiProvider.toUpperCase()} servers...`);
-    setTimeout(() => {
-        addChatMessage('system', `✅ AI connection to ${state.config.aiProvider.toUpperCase()} successful.`);
-        showNotification('success', 'Connection successful!');
-    }, 1500);
+    setTimeout(() => { addChatMessage('system', `✅ AI connection to ${state.config.aiProvider.toUpperCase()} successful.`); showNotification('success', 'Connection successful!'); }, 1500);
 }
 
 function saveAIConfig() {
-     if (!state.config.aiProvider || !state.config.aiApiKey || state.config.aiApiKey.length < 10) {
-        showNotification('error', 'Cannot save incomplete configuration.');
-        return;
-     }
-     addActivity('💾', 'Configuration Saved', `AI Provider set to ${state.config.aiProvider.toUpperCase()}`);
+     if (!state.config.aiProvider || !state.config.aiApiKey || state.config.aiApiKey.length < 10) { showNotification('error', 'Cannot save incomplete configuration.'); return; }
+     addActivity('💾', 'Configuration Saved', `AI Provider set to ${state.config.aiProvider.toUpperCase()}`, 'var(--success)');
      showNotification('success', 'AI Configuration has been saved.');
 }
 
-function showNotification(type, message) {
-    const toast = document.getElementById('notificationToast');
-    const msg = document.getElementById('notificationMessage');
-    const icons = { success: '✅', error: '❌', warning: '⚠️', info: 'ℹ️' };
-    msg.innerHTML = `${icons[type] || '🔔'} &nbsp; ${message}`;
-    toast.className = `notification-toast show color-${type}`;
-    setTimeout(() => toast.classList.remove('show'), 3000);
+// --- FULLY FUNCTIONAL PAGE COMPONENTS ---
+
+// Customer Form
+function buildFullCustomerForm() {
+    const container = document.getElementById('addCustomerForm');
+    container.innerHTML = `
+        <div class="widget-header" style="margin: 0 0 24px 0;"><div class="widget-title">Add New Customer</div></div>
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px;">
+            <div class="form-group"><label class="form-label">First Name</label><input type="text" id="newCustomerFirstName" class="form-input" placeholder="e.g., Jane"></div>
+            <div class="form-group"><label class="form-label">Last Name</label><input type="text" id="newCustomerLastName" class="form-input" placeholder="e.g., Doe"></div>
+            <div class="form-group"><label class="form-label">Email</label><input type="email" id="newCustomerEmail" class="form-input" placeholder="e.g., jane@example.com"></div>
+            <div class="form-group"><label class="form-label">Phone</label><input type="tel" id="newCustomerPhone" class="form-input" placeholder="e.g., 555-123-4567"></div>
+        </div>
+        <div class="form-group"><label class="form-label">Vehicle Interest</label><input type="text" id="newCustomerVehicleInterest" class="form-input" placeholder="e.g., 2024 BMW X5"></div>
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px;">
+            <div class="form-group"><label class="form-label">Status</label><select id="newCustomerStatus" class="form-select"><option value="new">New</option><option value="follow">Follow Up</option><option value="qualified">Qualified</option><option value="hot">Hot</option></select></div>
+            <div class="form-group"><label class="form-label">Potential Value ($)</label><input type="number" id="newCustomerValue" class="form-input" placeholder="e.g., 50000"></div>
+        </div>
+        <div style="display: flex; gap: 12px; margin-top: 20px;"><button class="btn btn-primary" onclick="addCustomer()" style="flex: 1;">Add Customer</button><button class="btn btn-secondary" onclick="closeCustomerForm()" style="flex: 1;">Cancel</button></div>
+    `;
+}
+function openCustomerForm() { document.getElementById('addCustomerForm').style.display = 'block'; }
+function closeCustomerForm() { document.getElementById('addCustomerForm').style.display = 'none'; }
+function addCustomer() {
+    const newCustomer = {
+        id: Date.now(),
+        firstName: document.getElementById('newCustomerFirstName').value || 'N/A',
+        lastName: document.getElementById('newCustomerLastName').value || 'N/A',
+        email: document.getElementById('newCustomerEmail').value || 'N/A',
+        phone: document.getElementById('newCustomerPhone').value || 'N/A',
+        status: document.getElementById('newCustomerStatus').value,
+        value: parseInt(document.getElementById('newCustomerValue').value) || 0,
+        vehicleInterest: document.getElementById('newCustomerVehicleInterest').value || 'N/A',
+        lastContact: new Date(),
+        leadScore: 5 // Default score for manual entry
+    };
+    state.customers.push(newCustomer);
+    addActivity('👥', `Customer Added: ${newCustomer.firstName}`, `Manually added to pipeline.`, 'var(--success)');
+    renderAll();
+    closeCustomerForm();
+    showNotification('success', 'New customer added successfully!');
+}
+
+// Photo Manager
+function populateVehicleSelect() {
+    const select = document.getElementById('vehicleSelect');
+    select.innerHTML = '<option value="">Choose vehicle...</option>';
+    state.inventory.filter(v => v.status === 'available').forEach(v => {
+        const option = document.createElement('option');
+        option.value = v.id;
+        option.textContent = v.vehicle;
+        select.appendChild(option);
+    });
+}
+async function startCamera() {
+    if (cameraStream) stopCamera();
+    try {
+        cameraStream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: 'environment' } });
+        const video = document.getElementById('cameraFeed');
+        video.srcObject = cameraStream;
+        video.style.display = 'block';
+        document.getElementById('cameraPlaceholder').style.display = 'none';
+        document.getElementById('captureBtn').disabled = false;
+        showNotification('success', 'Camera activated.');
+    } catch (err) {
+        showNotification('error', 'Could not access camera.');
+        console.error("Camera Error:", err);
+    }
+}
+function stopCamera() {
+    if (cameraStream) {
+        cameraStream.getTracks().forEach(track => track.stop());
+        cameraStream = null;
+        document.getElementById('cameraFeed').style.display = 'none';
+        document.getElementById('cameraPlaceholder').style.display = 'flex';
+        document.getElementById('captureBtn').disabled = true;
+        showNotification('info', 'Camera deactivated.');
+    }
+}
+function capturePhoto() {
+    const vehicleId = document.getElementById('vehicleSelect').value;
+    if (!vehicleId) { showNotification('error', 'Please select a vehicle first.'); return; }
+    
+    const canvas = document.getElementById('photoCanvas');
+    const video = document.getElementById('cameraFeed');
+    canvas.width = video.videoWidth;
+    canvas.height = video.videoHeight;
+    canvas.getContext('2d').drawImage(video, 0, 0, canvas.width, canvas.height);
+    const dataUrl = canvas.toDataURL('image/jpeg');
+    
+    const photo = { id: Date.now(), vehicleId: parseInt(vehicleId), dataUrl };
+    state.vehiclePhotos.push(photo);
+    
+    const vehicle = state.inventory.find(v => v.id === parseInt(vehicleId));
+    if (vehicle) vehicle.photoCount++;
+    
+    renderAll();
+    showNotification('success', `Photo captured for ${vehicle.vehicle}`);
+}
+function updatePhotoDisplay() {
+    const gallery = document.getElementById('photoGallery');
+    gallery.innerHTML = '';
+    if (state.vehiclePhotos.length === 0) {
+        gallery.innerHTML = `<div style="color: var(--text-muted); text-align: center; grid-column: 1 / -1;">No photos captured.</div>`;
+        return;
+    }
+    state.vehiclePhotos.forEach(photo => {
+        const item = document.createElement('div');
+        item.className = 'photo-item';
+        item.innerHTML = `<img src="${photo.dataUrl}" alt="Vehicle Photo">`;
+        gallery.appendChild(item);
+    });
+}
+
+// VIN Scanner
+function scanVIN() {
+    const vin = document.getElementById('vinInput').value.toUpperCase();
+    const resultDiv = document.getElementById('vinResult');
+    if (vin.length !== 17) {
+        showNotification('error', 'Please enter a valid 17-character VIN.');
+        return;
+    }
+    resultDiv.style.display = 'block';
+    resultDiv.innerHTML = `<div style="text-align: center; color: var(--info);">Decoding VIN...</div>`;
+    
+    setTimeout(() => {
+        // Simulate API response
+        const sampleData = { '1HGBH41JXMN109186': { make: 'Honda', model: 'Accord', year: '2022', engine: '1.5L I4 Turbo' }, '3HGBH41JXMN109188': { make: 'Ford', model: 'F-150', year: '2024', engine: '3.5L V6 EcoBoost' } };
+        const data = sampleData[vin] || { make: 'Unknown', model: 'Unknown', year: 'N/A', engine: 'N/A' };
+        
+        resultDiv.innerHTML = `
+            <div class="vin-result-grid">
+                <div><div class="vin-field-label">Make</div><div class="vin-field-value">${data.make}</div></div>
+                <div><div class="vin-field-label">Model</div><div class="vin-field-value">${data.model}</div></div>
+                <div><div class="vin-field-label">Year</div><div class="vin-field-value">${data.year}</div></div>
+                <div><div class="vin-field-label">Engine</div><div class="vin-field-value">${data.engine}</div></div>
+            </div>`;
+        addActivity('🔍', 'VIN Decoded', `${data.year} ${data.make} ${data.model}`, 'var(--info)');
+    }, 1200);
+}
+
+// Email Templates
+function loadEmailTemplate() {
+    const type = document.getElementById('templateType').value;
+    const template = state.emailTemplates[type];
+    document.getElementById('emailSubject').value = template.subject;
+    document.getElementById('emailBody').value = template.body;
+}
+function saveEmailTemplate() {
+    const type = document.getElementById('templateType').value;
+    state.emailTemplates[type].subject = document.getElementById('emailSubject').value;
+    state.emailTemplates[type].body = document.getElementById('emailBody').value;
+    showNotification('success', 'Email template saved!');
+    addActivity('💾', 'Template Saved', `${type.charAt(0).toUpperCase() + type.slice(1)} template updated.`, 'var(--success)');
 }
 
 // --- UTILITY HELPERS ---
 function formatTimeAgo(date) {
     const seconds = Math.floor((new Date() - new Date(date)) / 1000);
-    let interval = seconds / 31536000;
-    if (interval > 1) return `${Math.floor(interval)}y ago`;
-    interval = seconds / 86400;
-    if (interval > 1) return `${Math.floor(interval)}d ago`;
-    interval = seconds / 3600;
-    if (interval > 1) return `${Math.floor(interval)}h ago`;
-    interval = seconds / 60;
-    if (interval > 1) return `${Math.floor(interval)}m ago`;
-    return "Just now";
+    if (seconds < 60) return "Just now";
+    const intervals = { 'year': 31536000, 'month': 2592000, 'day': 86400, 'hour': 3600, 'minute': 60 };
+    for (let unit in intervals) {
+        let interval = seconds / intervals[unit];
+        if (interval > 1) {
+            const val = Math.floor(interval);
+            return `${val} ${unit}${val > 1 ? 's' : ''} ago`;
+        }
+    }
 }
-function isToday(someDate) {
-    const today = new Date();
-    const d = new Date(someDate);
-    return d.getDate() === today.getDate() && d.getMonth() === today.getMonth() && d.getFullYear() === today.getFullYear();
-}
-function getScoreClass(score) {
-    if (score >= 8) return 'score-high';
-    if (score >= 6) return 'score-medium';
-    return 'score-low';
-}
-function formatDuration(seconds) {
-    if (!seconds) return 'N/A';
-    const min = Math.floor(seconds / 60);
-    const sec = seconds % 60;
-    return `${min}m ${sec}s`;
-}
-function openCustomerForm() { showNotification('info', 'Customer form functionality coming soon.'); }
+function isToday(someDate) { const today = new Date(); const d = new Date(someDate); return d.getDate() === today.getDate() && d.getMonth() === today.getMonth() && d.getFullYear() === today.getFullYear(); }
+function getScoreClass(score) { if (score >= 8) return 'score-high'; if (score >= 6) return 'score-medium'; return 'score-low'; }
+function formatDuration(seconds) { if (!seconds) return 'N/A'; const min = Math.floor(seconds / 60); const sec = seconds % 60; return `${min}m ${sec}s`; }
+function showMetricDetails(metric) { showNotification('info', `Loading deep dive for ${metric}...`); showPage('analytics', document.querySelector('.nav-item[onclick*="analytics"]')); }
 
 // --- [END] JAVASCRIPT ENGINE ---
 </script>
