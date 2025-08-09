@@ -128,6 +128,7 @@
         .activity-subtitle { font-size: 11px; color: var(--text-muted); }
         .activity-time { font-size: 11px; color: var(--text-muted); flex-shrink: 0; margin-left: auto;}
         .chart-widget { background: var(--bg-glass); backdrop-filter: blur(10px); border: 1px solid var(--border-color); border-radius: 12px; padding: 20px; }
+        .chart-placeholder { height: 250px; position: relative; } /* MODIFIED FOR SVG CHART */
 
         /* --- AI Terminal & Chat --- */
         .ai-config-panel { background: linear-gradient(135deg, var(--bg-tertiary), var(--bg-quaternary)); border: 2px solid var(--accent-primary); border-radius: 12px; padding: 24px; margin-bottom: 24px; box-shadow: 0 0 30px var(--accent-glow); position: relative; overflow: hidden; }
@@ -195,22 +196,11 @@
                 <div class="logo-text">TVC Auto AI Pro</div>
             </div>
             <div class="market-data">
-                <div class="market-item">
-                    <span style="color: var(--text-muted);">Revenue</span>
-                    <span class="market-value" id="topBarRevenue">$0K</span>
-                    <span class="market-change positive" id="topBarRevenueChange">+0%</span>
-                </div>
-                <div class="market-item">
-                    <span style="color: var(--text-muted);">Hot Leads</span>
-                    <span class="market-value" id="topBarLeads">0</span>
-                    <span class="market-change positive" id="topBarLeadsChange">+0</span>
-                </div>
+                <div class="market-item"><span style="color: var(--text-muted);">Revenue</span><span class="market-value" id="topBarRevenue"></span><span class="market-change positive" id="topBarRevenueChange"></span></div>
+                <div class="market-item"><span style="color: var(--text-muted);">Hot Leads</span><span class="market-value" id="topBarLeads"></span><span class="market-change positive" id="topBarLeadsChange"></span></div>
             </div>
             <div class="top-actions">
-                <div class="status-indicator">
-                    <div class="status-dot"></div>
-                    <span>LIVE DATA</span>
-                </div>
+                <div class="status-indicator"><div class="status-dot"></div><span>LIVE DATA</span></div>
                 <button class="btn btn-secondary" id="voiceBtn" onclick="toggleVoice()">🎙️ Voice AI</button>
                 <button class="btn btn-primary" onclick="showPage('chat', document.querySelector('.nav-item[onclick*=\'chat\']'))">🤖 AI Terminal</button>
             </div>
@@ -270,7 +260,10 @@
                         </div>
                     </div>
                     <div class="widget-grid">
-                        <div class="chart-widget"><div class="widget-header"><div class="widget-title">AI-Powered Sales Forecast</div></div><div class="chart-placeholder">📈 Sales Chart Placeholder</div></div>
+                        <div class="chart-widget">
+                            <div class="widget-header"><div class="widget-title">AI-Powered Sales Forecast</div></div>
+                            <div class="chart-placeholder" id="salesForecastChart"></div>
+                        </div>
                         <div class="activity-feed"><div class="widget-header"><div class="widget-title">Live Activity Stream</div></div><div id="activityFeedContent"></div></div>
                     </div>
                 </div>
@@ -396,7 +389,6 @@
 // --- [START] FULLY FUNCTIONAL JAVASCRIPT ENGINE ---
 
 // --- 1. STATE MANAGEMENT ---
-// This object acts as our single source of truth, like a mini-database.
 const state = {
     user: { name: 'Operator' },
     config: { aiProvider: null, aiApiKey: null },
@@ -456,9 +448,62 @@ function renderAll() {
     loadEmailTemplate();
     populateVehicleSelect();
     updatePhotoDisplay();
+    renderSalesForecastChart(); // Added this call
 }
 
-// ... (Rest of render functions are detailed and specific)
+function renderSalesForecastChart() {
+    const container = document.getElementById('salesForecastChart');
+    if (!container) return;
+
+    // Simulate past 5 months of sales data + 1 month AI forecast
+    const salesData = [
+        { month: 'Mar', sales: 380000 },
+        { month: 'Apr', sales: 410000 },
+        { month: 'May', sales: 435000 },
+        { month: 'Jun', sales: 450000 },
+        { month: 'Jul', sales: state.metrics.revenue.current }
+    ];
+    
+    // Simple AI forecast: average of last two months' growth
+    const growth1 = salesData[4].sales - salesData[3].sales;
+    const growth2 = salesData[3].sales - salesData[2].sales;
+    const avgGrowth = (growth1 + growth2) / 2;
+    const forecastSales = salesData[4].sales + avgGrowth;
+    salesData.push({ month: 'Aug (FC)', sales: forecastSales, forecast: true });
+
+    const maxSales = Math.max(...salesData.map(d => d.sales)) * 1.1; // Add 10% padding
+    const chartHeight = 200;
+    const chartWidth = container.clientWidth;
+    const barWidth = (chartWidth / salesData.length) * 0.6;
+    const barMargin = (chartWidth / salesData.length) * 0.4;
+
+    let svgContent = `<svg width="100%" height="${chartHeight + 30}" style="font-family: 'JetBrains Mono', monospace;">`;
+
+    salesData.forEach((d, i) => {
+        const barHeight = (d.sales / maxSales) * chartHeight;
+        const x = i * (barWidth + barMargin);
+        const y = chartHeight - barHeight;
+        
+        const isForecast = d.forecast;
+        const barFill = isForecast ? "url(#forecastGradient)" : "var(--accent-primary)";
+        
+        svgContent += `
+            <defs>
+                <linearGradient id="forecastGradient" x1="0" x2="0" y1="0" y2="1">
+                    <stop offset="0%" stop-color="var(--accent-bright)" />
+                    <stop offset="100%" stop-color="var(--accent-primary)" />
+                </linearGradient>
+            </defs>
+            <rect x="${x}" y="${y}" width="${barWidth}" height="${barHeight}" fill="${barFill}" rx="4" ${isForecast ? 'stroke-dasharray="4" stroke="var(--accent-bright)" stroke-width="2"' : ''}>
+                <title>${d.month}: $${d.sales.toLocaleString()}</title>
+            </rect>
+            <text x="${x + barWidth / 2}" y="${chartHeight + 20}" fill="var(--text-muted)" font-size="12" text-anchor="middle">${d.month}</text>
+        `;
+    });
+
+    svgContent += `</svg>`;
+    container.innerHTML = svgContent;
+}
 
 function renderDashboardMetrics() {
     const { revenue, saleTime, industrySaleTime } = state.metrics;
@@ -548,7 +593,7 @@ function renderCallTable() {
             <td><span class="lead-score ${getScoreClass(c.leadScore)}">${c.leadScore}/10</span></td>
             <td>${formatDuration(c.duration)}</td>
             <td>${formatTimeAgo(c.timestamp)}</td>
-            <td><span class="status-badge status-${c.status}">${c.status}</span></td>
+            <td><span class="status-badge status-transcribed">${c.status}</span></td>
         `;
     });
 }
@@ -610,8 +655,6 @@ function renderBadges() {
 }
 
 // --- 4. CORE AI & FUNCTIONALITY ---
-
-// VOICE AI - RESTORED AND EXPANDED
 function toggleVoice() {
     const voiceBtn = document.getElementById('voiceBtn');
     if (!('webkitSpeechRecognition' in window)) {
@@ -680,14 +723,10 @@ function toggleVoice() {
         showNotification('error', `Voice recognition error: ${event.error}`);
     };
 
-    if (!isListening) {
-        recognition.start();
-    } else {
-        recognition.stop();
-    }
+    if (!isListening) recognition.start();
+    else recognition.stop();
 }
 
-// ... other core functions
 function simulateNewCall() {
     showNotification('info', 'Simulating incoming AI-processed call...');
     const sampleCalls = [
@@ -820,39 +859,15 @@ function saveAIConfig() {
 
 // --- FULLY FUNCTIONAL PAGE COMPONENTS ---
 
-// Customer Form
 function buildFullCustomerForm() {
     const container = document.getElementById('addCustomerForm');
-    container.innerHTML = `
-        <div class="widget-header" style="margin: 0 0 24px 0;"><div class="widget-title">Add New Customer</div></div>
-        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px;">
-            <div class="form-group"><label class="form-label">First Name</label><input type="text" id="newCustomerFirstName" class="form-input" placeholder="e.g., Jane"></div>
-            <div class="form-group"><label class="form-label">Last Name</label><input type="text" id="newCustomerLastName" class="form-input" placeholder="e.g., Doe"></div>
-            <div class="form-group"><label class="form-label">Email</label><input type="email" id="newCustomerEmail" class="form-input" placeholder="e.g., jane@example.com"></div>
-            <div class="form-group"><label class="form-label">Phone</label><input type="tel" id="newCustomerPhone" class="form-input" placeholder="e.g., 555-123-4567"></div>
-        </div>
-        <div class="form-group"><label class="form-label">Vehicle Interest</label><input type="text" id="newCustomerVehicleInterest" class="form-input" placeholder="e.g., 2024 BMW X5"></div>
-        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px;">
-            <div class="form-group"><label class="form-label">Status</label><select id="newCustomerStatus" class="form-select"><option value="new">New</option><option value="follow">Follow Up</option><option value="qualified">Qualified</option><option value="hot">Hot</option></select></div>
-            <div class="form-group"><label class="form-label">Potential Value ($)</label><input type="number" id="newCustomerValue" class="form-input" placeholder="e.g., 50000"></div>
-        </div>
-        <div style="display: flex; gap: 12px; margin-top: 20px;"><button class="btn btn-primary" onclick="addCustomer()" style="flex: 1;">Add Customer</button><button class="btn btn-secondary" onclick="closeCustomerForm()" style="flex: 1;">Cancel</button></div>
-    `;
+    container.innerHTML = `<div class="widget-header" style="margin: 0 0 24px 0;"><div class="widget-title">Add New Customer</div></div><div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px;"><div class="form-group"><label class="form-label">First Name</label><input type="text" id="newCustomerFirstName" class="form-input"></div><div class="form-group"><label class="form-label">Last Name</label><input type="text" id="newCustomerLastName" class="form-input"></div><div class="form-group"><label class="form-label">Email</label><input type="email" id="newCustomerEmail" class="form-input"></div><div class="form-group"><label class="form-label">Phone</label><input type="tel" id="newCustomerPhone" class="form-input"></div></div><div class="form-group"><label class="form-label">Vehicle Interest</label><input type="text" id="newCustomerVehicleInterest" class="form-input"></div><div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px;"><div class="form-group"><label class="form-label">Status</label><select id="newCustomerStatus" class="form-select"><option value="new">New</option><option value="follow">Follow Up</option><option value="qualified">Qualified</option><option value="hot">Hot</option></select></div><div class="form-group"><label class="form-label">Potential Value ($)</label><input type="number" id="newCustomerValue" class="form-input"></div></div><div style="display: flex; gap: 12px; margin-top: 20px;"><button class="btn btn-primary" onclick="addCustomer()" style="flex: 1;">Add Customer</button><button class="btn btn-secondary" onclick="closeCustomerForm()" style="flex: 1;">Cancel</button></div>`;
 }
 function openCustomerForm() { document.getElementById('addCustomerForm').style.display = 'block'; }
 function closeCustomerForm() { document.getElementById('addCustomerForm').style.display = 'none'; }
 function addCustomer() {
     const newCustomer = {
-        id: Date.now(),
-        firstName: document.getElementById('newCustomerFirstName').value || 'N/A',
-        lastName: document.getElementById('newCustomerLastName').value || 'N/A',
-        email: document.getElementById('newCustomerEmail').value || 'N/A',
-        phone: document.getElementById('newCustomerPhone').value || 'N/A',
-        status: document.getElementById('newCustomerStatus').value,
-        value: parseInt(document.getElementById('newCustomerValue').value) || 0,
-        vehicleInterest: document.getElementById('newCustomerVehicleInterest').value || 'N/A',
-        lastContact: new Date(),
-        leadScore: 5 // Default score for manual entry
+        id: Date.now(), firstName: document.getElementById('newCustomerFirstName').value || 'N/A', lastName: document.getElementById('newCustomerLastName').value || 'N/A', email: document.getElementById('newCustomerEmail').value || 'N/A', phone: document.getElementById('newCustomerPhone').value || 'N/A', status: document.getElementById('newCustomerStatus').value, value: parseInt(document.getElementById('newCustomerValue').value) || 0, vehicleInterest: document.getElementById('newCustomerVehicleInterest').value || 'N/A', lastContact: new Date(), leadScore: 5
     };
     state.customers.push(newCustomer);
     addActivity('👥', `Customer Added: ${newCustomer.firstName}`, `Manually added to pipeline.`, 'var(--success)');
@@ -862,131 +877,21 @@ function addCustomer() {
 }
 
 // Photo Manager
-function populateVehicleSelect() {
-    const select = document.getElementById('vehicleSelect');
-    select.innerHTML = '<option value="">Choose vehicle...</option>';
-    state.inventory.filter(v => v.status === 'available').forEach(v => {
-        const option = document.createElement('option');
-        option.value = v.id;
-        option.textContent = v.vehicle;
-        select.appendChild(option);
-    });
-}
-async function startCamera() {
-    if (cameraStream) stopCamera();
-    try {
-        cameraStream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: 'environment' } });
-        const video = document.getElementById('cameraFeed');
-        video.srcObject = cameraStream;
-        video.style.display = 'block';
-        document.getElementById('cameraPlaceholder').style.display = 'none';
-        document.getElementById('captureBtn').disabled = false;
-        showNotification('success', 'Camera activated.');
-    } catch (err) {
-        showNotification('error', 'Could not access camera.');
-        console.error("Camera Error:", err);
-    }
-}
-function stopCamera() {
-    if (cameraStream) {
-        cameraStream.getTracks().forEach(track => track.stop());
-        cameraStream = null;
-        document.getElementById('cameraFeed').style.display = 'none';
-        document.getElementById('cameraPlaceholder').style.display = 'flex';
-        document.getElementById('captureBtn').disabled = true;
-        showNotification('info', 'Camera deactivated.');
-    }
-}
-function capturePhoto() {
-    const vehicleId = document.getElementById('vehicleSelect').value;
-    if (!vehicleId) { showNotification('error', 'Please select a vehicle first.'); return; }
-    
-    const canvas = document.getElementById('photoCanvas');
-    const video = document.getElementById('cameraFeed');
-    canvas.width = video.videoWidth;
-    canvas.height = video.videoHeight;
-    canvas.getContext('2d').drawImage(video, 0, 0, canvas.width, canvas.height);
-    const dataUrl = canvas.toDataURL('image/jpeg');
-    
-    const photo = { id: Date.now(), vehicleId: parseInt(vehicleId), dataUrl };
-    state.vehiclePhotos.push(photo);
-    
-    const vehicle = state.inventory.find(v => v.id === parseInt(vehicleId));
-    if (vehicle) vehicle.photoCount++;
-    
-    renderAll();
-    showNotification('success', `Photo captured for ${vehicle.vehicle}`);
-}
-function updatePhotoDisplay() {
-    const gallery = document.getElementById('photoGallery');
-    gallery.innerHTML = '';
-    if (state.vehiclePhotos.length === 0) {
-        gallery.innerHTML = `<div style="color: var(--text-muted); text-align: center; grid-column: 1 / -1;">No photos captured.</div>`;
-        return;
-    }
-    state.vehiclePhotos.forEach(photo => {
-        const item = document.createElement('div');
-        item.className = 'photo-item';
-        item.innerHTML = `<img src="${photo.dataUrl}" alt="Vehicle Photo">`;
-        gallery.appendChild(item);
-    });
-}
+function populateVehicleSelect() { const select = document.getElementById('vehicleSelect'); select.innerHTML = '<option value="">Choose vehicle...</option>'; state.inventory.filter(v => v.status === 'available').forEach(v => { const option = document.createElement('option'); option.value = v.id; option.textContent = v.vehicle; select.appendChild(option); }); }
+async function startCamera() { if (cameraStream) stopCamera(); try { cameraStream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: 'environment' } }); const video = document.getElementById('cameraFeed'); video.srcObject = cameraStream; video.style.display = 'block'; document.getElementById('cameraPlaceholder').style.display = 'none'; document.getElementById('captureBtn').disabled = false; showNotification('success', 'Camera activated.'); } catch (err) { showNotification('error', 'Could not access camera.'); console.error("Camera Error:", err); } }
+function stopCamera() { if (cameraStream) { cameraStream.getTracks().forEach(track => track.stop()); cameraStream = null; document.getElementById('cameraFeed').style.display = 'none'; document.getElementById('cameraPlaceholder').style.display = 'flex'; document.getElementById('captureBtn').disabled = true; showNotification('info', 'Camera deactivated.'); } }
+function capturePhoto() { const vehicleId = document.getElementById('vehicleSelect').value; if (!vehicleId) { showNotification('error', 'Please select a vehicle first.'); return; } const canvas = document.getElementById('photoCanvas'); const video = document.getElementById('cameraFeed'); canvas.width = video.videoWidth; canvas.height = video.videoHeight; canvas.getContext('2d').drawImage(video, 0, 0, canvas.width, canvas.height); const dataUrl = canvas.toDataURL('image/jpeg'); const photo = { id: Date.now(), vehicleId: parseInt(vehicleId), dataUrl }; state.vehiclePhotos.push(photo); const vehicle = state.inventory.find(v => v.id === parseInt(vehicleId)); if (vehicle) vehicle.photoCount++; renderAll(); showNotification('success', `Photo captured for ${vehicle.vehicle}`); }
+function updatePhotoDisplay() { const gallery = document.getElementById('photoGallery'); gallery.innerHTML = ''; if (state.vehiclePhotos.length === 0) { gallery.innerHTML = `<div style="color: var(--text-muted); text-align: center; grid-column: 1 / -1;">No photos captured.</div>`; return; } state.vehiclePhotos.forEach(photo => { const item = document.createElement('div'); item.className = 'photo-item'; item.innerHTML = `<img src="${photo.dataUrl}" alt="Vehicle Photo">`; gallery.appendChild(item); }); }
 
 // VIN Scanner
-function scanVIN() {
-    const vin = document.getElementById('vinInput').value.toUpperCase();
-    const resultDiv = document.getElementById('vinResult');
-    if (vin.length !== 17) {
-        showNotification('error', 'Please enter a valid 17-character VIN.');
-        return;
-    }
-    resultDiv.style.display = 'block';
-    resultDiv.innerHTML = `<div style="text-align: center; color: var(--info);">Decoding VIN...</div>`;
-    
-    setTimeout(() => {
-        // Simulate API response
-        const sampleData = { '1HGBH41JXMN109186': { make: 'Honda', model: 'Accord', year: '2022', engine: '1.5L I4 Turbo' }, '3HGBH41JXMN109188': { make: 'Ford', model: 'F-150', year: '2024', engine: '3.5L V6 EcoBoost' } };
-        const data = sampleData[vin] || { make: 'Unknown', model: 'Unknown', year: 'N/A', engine: 'N/A' };
-        
-        resultDiv.innerHTML = `
-            <div class="vin-result-grid">
-                <div><div class="vin-field-label">Make</div><div class="vin-field-value">${data.make}</div></div>
-                <div><div class="vin-field-label">Model</div><div class="vin-field-value">${data.model}</div></div>
-                <div><div class="vin-field-label">Year</div><div class="vin-field-value">${data.year}</div></div>
-                <div><div class="vin-field-label">Engine</div><div class="vin-field-value">${data.engine}</div></div>
-            </div>`;
-        addActivity('🔍', 'VIN Decoded', `${data.year} ${data.make} ${data.model}`, 'var(--info)');
-    }, 1200);
-}
+function scanVIN() { const vin = document.getElementById('vinInput').value.toUpperCase(); const resultDiv = document.getElementById('vinResult'); if (vin.length !== 17) { showNotification('error', 'Please enter a valid 17-character VIN.'); return; } resultDiv.style.display = 'block'; resultDiv.innerHTML = `<div style="text-align: center; color: var(--info);">Decoding VIN...</div>`; setTimeout(() => { const sampleData = { '1HGBH41JXMN109186': { make: 'Honda', model: 'Accord', year: '2022', engine: '1.5L I4 Turbo' }, '3HGBH41JXMN109188': { make: 'Ford', model: 'F-150', year: '2024', engine: '3.5L V6 EcoBoost' } }; const data = sampleData[vin] || { make: 'Unknown', model: 'Unknown', year: 'N/A', engine: 'N/A' }; resultDiv.innerHTML = `<div class="vin-result-grid"><div><div class="vin-field-label">Make</div><div class="vin-field-value">${data.make}</div></div><div><div class="vin-field-label">Model</div><div class="vin-field-value">${data.model}</div></div><div><div class="vin-field-label">Year</div><div class="vin-field-value">${data.year}</div></div><div><div class="vin-field-label">Engine</div><div class="vin-field-value">${data.engine}</div></div></div>`; addActivity('🔍', 'VIN Decoded', `${data.year} ${data.make} ${data.model}`, 'var(--info)'); }, 1200); }
 
 // Email Templates
-function loadEmailTemplate() {
-    const type = document.getElementById('templateType').value;
-    const template = state.emailTemplates[type];
-    document.getElementById('emailSubject').value = template.subject;
-    document.getElementById('emailBody').value = template.body;
-}
-function saveEmailTemplate() {
-    const type = document.getElementById('templateType').value;
-    state.emailTemplates[type].subject = document.getElementById('emailSubject').value;
-    state.emailTemplates[type].body = document.getElementById('emailBody').value;
-    showNotification('success', 'Email template saved!');
-    addActivity('💾', 'Template Saved', `${type.charAt(0).toUpperCase() + type.slice(1)} template updated.`, 'var(--success)');
-}
+function loadEmailTemplate() { const type = document.getElementById('templateType').value; const template = state.emailTemplates[type]; document.getElementById('emailSubject').value = template.subject; document.getElementById('emailBody').value = template.body; }
+function saveEmailTemplate() { const type = document.getElementById('templateType').value; state.emailTemplates[type].subject = document.getElementById('emailSubject').value; state.emailTemplates[type].body = document.getElementById('emailBody').value; showNotification('success', 'Email template saved!'); addActivity('💾', 'Template Saved', `${type.charAt(0).toUpperCase() + type.slice(1)} template updated.`, 'var(--success)'); }
 
 // --- UTILITY HELPERS ---
-function formatTimeAgo(date) {
-    const seconds = Math.floor((new Date() - new Date(date)) / 1000);
-    if (seconds < 60) return "Just now";
-    const intervals = { 'year': 31536000, 'month': 2592000, 'day': 86400, 'hour': 3600, 'minute': 60 };
-    for (let unit in intervals) {
-        let interval = seconds / intervals[unit];
-        if (interval > 1) {
-            const val = Math.floor(interval);
-            return `${val} ${unit}${val > 1 ? 's' : ''} ago`;
-        }
-    }
-}
+function formatTimeAgo(date) { const seconds = Math.floor((new Date() - new Date(date)) / 1000); if (seconds < 60) return "Just now"; const intervals = { 'year': 31536000, 'month': 2592000, 'day': 86400, 'hour': 3600, 'minute': 60 }; for (let unit in intervals) { let interval = seconds / intervals[unit]; if (interval > 1) { const val = Math.floor(interval); return `${val} ${unit}${val > 1 ? 's' : ''} ago`; } } }
 function isToday(someDate) { const today = new Date(); const d = new Date(someDate); return d.getDate() === today.getDate() && d.getMonth() === today.getMonth() && d.getFullYear() === today.getFullYear(); }
 function getScoreClass(score) { if (score >= 8) return 'score-high'; if (score >= 6) return 'score-medium'; return 'score-low'; }
 function formatDuration(seconds) { if (!seconds) return 'N/A'; const min = Math.floor(seconds / 60); const sec = seconds % 60; return `${min}m ${sec}s`; }
