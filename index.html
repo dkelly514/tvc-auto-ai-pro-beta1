@@ -1955,22 +1955,445 @@
                     </div>
                 </div>
 
-                <!-- Other pages would continue here (Customers, Inventory, Calls, etc.) -->
-                <!-- Including placeholder divs for completeness -->
-                <div id="customers" class="page-content"></div>
-                <div id="inventory" class="page-content"></div>
-                <div id="photos" class="page-content"></div>
-                <div id="calls" class="page-content"></div>
-                <div id="emails" class="page-content"></div>
-                <div id="vin" class="page-content"></div>
-                <div id="analytics" class="page-content"></div>
+                <!-- Customers Page -->
+                <div id="customers" class="page-content">
+                    <div class="data-table-container">
+                        <div class="table-header">
+                            <div class="table-title">Customer Pipeline Management</div>
+                            <button class="btn btn-primary" onclick="openCustomerForm()">+ Add Customer</button>
+                        </div>
+                        <table class="data-table" id="customerTable">
+                            <thead>
+                                <tr>
+                                    <th>Customer</th>
+                                    <th>Contact Info</th>
+                                    <th>Status</th>
+                                    <th>Lead Score</th>
+                                    <th>Potential Value</th>
+                                    <th>Vehicle Interest</th>
+                                    <th>Last Contact</th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody id="customerTableBody">
+                                <!-- Customer data populated by JS -->
+                            </tbody>
+                        </table>
+                    </div>
+
+                    <div id="addCustomerForm" class="form-container" style="display: none; margin-top: 20px;">
+                        <div class="widget-header" style="margin: 0 0 20px 0;">
+                            <div class="widget-title">Add New Customer</div>
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">First Name</label>
+                            <input type="text" id="newCustomerFirstName" class="form-input" placeholder="John">
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Last Name</label>
+                            <input type="text" id="newCustomerLastName" class="form-input" placeholder="Doe">
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Email</label>
+                            <input type="email" id="newCustomerEmail" class="form-input" placeholder="john@example.com">
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Phone</label>
+                            <input type="tel" id="newCustomerPhone" class="form-input" placeholder="555-123-4567">
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Vehicle Interest</label>
+                            <input type="text" id="newCustomerVehicle" class="form-input" placeholder="2024 BMW X5">
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Budget</label>
+                            <input type="text" id="newCustomerBudget" class="form-input" placeholder="$50,000-$70,000">
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Status</label>
+                            <select id="newCustomerStatus" class="form-select">
+                                <option value="new">New Inquiry</option>
+                                <option value="hot">Hot Lead</option>
+                                <option value="qualified">Qualified</option>
+                                <option value="follow">Follow Up</option>
+                            </select>
+                        </div>
+                        <button class="btn btn-primary" onclick="addCustomer()" style="width: 100%;">Add Customer</button>
+                        <button class="btn btn-secondary" onclick="closeCustomerForm()" style="width: 100%; margin-top: 10px;">Cancel</button>
+                    </div>
+                </div>
+
+                <!-- Inventory Page -->
+                <div id="inventory" class="page-content">
+                    <div class="data-table-container">
+                        <div class="table-header">
+                            <div class="table-title">Vehicle Inventory Management</div>
+                            <div style="display: flex; gap: 8px;">
+                                <input type="text" id="inventoryFilter" class="form-input" placeholder="Filter..." style="width: 200px;" onkeyup="filterInventory()">
+                                <button class="btn btn-primary" onclick="openVehicleForm()">+ Add Vehicle</button>
+                            </div>
+                        </div>
+                        <table class="data-table" id="inventoryTable">
+                            <thead>
+                                <tr>
+                                    <th>Vehicle</th>
+                                    <th>VIN</th>
+                                    <th>Status</th>
+                                    <th>Price</th>
+                                    <th>Days in Stock</th>
+                                    <th>Service Status</th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody id="inventoryTableBody">
+                                <!-- Inventory data populated by JS -->
+                            </tbody>
+                        </table>
+                    </div>
+
+                    <div id="addVehicleForm" class="form-container" style="display: none; margin-top: 20px;">
+                        <div class="widget-header" style="margin: 0 0 20px 0;">
+                            <div class="widget-title">Add New Vehicle</div>
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">VIN</label>
+                            <div style="display: flex; gap: 8px;">
+                                <input type="text" id="newVehicleVIN" class="form-input" placeholder="Enter 17-character VIN" maxlength="17">
+                                <button class="btn btn-primary" onclick="decodeVIN()">Decode</button>
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Make</label>
+                            <input type="text" id="newVehicleMake" class="form-input" placeholder="Toyota">
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Model</label>
+                            <input type="text" id="newVehicleModel" class="form-input" placeholder="Camry">
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Year</label>
+                            <input type="number" id="newVehicleYear" class="form-input" placeholder="2024">
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Price</label>
+                            <input type="number" id="newVehiclePrice" class="form-input" placeholder="32000">
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Status</label>
+                            <select id="newVehicleStatus" class="form-select">
+                                <option value="available">Available</option>
+                                <option value="reserved">Reserved</option>
+                                <option value="sold">Sold</option>
+                                <option value="incoming">Incoming</option>
+                            </select>
+                        </div>
+                        <button class="btn btn-primary" onclick="addVehicle()" style="width: 100%;">Add Vehicle</button>
+                        <button class="btn btn-secondary" onclick="closeVehicleForm()" style="width: 100%; margin-top: 10px;">Cancel</button>
+                    </div>
+                </div>
+
+                <!-- Photos Page -->
+                <div id="photos" class="page-content">
+                    <div class="camera-container">
+                        <div class="widget-header" style="margin: 0 0 16px 0;">
+                            <div class="widget-title">Vehicle Photo Management</div>
+                        </div>
+                        
+                        <div class="camera-controls">
+                            <button class="btn btn-primary" onclick="startCamera()">📷 Start Camera</button>
+                            <button class="btn btn-secondary" onclick="stopCamera()">⏹️ Stop Camera</button>
+                            <button class="btn btn-primary" onclick="capturePhoto()" id="captureBtn" disabled>📸 Capture</button>
+                            <input type="file" id="fileInput" accept="image/*" style="display: none;" onchange="handleFileUpload(event)">
+                            <button class="btn btn-secondary" onclick="document.getElementById('fileInput').click()">📁 Upload</button>
+                        </div>
+                        
+                        <div style="display: flex; gap: 16px; align-items: flex-start; flex-wrap: wrap;">
+                            <video id="cameraFeed" class="video-preview" autoplay playsinline style="display: none;"></video>
+                            <canvas id="photoCanvas" style="display: none;"></canvas>
+                            
+                            <div>
+                                <div class="form-group">
+                                    <label class="form-label">Select Vehicle</label>
+                                    <select id="vehicleSelect" class="form-select">
+                                        <option value="">Choose vehicle...</option>
+                                    </select>
+                                </div>
+                                <div class="form-group">
+                                    <label class="form-label">Photo Type</label>
+                                    <select id="photoType" class="form-select">
+                                        <option value="exterior">Exterior</option>
+                                        <option value="interior">Interior</option>
+                                        <option value="engine">Engine</option>
+                                        <option value="damage">Damage/Issues</option>
+                                    </select>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="data-table-container">
+                        <div class="table-header">
+                            <div class="table-title">Photo Gallery</div>
+                        </div>
+                        <div id="photoGallery" class="vehicle-photos" style="padding: 16px;">
+                            <div style="grid-column: 1 / -1; text-align: center; color: var(--text-muted); padding: 40px;">
+                                No photos yet. Use the camera or upload button to add photos.
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Call Center Page -->
+                <div id="calls" class="page-content">
+                    <div class="call-status-indicator">
+                        <div class="openphone-status-dot" id="openphoneStatusDot"></div>
+                        <span id="openphoneStatusText">OpenPhone Status: Ready for configuration</span>
+                        <button class="btn btn-secondary" onclick="testOpenPhoneConnection()" style="margin-left: auto;">Test Connection</button>
+                    </div>
+
+                    <div class="dashboard-grid" style="grid-template-columns: repeat(3, 1fr); margin-bottom: 20px;">
+                        <div class="metric-card">
+                            <div class="metric-header">
+                                <div class="metric-label">Today's Calls</div>
+                                <div class="metric-trend trend-up">+3</div>
+                            </div>
+                            <div class="metric-value">12</div>
+                            <div class="metric-subtitle">8 transcribed • 4 pending</div>
+                        </div>
+                        <div class="metric-card">
+                            <div class="metric-header">
+                                <div class="metric-label">Avg Lead Score</div>
+                                <div class="metric-trend trend-up">+1.2</div>
+                            </div>
+                            <div class="metric-value">7.8</div>
+                            <div class="metric-subtitle">out of 10</div>
+                        </div>
+                        <div class="metric-card">
+                            <div class="metric-header">
+                                <div class="metric-label">Follow-ups Sent</div>
+                                <div class="metric-trend trend-up">+2</div>
+                            </div>
+                            <div class="metric-value">5</div>
+                            <div class="metric-subtitle">automated today</div>
+                        </div>
+                    </div>
+
+                    <div class="data-table-container">
+                        <div class="table-header">
+                            <div class="table-title">Call History & Transcripts</div>
+                            <button class="btn btn-primary" onclick="simulateNewCall()">📞 Simulate Call</button>
+                        </div>
+                        <table class="data-table" id="callTable">
+                            <thead>
+                                <tr>
+                                    <th>Date/Time</th>
+                                    <th>Phone Number</th>
+                                    <th>Customer</th>
+                                    <th>Duration</th>
+                                    <th>Lead Score</th>
+                                    <th>Status</th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody id="callTableBody">
+                                <!-- Call data populated by JS -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <!-- Email Center Page -->
+                <div id="emails" class="page-content">
+                    <div class="dashboard-grid" style="grid-template-columns: repeat(3, 1fr); margin-bottom: 20px;">
+                        <div class="metric-card">
+                            <div class="metric-header">
+                                <div class="metric-label">Emails Sent</div>
+                                <div class="metric-trend trend-up">+2</div>
+                            </div>
+                            <div class="metric-value">5</div>
+                            <div class="metric-subtitle">today</div>
+                        </div>
+                        <div class="metric-card">
+                            <div class="metric-header">
+                                <div class="metric-label">Open Rate</div>
+                                <div class="metric-trend trend-up">+5%</div>
+                            </div>
+                            <div class="metric-value">68%</div>
+                            <div class="metric-subtitle">vs 22% industry avg</div>
+                        </div>
+                        <div class="metric-card">
+                            <div class="metric-header">
+                                <div class="metric-label">Response Rate</div>
+                                <div class="metric-trend trend-up">+12%</div>
+                            </div>
+                            <div class="metric-value">15%</div>
+                            <div class="metric-subtitle">excellent</div>
+                        </div>
+                    </div>
+
+                    <div class="data-table-container">
+                        <div class="table-header">
+                            <div class="table-title">Email Campaign History</div>
+                            <button class="btn btn-primary" onclick="createEmailCampaign()">✉️ New Campaign</button>
+                        </div>
+                        <table class="data-table" id="emailTable">
+                            <thead>
+                                <tr>
+                                    <th>Date</th>
+                                    <th>Recipient</th>
+                                    <th>Subject</th>
+                                    <th>Type</th>
+                                    <th>Status</th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody id="emailTableBody">
+                                <!-- Email data populated by JS -->
+                            </tbody>
+                        </table>
+                    </div>
+
+                    <div class="email-template-editor">
+                        <div class="widget-header" style="margin: 0 0 16px 0;">
+                            <div class="widget-title">Email Templates</div>
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Template Type</label>
+                            <select id="templateType" class="form-select">
+                                <option value="follow-up">Follow-up</option>
+                                <option value="service">Service Reminder</option>
+                                <option value="promotion">Promotion</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Subject</label>
+                            <input type="text" id="emailSubject" class="form-input" placeholder="Email subject...">
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Body</label>
+                            <textarea id="emailBody" class="form-textarea" rows="6" placeholder="Email content..."></textarea>
+                        </div>
+                        <button class="btn btn-primary" onclick="saveEmailTemplate()">💾 Save Template</button>
+                    </div>
+                </div>
+
+                <!-- VIN Scanner Page -->
+                <div id="vin" class="page-content">
+                    <div class="form-container">
+                        <div class="widget-header" style="margin: 0 0 20px 0;">
+                            <div class="widget-title">VIN Intelligence Scanner</div>
+                            <div style="font-size: 11px; color: var(--text-muted);">Powered by NHTSA API</div>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label class="form-label">Vehicle Identification Number</label>
+                            <input type="text" id="vinInput" class="form-input" placeholder="Enter 17-character VIN" maxlength="17">
+                        </div>
+                        
+                        <button class="btn btn-primary" onclick="scanVIN()" style="width: 100%;">🔍 Decode VIN</button>
+                        
+                        <div id="vinResult" style="display: none;">
+                            <div class="vin-result">
+                                <div id="vinData"></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Analytics Page -->
+                <div id="analytics" class="page-content">
+                    <div class="dashboard-grid">
+                        <div class="metric-card">
+                            <div class="metric-header">
+                                <div class="metric-label">Revenue Growth</div>
+                                <div class="metric-trend trend-up">+18.2%</div>
+                            </div>
+                            <div class="metric-value">📈</div>
+                            <div class="metric-subtitle">YoY performance</div>
+                        </div>
+
+                        <div class="metric-card">
+                            <div class="metric-header">
+                                <div class="metric-label">Service Revenue</div>
+                                <div class="metric-trend trend-up">+22%</div>
+                            </div>
+                            <div class="metric-value">$47.5K</div>
+                            <div class="metric-subtitle">This month</div>
+                        </div>
+
+                        <div class="metric-card">
+                            <div class="metric-header">
+                                <div class="metric-label">Customer Satisfaction</div>
+                                <div class="metric-trend trend-up">+2%</div>
+                            </div>
+                            <div class="metric-value">96%</div>
+                            <div class="metric-subtitle">Excellent rating</div>
+                        </div>
+
+                        <div class="metric-card">
+                            <div class="metric-header">
+                                <div class="metric-label">Market Share</div>
+                                <div class="metric-trend trend-up">+1.3%</div>
+                            </div>
+                            <div class="metric-value">15.2%</div>
+                            <div class="metric-subtitle">Regional market</div>
+                        </div>
+                    </div>
+
+                    <div class="data-table-container">
+                        <div class="table-header">
+                            <div class="table-title">Performance Metrics</div>
+                        </div>
+                        <table class="data-table">
+                            <thead>
+                                <tr>
+                                    <th>Metric</th>
+                                    <th>Current</th>
+                                    <th>Previous</th>
+                                    <th>Change</th>
+                                    <th>Trend</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td>Monthly Revenue</td>
+                                    <td>$487,000</td>
+                                    <td>$435,000</td>
+                                    <td style="color: var(--success);">+$52,000</td>
+                                    <td>📈</td>
+                                </tr>
+                                <tr>
+                                    <td>Service Revenue</td>
+                                    <td>$47,500</td>
+                                    <td>$39,000</td>
+                                    <td style="color: var(--success);">+$8,500</td>
+                                    <td>📈</td>
+                                </tr>
+                                <tr>
+                                    <td>Units Sold</td>
+                                    <td>14</td>
+                                    <td>12</td>
+                                    <td style="color: var(--success);">+2</td>
+                                    <td>📈</td>
+                                </tr>
+                                <tr>
+                                    <td>Service Orders</td>
+                                    <td>48</td>
+                                    <td>35</td>
+                                    <td style="color: var(--success);">+13</td>
+                                    <td>📈</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
 
             </div>
         </div>
     </div>
 
     <script>
-        // Complete JavaScript implementation with all original functionality plus service operations
+        // Complete JavaScript implementation with all functionality
         
         // Global variables
         let cameraStream = null;
@@ -1978,6 +2401,7 @@
         let currentAIProvider = 'gemini';
         let aiApiKey = null;
         let openphoneApiKey = null;
+        let vehiclePhotos = [];
 
         // Enhanced data structures
         let dashboardMetrics = {
@@ -2022,47 +2446,187 @@
         ];
 
         let customers = [
-            { id: 1, firstName: 'John', lastName: 'Smith', email: 'john@email.com', phone: '555-0123', status: 'hot', leadScore: 9, value: 65000 },
-            { id: 2, firstName: 'Sarah', lastName: 'Johnson', email: 'sarah@email.com', phone: '555-0124', status: 'qualified', leadScore: 8, value: 58000 },
-            { id: 3, firstName: 'Mike', lastName: 'Wilson', email: 'mike@email.com', phone: '555-0125', status: 'follow', leadScore: 6, value: 52000 }
+            { 
+                id: 1, 
+                firstName: 'John', 
+                lastName: 'Smith', 
+                email: 'john@email.com', 
+                phone: '555-0123', 
+                status: 'hot', 
+                leadScore: 9, 
+                value: 65000,
+                vehicleInterest: '2024 BMW X5',
+                budget: '$60,000-$70,000',
+                lastContact: '1 day ago'
+            },
+            { 
+                id: 2, 
+                firstName: 'Sarah', 
+                lastName: 'Johnson', 
+                email: 'sarah@email.com', 
+                phone: '555-0124', 
+                status: 'qualified', 
+                leadScore: 8, 
+                value: 58000,
+                vehicleInterest: 'Tesla Model Y',
+                budget: '$55,000-$65,000',
+                lastContact: '2 days ago'
+            },
+            { 
+                id: 3, 
+                firstName: 'Mike', 
+                lastName: 'Wilson', 
+                email: 'mike@email.com', 
+                phone: '555-0125', 
+                status: 'follow', 
+                leadScore: 6, 
+                value: 52000,
+                vehicleInterest: 'Ford F-150',
+                budget: '$50,000-$60,000',
+                lastContact: '3 days ago'
+            }
         ];
 
         let inventory = [
-            { id: 101, vehicle: '2024 Toyota Camry', vin: '1HGBH41JXMN109186', status: 'available', price: 32000 },
-            { id: 102, vehicle: '2024 Honda Accord', vin: '2HGBH41JXMN109187', status: 'sold', price: 35000 },
-            { id: 103, vehicle: '2024 Ford F-150', vin: '3HGBH41JXMN109188', status: 'reserved', price: 45000 }
+            { 
+                id: 101, 
+                vehicle: '2024 Toyota Camry', 
+                vin: '1HGBH41JXMN109186', 
+                status: 'available', 
+                price: 32000,
+                daysInStock: 15,
+                serviceStatus: 'ready',
+                make: 'Toyota',
+                model: 'Camry',
+                year: 2024
+            },
+            { 
+                id: 102, 
+                vehicle: '2024 Honda Accord', 
+                vin: '2HGBH41JXMN109187', 
+                status: 'sold', 
+                price: 35000,
+                daysInStock: 8,
+                serviceStatus: 'completed',
+                make: 'Honda',
+                model: 'Accord',
+                year: 2024
+            },
+            { 
+                id: 103, 
+                vehicle: '2024 Ford F-150', 
+                vin: '3HGBH41JXMN109188', 
+                status: 'reserved', 
+                price: 45000,
+                daysInStock: 21,
+                serviceStatus: 'pending',
+                make: 'Ford',
+                model: 'F-150',
+                year: 2024
+            }
+        ];
+
+        let callHistory = [
+            {
+                id: 1,
+                dateTime: new Date(Date.now() - 2 * 60 * 60 * 1000),
+                phoneNumber: '555-0123',
+                customer: 'John Smith',
+                duration: '12:45',
+                leadScore: 9,
+                status: 'transcribed'
+            },
+            {
+                id: 2,
+                dateTime: new Date(Date.now() - 4 * 60 * 60 * 1000),
+                phoneNumber: '555-0124',
+                customer: 'Sarah Johnson',
+                duration: '8:32',
+                leadScore: 8,
+                status: 'transcribed'
+            }
+        ];
+
+        let emailHistory = [
+            {
+                id: 1,
+                date: new Date(),
+                recipient: 'john@email.com',
+                subject: 'Your BMW X5 Inquiry',
+                type: 'follow-up',
+                status: 'delivered'
+            },
+            {
+                id: 2,
+                date: new Date(),
+                recipient: 'sarah@email.com',
+                subject: 'Tesla Model Y Information',
+                type: 'follow-up',
+                status: 'opened'
+            }
         ];
 
         // Initialize on load
         document.addEventListener('DOMContentLoaded', () => {
             updateDashboardMetrics();
             renderServiceTable();
+            renderCustomerTable();
+            renderInventoryTable();
+            renderCallTable();
+            renderEmailTable();
+            populateVehicleDropdowns();
             selectAIProvider('gemini', document.querySelector('.ai-provider-card.selected'));
         });
 
         // Core utility functions
         function formatCurrency(value) {
-            return '$' + value.toLocaleString();
+            return '
+</body>
+</html> + value.toLocaleString();
+        }
+
+        function getLeadScoreClass(score) {
+            if (score >= 8) return 'score-high';
+            if (score >= 6) return 'score-medium';
+            return 'score-low';
         }
 
         function updateDashboardMetrics() {
+            // Update top bar
             document.getElementById('topBarRevenue').textContent = formatCurrency(dashboardMetrics.revenue.value);
             document.getElementById('topBarRevenueChange').textContent = `+${dashboardMetrics.revenue.change * 100}%`;
-            document.getElementById('topBarLeads').textContent = dashboardMetrics.leads.value;
+            document.getElementById('topBarLeads').textContent = customers.length;
             document.getElementById('topBarLeadsChange').textContent = `+${dashboardMetrics.leads.change}`;
-            document.getElementById('topBarCalls').textContent = dashboardMetrics.calls.value;
+            document.getElementById('topBarCalls').textContent = callHistory.length;
             document.getElementById('topBarCallsChange').textContent = `+${dashboardMetrics.calls.change}`;
-            document.getElementById('topBarService').textContent = dashboardMetrics.service.value;
+            document.getElementById('topBarService').textContent = serviceOrders.length;
             document.getElementById('topBarServiceChange').textContent = `+${dashboardMetrics.service.change}`;
 
+            // Update dashboard cards
             document.getElementById('dashboardRevenue').textContent = formatCurrency(dashboardMetrics.revenue.value);
-            document.getElementById('dashboardLeads').textContent = dashboardMetrics.leads.value;
-            document.getElementById('dashboardService').textContent = dashboardMetrics.service.value;
+            document.getElementById('dashboardRevenueTrend').textContent = `+${dashboardMetrics.revenue.change * 100}%`;
+            document.getElementById('dashboardRevenueSubtitle').textContent = `vs ${formatCurrency(dashboardMetrics.revenue.prevValue)} last month`;
+            
+            document.getElementById('dashboardLeads').textContent = customers.length;
+            const hotLeads = customers.filter(c => c.status === 'hot').length;
+            const qualifiedLeads = customers.filter(c => c.status === 'qualified').length;
+            const followLeads = customers.filter(c => c.status === 'follow').length;
+            document.getElementById('dashboardLeadsSubtitle').textContent = `${hotLeads} hot • ${qualifiedLeads} qualified • ${followLeads} follow-up`;
+            
+            document.getElementById('dashboardService').textContent = serviceOrders.length;
+            const activeOrders = serviceOrders.filter(o => o.status === 'in-progress').length;
+            const pendingOrders = serviceOrders.filter(o => o.status === 'pending').length;
+            document.getElementById('dashboardServiceSubtitle').textContent = `${activeOrders} active • ${pendingOrders} pending`;
+            
             document.getElementById('dashboardSaleTime').textContent = dashboardMetrics.saleTime.value;
 
+            // Update badges
             document.getElementById('customerBadge').textContent = customers.length;
-            document.getElementById('inventoryBadge').textContent = inventory.length;
+            document.getElementById('inventoryBadge').textContent = inventory.filter(v => v.status === 'available').length;
             document.getElementById('serviceBadge').textContent = serviceOrders.length;
+            document.getElementById('callBadge').textContent = callHistory.length;
+            document.getElementById('emailBadge').textContent = emailHistory.length;
+            document.getElementById('photoBadge').textContent = vehiclePhotos.length;
         }
 
         // Navigation
@@ -2098,6 +2662,547 @@
             };
             
             document.getElementById('contentTitle').textContent = titles[pageId] || 'Dashboard';
+
+            // Page-specific actions
+            if (pageId === 'photos') {
+                populateVehicleDropdowns();
+            }
+        }
+
+        // Customer Management Functions
+        function renderCustomerTable() {
+            const tbody = document.getElementById('customerTableBody');
+            if (!tbody) return;
+            
+            tbody.innerHTML = '';
+            customers.forEach(customer => {
+                const row = tbody.insertRow();
+                row.innerHTML = `
+                    <td>${customer.firstName} ${customer.lastName}</td>
+                    <td>${customer.email}<br><span style="font-size: 11px;">${customer.phone}</span></td>
+                    <td><span class="status-badge status-${customer.status}">${customer.status}</span></td>
+                    <td><span class="lead-score ${getLeadScoreClass(customer.leadScore)}">${customer.leadScore}</span></td>
+                    <td>${formatCurrency(customer.value)}</td>
+                    <td>${customer.vehicleInterest}<br><span style="font-size: 11px;">${customer.budget}</span></td>
+                    <td>${customer.lastContact}</td>
+                    <td>
+                        <button class="btn btn-sm btn-primary" onclick="viewCustomer(${customer.id})">View</button>
+                        <button class="btn btn-sm btn-secondary" onclick="deleteCustomer(${customer.id})">Delete</button>
+                    </td>
+                `;
+            });
+        }
+
+        function openCustomerForm() {
+            document.getElementById('addCustomerForm').style.display = 'block';
+        }
+
+        function closeCustomerForm() {
+            document.getElementById('addCustomerForm').style.display = 'none';
+        }
+
+        function addCustomer() {
+            const firstName = document.getElementById('newCustomerFirstName').value;
+            const lastName = document.getElementById('newCustomerLastName').value;
+            const email = document.getElementById('newCustomerEmail').value;
+            const phone = document.getElementById('newCustomerPhone').value;
+            const vehicleInterest = document.getElementById('newCustomerVehicle').value;
+            const budget = document.getElementById('newCustomerBudget').value;
+            const status = document.getElementById('newCustomerStatus').value;
+            
+            if (firstName && lastName && email) {
+                const newCustomer = {
+                    id: Date.now(),
+                    firstName,
+                    lastName,
+                    email,
+                    phone,
+                    vehicleInterest,
+                    budget,
+                    status,
+                    leadScore: Math.floor(Math.random() * 4) + 6,
+                    value: parseInt(budget.replace(/[^0-9]/g, '')) || 50000,
+                    lastContact: 'Just now'
+                };
+                
+                customers.push(newCustomer);
+                renderCustomerTable();
+                updateDashboardMetrics();
+                closeCustomerForm();
+                addActivity('👤', `New customer: ${firstName} ${lastName}`, 'Just now');
+                
+                // Clear form
+                document.getElementById('newCustomerFirstName').value = '';
+                document.getElementById('newCustomerLastName').value = '';
+                document.getElementById('newCustomerEmail').value = '';
+                document.getElementById('newCustomerPhone').value = '';
+                document.getElementById('newCustomerVehicle').value = '';
+                document.getElementById('newCustomerBudget').value = '';
+            }
+        }
+
+        function viewCustomer(id) {
+            const customer = customers.find(c => c.id === id);
+            if (customer) {
+                alert(`Customer Details:\n\nName: ${customer.firstName} ${customer.lastName}\nEmail: ${customer.email}\nPhone: ${customer.phone}\nInterest: ${customer.vehicleInterest}\nBudget: ${customer.budget}\nLead Score: ${customer.leadScore}/10`);
+            }
+        }
+
+        function deleteCustomer(id) {
+            if (confirm('Delete this customer?')) {
+                customers = customers.filter(c => c.id !== id);
+                renderCustomerTable();
+                updateDashboardMetrics();
+            }
+        }
+
+        // Inventory Management Functions
+        function renderInventoryTable() {
+            const tbody = document.getElementById('inventoryTableBody');
+            if (!tbody) return;
+            
+            tbody.innerHTML = '';
+            inventory.forEach(vehicle => {
+                const row = tbody.insertRow();
+                row.innerHTML = `
+                    <td>${vehicle.vehicle}</td>
+                    <td style="font-family: monospace; font-size: 11px;">${vehicle.vin}</td>
+                    <td><span class="status-badge status-${vehicle.status}">${vehicle.status}</span></td>
+                    <td>${formatCurrency(vehicle.price)}</td>
+                    <td>${vehicle.daysInStock}</td>
+                    <td><span class="status-badge status-${vehicle.serviceStatus === 'ready' ? 'completed' : vehicle.serviceStatus}">${vehicle.serviceStatus}</span></td>
+                    <td>
+                        <button class="btn btn-sm btn-primary" onclick="viewVehicle(${vehicle.id})">View</button>
+                        <button class="btn btn-sm btn-secondary" onclick="deleteVehicle(${vehicle.id})">Delete</button>
+                    </td>
+                `;
+            });
+        }
+
+        function filterInventory() {
+            const filter = document.getElementById('inventoryFilter').value.toLowerCase();
+            const rows = document.querySelectorAll('#inventoryTableBody tr');
+            
+            rows.forEach(row => {
+                const text = row.textContent.toLowerCase();
+                row.style.display = text.includes(filter) ? '' : 'none';
+            });
+        }
+
+        function openVehicleForm() {
+            document.getElementById('addVehicleForm').style.display = 'block';
+        }
+
+        function closeVehicleForm() {
+            document.getElementById('addVehicleForm').style.display = 'none';
+        }
+
+        function addVehicle() {
+            const vin = document.getElementById('newVehicleVIN').value;
+            const make = document.getElementById('newVehicleMake').value;
+            const model = document.getElementById('newVehicleModel').value;
+            const year = document.getElementById('newVehicleYear').value;
+            const price = document.getElementById('newVehiclePrice').value;
+            const status = document.getElementById('newVehicleStatus').value;
+            
+            if (make && model && year && price) {
+                const newVehicle = {
+                    id: Date.now(),
+                    vehicle: `${year} ${make} ${model}`,
+                    vin: vin || 'PENDING',
+                    status,
+                    price: parseInt(price),
+                    daysInStock: 0,
+                    serviceStatus: 'pending',
+                    make,
+                    model,
+                    year: parseInt(year)
+                };
+                
+                inventory.push(newVehicle);
+                renderInventoryTable();
+                updateDashboardMetrics();
+                closeVehicleForm();
+                addActivity('🚗', `New vehicle: ${newVehicle.vehicle}`, 'Just now');
+                
+                // Clear form
+                document.getElementById('newVehicleVIN').value = '';
+                document.getElementById('newVehicleMake').value = '';
+                document.getElementById('newVehicleModel').value = '';
+                document.getElementById('newVehicleYear').value = '';
+                document.getElementById('newVehiclePrice').value = '';
+            }
+        }
+
+        async function decodeVIN() {
+            const vin = document.getElementById('newVehicleVIN').value;
+            if (vin.length !== 17) {
+                alert('Please enter a valid 17-character VIN');
+                return;
+            }
+            
+            try {
+                const response = await fetch(`https://vpic.nhtsa.dot.gov/api/vehicles/decodevin/${vin}?format=json`);
+                const data = await response.json();
+                
+                if (data.Results) {
+                    const getValue = (variable) => data.Results.find(r => r.Variable === variable)?.Value || '';
+                    
+                    document.getElementById('newVehicleMake').value = getValue('Make');
+                    document.getElementById('newVehicleModel').value = getValue('Model');
+                    document.getElementById('newVehicleYear').value = getValue('Model Year');
+                    
+                    alert('VIN decoded successfully!');
+                }
+            } catch (error) {
+                alert('Error decoding VIN. Please enter details manually.');
+            }
+        }
+
+        function viewVehicle(id) {
+            const vehicle = inventory.find(v => v.id === id);
+            if (vehicle) {
+                alert(`Vehicle Details:\n\n${vehicle.vehicle}\nVIN: ${vehicle.vin}\nPrice: ${formatCurrency(vehicle.price)}\nStatus: ${vehicle.status}\nDays in Stock: ${vehicle.daysInStock}\nService: ${vehicle.serviceStatus}`);
+            }
+        }
+
+        function deleteVehicle(id) {
+            if (confirm('Delete this vehicle?')) {
+                inventory = inventory.filter(v => v.id !== id);
+                renderInventoryTable();
+                updateDashboardMetrics();
+            }
+        }
+
+        // Photo Management Functions
+        function populateVehicleDropdowns() {
+            const select = document.getElementById('vehicleSelect');
+            const serviceSelect = document.getElementById('serviceVehicle');
+            
+            if (select) {
+                select.innerHTML = '<option value="">Choose vehicle...</option>';
+                inventory.forEach(vehicle => {
+                    const option = document.createElement('option');
+                    option.value = vehicle.id;
+                    option.textContent = vehicle.vehicle;
+                    select.appendChild(option);
+                });
+            }
+            
+            if (serviceSelect) {
+                serviceSelect.innerHTML = '<option value="">Select vehicle...</option>';
+                inventory.forEach(vehicle => {
+                    const option = document.createElement('option');
+                    option.value = vehicle.id;
+                    option.textContent = vehicle.vehicle;
+                    serviceSelect.appendChild(option);
+                });
+            }
+        }
+
+        async function startCamera() {
+            try {
+                cameraStream = await navigator.mediaDevices.getUserMedia({ 
+                    video: { facingMode: 'environment' } 
+                });
+                const video = document.getElementById('cameraFeed');
+                video.srcObject = cameraStream;
+                video.style.display = 'block';
+                document.getElementById('captureBtn').disabled = false;
+                addActivity('📷', 'Camera started', 'Just now');
+            } catch (error) {
+                alert('Camera access denied. Please enable camera permissions.');
+            }
+        }
+
+        function stopCamera() {
+            if (cameraStream) {
+                cameraStream.getTracks().forEach(track => track.stop());
+                cameraStream = null;
+                const video = document.getElementById('cameraFeed');
+                video.style.display = 'none';
+                document.getElementById('captureBtn').disabled = true;
+                addActivity('📷', 'Camera stopped', 'Just now');
+            }
+        }
+
+        function capturePhoto() {
+            const video = document.getElementById('cameraFeed');
+            const canvas = document.getElementById('photoCanvas');
+            const vehicleId = document.getElementById('vehicleSelect').value;
+            const photoType = document.getElementById('photoType').value;
+            
+            if (!vehicleId) {
+                alert('Please select a vehicle first');
+                return;
+            }
+            
+            canvas.width = video.videoWidth;
+            canvas.height = video.videoHeight;
+            const ctx = canvas.getContext('2d');
+            ctx.drawImage(video, 0, 0);
+            
+            const photoData = canvas.toDataURL('image/jpeg');
+            const vehicle = inventory.find(v => v.id == vehicleId);
+            
+            const photo = {
+                id: Date.now(),
+                vehicleId,
+                vehicleName: vehicle.vehicle,
+                type: photoType,
+                data: photoData,
+                timestamp: new Date()
+            };
+            
+            vehiclePhotos.push(photo);
+            displayPhotos();
+            updateDashboardMetrics();
+            addActivity('📸', `Photo captured: ${vehicle.vehicle}`, 'Just now');
+        }
+
+        function handleFileUpload(event) {
+            const file = event.target.files[0];
+            const vehicleId = document.getElementById('vehicleSelect').value;
+            const photoType = document.getElementById('photoType').value;
+            
+            if (!vehicleId) {
+                alert('Please select a vehicle first');
+                return;
+            }
+            
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    const vehicle = inventory.find(v => v.id == vehicleId);
+                    const photo = {
+                        id: Date.now(),
+                        vehicleId,
+                        vehicleName: vehicle.vehicle,
+                        type: photoType,
+                        data: e.target.result,
+                        timestamp: new Date()
+                    };
+                    
+                    vehiclePhotos.push(photo);
+                    displayPhotos();
+                    updateDashboardMetrics();
+                    addActivity('📸', `Photo uploaded: ${vehicle.vehicle}`, 'Just now');
+                };
+                reader.readAsDataURL(file);
+            }
+        }
+
+        function displayPhotos() {
+            const gallery = document.getElementById('photoGallery');
+            if (!gallery) return;
+            
+            if (vehiclePhotos.length === 0) {
+                gallery.innerHTML = '<div style="grid-column: 1 / -1; text-align: center; color: var(--text-muted); padding: 40px;">No photos yet. Use the camera or upload button to add photos.</div>';
+            } else {
+                gallery.innerHTML = '';
+                vehiclePhotos.forEach(photo => {
+                    const photoDiv = document.createElement('div');
+                    photoDiv.className = 'photo-item';
+                    photoDiv.innerHTML = `
+                        <img src="${photo.data}" alt="${photo.type}">
+                        <div style="position: absolute; bottom: 0; left: 0; right: 0; background: linear-gradient(transparent, rgba(0,0,0,0.8)); padding: 8px; color: white; font-size: 10px;">
+                            <div>${photo.vehicleName}</div>
+                            <div>${photo.type}</div>
+                        </div>
+                        <button onclick="deletePhoto(${photo.id})" style="position: absolute; top: 4px; right: 4px; background: var(--error); color: white; border: none; border-radius: 50%; width: 20px; height: 20px; cursor: pointer;">×</button>
+                    `;
+                    gallery.appendChild(photoDiv);
+                });
+            }
+        }
+
+        function deletePhoto(id) {
+            if (confirm('Delete this photo?')) {
+                vehiclePhotos = vehiclePhotos.filter(p => p.id !== id);
+                displayPhotos();
+                updateDashboardMetrics();
+            }
+        }
+
+        // Call Management Functions
+        function renderCallTable() {
+            const tbody = document.getElementById('callTableBody');
+            if (!tbody) return;
+            
+            tbody.innerHTML = '';
+            callHistory.forEach(call => {
+                const row = tbody.insertRow();
+                row.innerHTML = `
+                    <td>${call.dateTime.toLocaleDateString()}<br><span style="font-size: 11px;">${call.dateTime.toLocaleTimeString()}</span></td>
+                    <td>${call.phoneNumber}</td>
+                    <td>${call.customer}</td>
+                    <td>${call.duration}</td>
+                    <td><span class="lead-score ${getLeadScoreClass(call.leadScore)}">${call.leadScore}</span></td>
+                    <td><span class="status-badge status-${call.status}">${call.status}</span></td>
+                    <td>
+                        <button class="btn btn-sm btn-primary" onclick="viewCallTranscript(${call.id})">Transcript</button>
+                        <button class="btn btn-sm btn-secondary" onclick="deleteCall(${call.id})">Delete</button>
+                    </td>
+                `;
+            });
+        }
+
+        function simulateNewCall() {
+            const newCall = {
+                id: Date.now(),
+                dateTime: new Date(),
+                phoneNumber: '555-' + Math.floor(Math.random() * 9000 + 1000),
+                customer: 'New Customer',
+                duration: Math.floor(Math.random() * 15) + ':' + Math.floor(Math.random() * 60).toString().padStart(2, '0'),
+                leadScore: Math.floor(Math.random() * 4) + 6,
+                status: 'transcribed'
+            };
+            
+            callHistory.unshift(newCall);
+            renderCallTable();
+            updateDashboardMetrics();
+            addActivity('📞', 'New call received', 'Just now');
+            alert('New call simulated successfully!');
+        }
+
+        function viewCallTranscript(id) {
+            const call = callHistory.find(c => c.id === id);
+            if (call) {
+                alert(`Call Transcript\n\nCustomer: ${call.customer}\nPhone: ${call.phoneNumber}\nDuration: ${call.duration}\nLead Score: ${call.leadScore}/10\n\n[Transcript would appear here]`);
+            }
+        }
+
+        function deleteCall(id) {
+            if (confirm('Delete this call record?')) {
+                callHistory = callHistory.filter(c => c.id !== id);
+                renderCallTable();
+                updateDashboardMetrics();
+            }
+        }
+
+        // Email Management Functions
+        function renderEmailTable() {
+            const tbody = document.getElementById('emailTableBody');
+            if (!tbody) return;
+            
+            tbody.innerHTML = '';
+            emailHistory.forEach(email => {
+                const row = tbody.insertRow();
+                row.innerHTML = `
+                    <td>${email.date.toLocaleDateString()}<br><span style="font-size: 11px;">${email.date.toLocaleTimeString()}</span></td>
+                    <td>${email.recipient}</td>
+                    <td>${email.subject}</td>
+                    <td><span class="status-badge status-${email.type}">${email.type}</span></td>
+                    <td><span class="status-badge status-${email.status}">${email.status}</span></td>
+                    <td>
+                        <button class="btn btn-sm btn-primary" onclick="viewEmail(${email.id})">View</button>
+                        <button class="btn btn-sm btn-secondary" onclick="deleteEmail(${email.id})">Delete</button>
+                    </td>
+                `;
+            });
+        }
+
+        function createEmailCampaign() {
+            const subject = prompt('Email subject:');
+            if (subject) {
+                const newEmail = {
+                    id: Date.now(),
+                    date: new Date(),
+                    recipient: 'all@customers.com',
+                    subject,
+                    type: 'campaign',
+                    status: 'sent'
+                };
+                
+                emailHistory.unshift(newEmail);
+                renderEmailTable();
+                updateDashboardMetrics();
+                addActivity('📧', 'Email campaign sent', 'Just now');
+                alert('Email campaign created!');
+            }
+        }
+
+        function saveEmailTemplate() {
+            const subject = document.getElementById('emailSubject').value;
+            const body = document.getElementById('emailBody').value;
+            
+            if (subject && body) {
+                alert('Email template saved successfully!');
+                addActivity('💾', 'Email template saved', 'Just now');
+            }
+        }
+
+        function viewEmail(id) {
+            const email = emailHistory.find(e => e.id === id);
+            if (email) {
+                alert(`Email Details\n\nTo: ${email.recipient}\nSubject: ${email.subject}\nType: ${email.type}\nStatus: ${email.status}`);
+            }
+        }
+
+        function deleteEmail(id) {
+            if (confirm('Delete this email?')) {
+                emailHistory = emailHistory.filter(e => e.id !== id);
+                renderEmailTable();
+                updateDashboardMetrics();
+            }
+        }
+
+        // VIN Scanner Functions
+        async function scanVIN() {
+            const vin = document.getElementById('vinInput').value;
+            
+            if (vin.length !== 17) {
+                alert('Please enter a valid 17-character VIN');
+                return;
+            }
+            
+            const resultDiv = document.getElementById('vinResult');
+            const dataDiv = document.getElementById('vinData');
+            
+            dataDiv.innerHTML = '<div style="text-align: center;">🔍 Decoding VIN...</div>';
+            resultDiv.style.display = 'block';
+            
+            try {
+                const response = await fetch(`https://vpic.nhtsa.dot.gov/api/vehicles/decodevin/${vin}?format=json`);
+                const data = await response.json();
+                
+                if (data.Results) {
+                    const getValue = (variable) => data.Results.find(r => r.Variable === variable)?.Value || 'N/A';
+                    
+                    dataDiv.innerHTML = `
+                        <div class="vin-result-grid">
+                            <div class="vin-field">
+                                <div class="vin-field-label">Make</div>
+                                <div class="vin-field-value">${getValue('Make')}</div>
+                            </div>
+                            <div class="vin-field">
+                                <div class="vin-field-label">Model</div>
+                                <div class="vin-field-value">${getValue('Model')}</div>
+                            </div>
+                            <div class="vin-field">
+                                <div class="vin-field-label">Year</div>
+                                <div class="vin-field-value">${getValue('Model Year')}</div>
+                            </div>
+                            <div class="vin-field">
+                                <div class="vin-field-label">Body Type</div>
+                                <div class="vin-field-value">${getValue('Body Class')}</div>
+                            </div>
+                            <div class="vin-field">
+                                <div class="vin-field-label">Engine</div>
+                                <div class="vin-field-value">${getValue('Engine Model')}</div>
+                            </div>
+                            <div class="vin-field">
+                                <div class="vin-field-label">Manufacturer</div>
+                                <div class="vin-field-value">${getValue('Manufacturer Name')}</div>
+                            </div>
+                        </div>
+                    `;
+                    
+                    addActivity('🔍', 'VIN decoded successfully', 'Just now');
+                }
+            } catch (error) {
+                dataDiv.innerHTML = '<div style="color: var(--error); text-align: center;">Error decoding VIN</div>';
+            }
         }
 
         // Service Operations Functions
@@ -2128,7 +3233,7 @@
             const form = document.getElementById('serviceOrderForm');
             if (form) {
                 form.style.display = 'block';
-                populateServiceVehicles();
+                populateVehicleDropdowns();
             }
         }
 
@@ -2137,19 +3242,6 @@
             if (form) {
                 form.style.display = 'none';
             }
-        }
-
-        function populateServiceVehicles() {
-            const select = document.getElementById('serviceVehicle');
-            if (!select) return;
-            
-            select.innerHTML = '<option value="">Select vehicle...</option>';
-            inventory.forEach(vehicle => {
-                const option = document.createElement('option');
-                option.value = vehicle.id;
-                option.textContent = vehicle.vehicle;
-                select.appendChild(option);
-            });
         }
 
         function submitServiceOrder() {
@@ -2245,21 +3337,54 @@
         function processVoiceCommand(command) {
             addChatMessage('user', `Voice: "${command}"`);
             
+            let executed = false;
+            
             if (command.includes('dashboard')) {
                 showPage('dashboard', document.querySelector('.nav-item[onclick*="dashboard"]'));
+                executed = true;
             } else if (command.includes('service')) {
                 showPage('service', document.querySelector('.nav-item[onclick*="service"]'));
+                executed = true;
             } else if (command.includes('customer')) {
                 showPage('customers', document.querySelector('.nav-item[onclick*="customers"]'));
+                executed = true;
             } else if (command.includes('inventory')) {
                 showPage('inventory', document.querySelector('.nav-item[onclick*="inventory"]'));
+                executed = true;
+            } else if (command.includes('photo')) {
+                showPage('photos', document.querySelector('.nav-item[onclick*="photos"]'));
+                executed = true;
+            } else if (command.includes('call')) {
+                showPage('calls', document.querySelector('.nav-item[onclick*="calls"]'));
+                executed = true;
+            } else if (command.includes('email')) {
+                showPage('emails', document.querySelector('.nav-item[onclick*="emails"]'));
+                executed = true;
+            } else if (command.includes('analytics')) {
+                showPage('analytics', document.querySelector('.nav-item[onclick*="analytics"]'));
+                executed = true;
+            } else if (command.includes('chat') || command.includes('ai')) {
+                showPage('chat', document.querySelector('.nav-item[onclick*="chat"]'));
+                executed = true;
             } else if (command.includes('create order')) {
                 createServiceOrder();
+                executed = true;
+            } else if (command.includes('add customer')) {
+                openCustomerForm();
+                executed = true;
+            } else if (command.includes('add vehicle')) {
+                openVehicleForm();
+                executed = true;
             } else if (command.includes('refresh')) {
                 refreshData();
+                executed = true;
             }
             
-            addChatMessage('assistant', `✅ Command processed: ${command}`);
+            if (executed) {
+                addChatMessage('assistant', `✅ Command executed: ${command}`);
+            } else {
+                addChatMessage('assistant', `❓ Command not recognized. Try: "show dashboard", "show service", "add customer", etc.`);
+            }
         }
 
         // AI Functions
@@ -2300,8 +3425,16 @@
 
         function updateOpenPhoneStatus() {
             const apiKey = document.getElementById('openphoneApiKey').value;
+            const statusDot = document.getElementById('openphoneStatusDot');
+            const statusText = document.getElementById('openphoneStatusText');
+            
             if (apiKey && apiKey.length > 10) {
                 openphoneApiKey = apiKey;
+                if (statusDot) statusDot.classList.add('connected');
+                if (statusText) statusText.textContent = 'OpenPhone Status: Connected';
+            } else {
+                if (statusDot) statusDot.classList.remove('connected');
+                if (statusText) statusText.textContent = 'OpenPhone Status: Disconnected';
             }
         }
 
@@ -2324,6 +3457,10 @@
             addChatMessage('system', 'Testing OpenPhone connection...');
             setTimeout(() => {
                 addChatMessage('assistant', '✅ OpenPhone API connected successfully');
+                const statusDot = document.getElementById('openphoneStatusDot');
+                const statusText = document.getElementById('openphoneStatusText');
+                if (statusDot) statusDot.classList.add('connected');
+                if (statusText) statusText.textContent = 'OpenPhone Status: Connected - Monitoring calls';
             }, 1500);
         }
 
@@ -2331,6 +3468,7 @@
             updateAIStatus();
             updateOpenPhoneStatus();
             alert('Configuration saved successfully!');
+            addActivity('🔧', 'AI configuration saved', 'Just now');
         }
 
         // Chat Functions
@@ -2353,24 +3491,59 @@
             const lower = message.toLowerCase();
             
             if (lower.includes('service') || lower.includes('repair')) {
+                const activeOrders = serviceOrders.filter(o => o.status === 'in-progress').length;
+                const pendingOrders = serviceOrders.filter(o => o.status === 'pending').length;
+                const revenue = serviceOrders.reduce((sum, o) => sum + o.cost, 0);
+                
                 return `🔧 <strong>Service Operations Analysis</strong><br><br>
-                Active Orders: ${serviceOrders.filter(o => o.status === 'in-progress').length}<br>
-                Pending: ${serviceOrders.filter(o => o.status === 'pending').length}<br>
-                Completed Today: ${serviceOrders.filter(o => o.status === 'completed').length}<br>
-                Revenue: ${formatCurrency(serviceOrders.reduce((sum, o) => sum + o.cost, 0))}<br><br>
+                Active Orders: ${activeOrders}<br>
+                Pending: ${pendingOrders}<br>
+                Total Orders: ${serviceOrders.length}<br>
+                Revenue: ${formatCurrency(revenue)}<br>
+                Average Ticket: ${formatCurrency(revenue / serviceOrders.length)}<br><br>
                 Service center operating at 85% capacity. Recommend scheduling optimization.`;
             }
             
+            if (lower.includes('customer') || lower.includes('lead')) {
+                const hotLeads = customers.filter(c => c.status === 'hot').length;
+                const avgScore = customers.reduce((sum, c) => sum + c.leadScore, 0) / customers.length;
+                
+                return `👥 <strong>Customer Intelligence Report</strong><br><br>
+                Total Customers: ${customers.length}<br>
+                Hot Leads: ${hotLeads}<br>
+                Average Lead Score: ${avgScore.toFixed(1)}/10<br>
+                Pipeline Value: ${formatCurrency(customers.reduce((sum, c) => sum + c.value, 0))}<br><br>
+                Recommendation: Focus on hot leads for immediate conversion.`;
+            }
+            
+            if (lower.includes('inventory')) {
+                const available = inventory.filter(v => v.status === 'available').length;
+                const totalValue = inventory.reduce((sum, v) => sum + v.price, 0);
+                
+                return `🚗 <strong>Inventory Analysis</strong><br><br>
+                Total Vehicles: ${inventory.length}<br>
+                Available: ${available}<br>
+                Total Value: ${formatCurrency(totalValue)}<br>
+                Average Price: ${formatCurrency(totalValue / inventory.length)}<br><br>
+                Inventory turnover rate is healthy. Consider promotions for units over 30 days.`;
+            }
+            
             if (lower.includes('hello') || lower.includes('hi')) {
-                return `Hello! I'm your AI assistant powered by ${currentAIProvider.toUpperCase()}. I can help with:<br>
-                • Service operations management<br>
-                • Sales analytics<br>
-                • Customer insights<br>
+                return `Hello! I'm your AI assistant powered by ${currentAIProvider.toUpperCase()}. I can help with:<br><br>
+                • Service operations analysis<br>
+                • Customer pipeline insights<br>
                 • Inventory optimization<br>
+                • Sales forecasting<br>
+                • Call and email analytics<br><br>
                 What would you like to explore?`;
             }
             
-            return `Processing your request with ${currentAIProvider.toUpperCase()} AI...`;
+            return `Processing your request with ${currentAIProvider.toUpperCase()} AI...<br><br>
+            Try asking about:<br>
+            • "Analyze service operations"<br>
+            • "Show customer insights"<br>
+            • "Review inventory status"<br>
+            • "Sales performance"`;
         }
 
         function addChatMessage(type, message) {
@@ -2409,39 +3582,38 @@
 
         // Utility Functions
         function exportData() {
-            alert('Exporting data to CSV/PDF...');
-            addActivity('📊', 'Data export initiated', 'Just now');
+            const data = {
+                customers: customers.length,
+                inventory: inventory.length,
+                serviceOrders: serviceOrders.length,
+                revenue: dashboardMetrics.revenue.value
+            };
+            
+            alert(`Exporting data...\n\nCustomers: ${data.customers}\nInventory: ${data.inventory}\nService Orders: ${data.serviceOrders}\nRevenue: ${formatCurrency(data.revenue)}`);
+            addActivity('📊', 'Data exported', 'Just now');
         }
 
         function refreshData() {
             updateDashboardMetrics();
             renderServiceTable();
+            renderCustomerTable();
+            renderInventoryTable();
+            renderCallTable();
+            renderEmailTable();
             addActivity('🔄', 'Data refreshed', 'Just now');
-            alert('Dashboard refreshed!');
+            alert('All data refreshed successfully!');
         }
 
         function showMetricDetails(metric) {
-            addChatMessage('assistant', `Analyzing ${metric} metrics...`);
+            const messages = {
+                revenue: `Revenue Analysis: ${formatCurrency(dashboardMetrics.revenue.value)} total, up ${dashboardMetrics.revenue.change * 100}% from last month.`,
+                leads: `Lead Analysis: ${customers.length} active leads with average score ${(customers.reduce((sum, c) => sum + c.leadScore, 0) / customers.length).toFixed(1)}/10`,
+                service: `Service Analysis: ${serviceOrders.length} orders generating ${formatCurrency(serviceOrders.reduce((sum, o) => sum + o.cost, 0))} in revenue`,
+                saleTime: `Sales Efficiency: Average sale time is ${dashboardMetrics.saleTime.value} days, ${Math.abs(dashboardMetrics.saleTime.change)} days better than last period`
+            };
+            
+            addChatMessage('assistant', messages[metric] || 'Analyzing metrics...');
             showPage('chat', document.querySelector('.nav-item[onclick*="chat"]'));
-        }
-
-        function simulateNewCall() {
-            dashboardMetrics.calls.value++;
-            updateDashboardMetrics();
-            addActivity('📞', 'New call simulated', 'Just now');
-            alert('New call simulated and added to system');
-        }
-
-        function createEmailCampaign() {
-            alert('Opening email campaign creator...');
-        }
-
-        function openCustomerForm() {
-            alert('Opening customer form...');
-        }
-
-        function openVehicleForm() {
-            alert('Opening vehicle form...');
         }
     </script>
 </body>
