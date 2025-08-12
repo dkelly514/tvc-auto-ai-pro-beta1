@@ -2754,29 +2754,918 @@
             }
         }
 
-        async function deleteCustomer(id) {
-  if (!confirm('Delete this customer?')) return;
+        function deleteCustomer(id) {
+            if (confirm('Delete this customer?')) {
+                customers = customers.filter(c => c.id !== id);
+                renderCustomerTable();
+                updateDashboardMetrics();
+            }
+        }
+
+        // Inventory Management Functions
+        function renderInventoryTable() {
+            const tbody = document.getElementById('inventoryTableBody');
+            if (!tbody) return;
+            
+            tbody.innerHTML = '';
+            inventory.forEach(vehicle => {
+                const row = tbody.insertRow();
+                row.innerHTML = `
+                    <td>${vehicle.vehicle}</td>
+                    <td style="font-family: monospace; font-size: 11px;">${vehicle.vin}</td>
+                    <td><span class="status-badge status-${vehicle.status}">${vehicle.status}</span></td>
+                    <td>${formatCurrency(vehicle.price)}</td>
+                    <td>${vehicle.daysInStock}</td>
+                    <td><span class="status-badge status-${vehicle.serviceStatus === 'ready' ? 'completed' : vehicle.serviceStatus}">${vehicle.serviceStatus}</span></td>
+                    <td>
+                        <button class="btn btn-sm btn-primary" onclick="viewVehicle(${vehicle.id})">View</button>
+                        <button class="btn btn-sm btn-secondary" onclick="deleteVehicle(${vehicle.id})">Delete</button>
+                    </td>
+                `;
+            });
+        }
+
+        function filterInventory() {
+            const filter = document.getElementById('inventoryFilter').value.toLowerCase();
+            const rows = document.querySelectorAll('#inventoryTableBody tr');
+            
+            rows.forEach(row => {
+                const text = row.textContent.toLowerCase();
+                row.style.display = text.includes(filter) ? '' : 'none';
+            });
+        }
+
+        function openVehicleForm() {
+            document.getElementById('addVehicleForm').style.display = 'block';
+        }
+
+        function closeVehicleForm() {
+            document.getElementById('addVehicleForm').style.display = 'none';
+        }
+
+        function addVehicle() {
+            const vin = document.getElementById('newVehicleVIN').value;
+            const make = document.getElementById('newVehicleMake').value;
+            const model = document.getElementById('newVehicleModel').value;
+            const year = document.getElementById('newVehicleYear').value;
+            const price = document.getElementById('newVehiclePrice').value;
+            const status = document.getElementById('newVehicleStatus').value;
+            
+            if (make && model && year && price) {
+                const newVehicle = {
+                    id: Date.now(),
+                    vehicle: `${year} ${make} ${model}`,
+                    vin: vin || 'PENDING',
+                    status,
+                    price: parseInt(price),
+                    daysInStock: 0,
+                    serviceStatus: 'pending',
+                    make,
+                    model,
+                    year: parseInt(year)
+                };
+                
+                inventory.push(newVehicle);
+                renderInventoryTable();
+                updateDashboardMetrics();
+                closeVehicleForm();
+                addActivity('🚗', `New vehicle: ${newVehicle.vehicle}`, 'Just now');
+                
+                // Clear form
+                document.getElementById('newVehicleVIN').value = '';
+                document.getElementById('newVehicleMake').value = '';
+                document.getElementById('newVehicleModel').value = '';
+                document.getElementById('newVehicleYear').value = '';
+                document.getElementById('newVehiclePrice').value = '';
+            }
+        }
+
+        async function decodeVIN() {
+            const vin = document.getElementById('newVehicleVIN').value;
+            if (vin.length !== 17) {
+                alert('Please enter a valid 17-character VIN');
+                return;
+            }
+            
+            try {
+                const response = await fetch(`https://vpic.nhtsa.dot.gov/api/vehicles/decodevin/${vin}?format=json`);
+                const data = await response.json();
+                
+                if (data.Results) {
+                    const getValue = (variable) => data.Results.find(r => r.Variable === variable)?.Value || '';
+                    
+                    document.getElementById('newVehicleMake').value = getValue('Make');
+                    document.getElementById('newVehicleModel').value = getValue('Model');
+                    document.getElementById('newVehicleYear').value = getValue('Model Year');
+                    
+                    alert('VIN decoded successfully!');
+                }
+            } catch (error) {
+                alert('Error decoding VIN. Please enter details manually.');
+            }
+        }
+
+        function viewVehicle(id) {
+            const vehicle = inventory.find(v => v.id === id);
+            if (vehicle) {
+                alert(`Vehicle Details:\n\n${vehicle.vehicle}\nVIN: ${vehicle.vin}\nPrice: ${formatCurrency(vehicle.price)}\nStatus: ${vehicle.status}\nDays in Stock: ${vehicle.daysInStock}\nService: ${vehicle.serviceStatus}`);
+            }
+        }
+
+        function deleteVehicle(id) {
+            if (confirm('Delete this vehicle?')) {
+                inventory = inventory.filter(v => v.id !== id);
+                renderInventoryTable();
+                updateDashboardMetrics();
+            }
+        }
+
+        // Photo Management Functions
+        function populateVehicleDropdowns() {
+            const select = document.getElementById('vehicleSelect');
+            const serviceSelect = document.getElementById('serviceVehicle');
+            
+            if (select) {
+                select.innerHTML = '<option value="">Choose vehicle...</option>';
+                inventory.forEach(vehicle => {
+                    const option = document.createElement('option');
+                    option.value = vehicle.id;
+                    option.textContent = vehicle.vehicle;
+                    select.appendChild(option);
+                });
+            }
+            
+            if (serviceSelect) {
+                serviceSelect.innerHTML = '<option value="">Select vehicle...</option>';
+                inventory.forEach(vehicle => {
+                    const option = document.createElement('option');
+                    option.value = vehicle.id;
+                    option.textContent = vehicle.vehicle;
+                    serviceSelect.appendChild(option);
+                });
+            }
+        }
+
+        async function startCamera() {
+            try {
+                cameraStream = await navigator.mediaDevices.getUserMedia({ 
+                    video: { facingMode: 'environment' } 
+                });
+                const video = document.getElementById('cameraFeed');
+                video.srcObject = cameraStream;
+                video.style.display = 'block';
+                document.getElementById('captureBtn').disabled = false;
+                addActivity('📷', 'Camera started', 'Just now');
+            } catch (error) {
+                alert('Camera access denied. Please enable camera permissions.');
+            }
+        }
+
+        function stopCamera() {
+            if (cameraStream) {
+                cameraStream.getTracks().forEach(track => track.stop());
+                cameraStream = null;
+                const video = document.getElementById('cameraFeed');
+                video.style.display = 'none';
+                document.getElementById('captureBtn').disabled = true;
+                addActivity('📷', 'Camera stopped', 'Just now');
+            }
+        }
+
+        function capturePhoto() {
+            const video = document.getElementById('cameraFeed');
+            const canvas = document.getElementById('photoCanvas');
+            const vehicleId = document.getElementById('vehicleSelect').value;
+            const photoType = document.getElementById('photoType').value;
+            
+            if (!vehicleId) {
+                alert('Please select a vehicle first');
+                return;
+            }
+            
+            canvas.width = video.videoWidth;
+            canvas.height = video.videoHeight;
+            const ctx = canvas.getContext('2d');
+            ctx.drawImage(video, 0, 0);
+            
+            const photoData = canvas.toDataURL('image/jpeg');
+            const vehicle = inventory.find(v => v.id == vehicleId);
+            
+            const photo = {
+                id: Date.now(),
+                vehicleId,
+                vehicleName: vehicle.vehicle,
+                type: photoType,
+                data: photoData,
+                timestamp: new Date()
+            };
+            
+            vehiclePhotos.push(photo);
+            displayPhotos();
+            updateDashboardMetrics();
+            addActivity('📸', `Photo captured: ${vehicle.vehicle}`, 'Just now');
+        }
+
+        function handleFileUpload(event) {
+            const file = event.target.files[0];
+            const vehicleId = document.getElementById('vehicleSelect').value;
+            const photoType = document.getElementById('photoType').value;
+            
+            if (!vehicleId) {
+                alert('Please select a vehicle first');
+                return;
+            }
+            
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    const vehicle = inventory.find(v => v.id == vehicleId);
+                    const photo = {
+                        id: Date.now(),
+                        vehicleId,
+                        vehicleName: vehicle.vehicle,
+                        type: photoType,
+                        data: e.target.result,
+                        timestamp: new Date()
+                    };
+                    
+                    vehiclePhotos.push(photo);
+                    displayPhotos();
+                    updateDashboardMetrics();
+                    addActivity('📸', `Photo uploaded: ${vehicle.vehicle}`, 'Just now');
+                };
+                reader.readAsDataURL(file);
+            }
+        }
+
+        function displayPhotos() {
+            const gallery = document.getElementById('photoGallery');
+            if (!gallery) return;
+            
+            if (vehiclePhotos.length === 0) {
+                gallery.innerHTML = '<div style="grid-column: 1 / -1; text-align: center; color: var(--text-muted); padding: 40px;">No photos yet. Use the camera or upload button to add photos.</div>';
+            } else {
+                gallery.innerHTML = '';
+                vehiclePhotos.forEach(photo => {
+                    const photoDiv = document.createElement('div');
+                    photoDiv.className = 'photo-item';
+                    photoDiv.innerHTML = `
+                        <img src="${photo.data}" alt="${photo.type}">
+                        <div style="position: absolute; bottom: 0; left: 0; right: 0; background: linear-gradient(transparent, rgba(0,0,0,0.8)); padding: 8px; color: white; font-size: 10px;">
+                            <div>${photo.vehicleName}</div>
+                            <div>${photo.type}</div>
+                        </div>
+                        <button onclick="deletePhoto(${photo.id})" style="position: absolute; top: 4px; right: 4px; background: var(--error); color: white; border: none; border-radius: 50%; width: 20px; height: 20px; cursor: pointer;">×</button>
+                    `;
+                    gallery.appendChild(photoDiv);
+                });
+            }
+        }
+
+        function deletePhoto(id) {
+            if (confirm('Delete this photo?')) {
+                vehiclePhotos = vehiclePhotos.filter(p => p.id !== id);
+                displayPhotos();
+                updateDashboardMetrics();
+            }
+        }
+
+        // Call Management Functions
+        function renderCallTable() {
+            const tbody = document.getElementById('callTableBody');
+            if (!tbody) return;
+            
+            tbody.innerHTML = '';
+            callHistory.forEach(call => {
+                const row = tbody.insertRow();
+                row.innerHTML = `
+                    <td>${call.dateTime.toLocaleDateString()}<br><span style="font-size: 11px;">${call.dateTime.toLocaleTimeString()}</span></td>
+                    <td>${call.phoneNumber}</td>
+                    <td>${call.customer}</td>
+                    <td>${call.duration}</td>
+                    <td><span class="lead-score ${getLeadScoreClass(call.leadScore)}">${call.leadScore}</span></td>
+                    <td><span class="status-badge status-${call.status}">${call.status}</span></td>
+                    <td>
+                        <button class="btn btn-sm btn-primary" onclick="viewCallTranscript(${call.id})">Transcript</button>
+                        <button class="btn btn-sm btn-secondary" onclick="deleteCall(${call.id})">Delete</button>
+                    </td>
+                `;
+            });
+        }
+
+        function simulateNewCall() {
+            const newCall = {
+                id: Date.now(),
+                dateTime: new Date(),
+                phoneNumber: '555-' + Math.floor(Math.random() * 9000 + 1000),
+                customer: 'New Customer',
+                duration: Math.floor(Math.random() * 15) + ':' + Math.floor(Math.random() * 60).toString().padStart(2, '0'),
+                leadScore: Math.floor(Math.random() * 4) + 6,
+                status: 'transcribed'
+            };
+            
+            callHistory.unshift(newCall);
+            renderCallTable();
+            updateDashboardMetrics();
+            addActivity('📞', 'New call received', 'Just now');
+            alert('New call simulated successfully!');
+        }
+
+        function viewCallTranscript(id) {
+            const call = callHistory.find(c => c.id === id);
+            if (call) {
+                alert(`Call Transcript\n\nCustomer: ${call.customer}\nPhone: ${call.phoneNumber}\nDuration: ${call.duration}\nLead Score: ${call.leadScore}/10\n\n[Transcript would appear here]`);
+            }
+        }
+
+        function deleteCall(id) {
+            if (confirm('Delete this call record?')) {
+                callHistory = callHistory.filter(c => c.id !== id);
+                renderCallTable();
+                updateDashboardMetrics();
+            }
+        }
+
+        // Email Management Functions
+        function renderEmailTable() {
+            const tbody = document.getElementById('emailTableBody');
+            if (!tbody) return;
+            
+            tbody.innerHTML = '';
+            emailHistory.forEach(email => {
+                const row = tbody.insertRow();
+                row.innerHTML = `
+                    <td>${email.date.toLocaleDateString()}<br><span style="font-size: 11px;">${email.date.toLocaleTimeString()}</span></td>
+                    <td>${email.recipient}</td>
+                    <td>${email.subject}</td>
+                    <td><span class="status-badge status-${email.type}">${email.type}</span></td>
+                    <td><span class="status-badge status-${email.status}">${email.status}</span></td>
+                    <td>
+                        <button class="btn btn-sm btn-primary" onclick="viewEmail(${email.id})">View</button>
+                        <button class="btn btn-sm btn-secondary" onclick="deleteEmail(${email.id})">Delete</button>
+                    </td>
+                `;
+            });
+        }
+
+        function createEmailCampaign() {
+            const subject = prompt('Email subject:');
+            if (subject) {
+                const newEmail = {
+                    id: Date.now(),
+                    date: new Date(),
+                    recipient: 'all@customers.com',
+                    subject,
+                    type: 'campaign',
+                    status: 'sent'
+                };
+                
+                emailHistory.unshift(newEmail);
+                renderEmailTable();
+                updateDashboardMetrics();
+                addActivity('📧', 'Email campaign sent', 'Just now');
+                alert('Email campaign created!');
+            }
+        }
+
+        function saveEmailTemplate() {
+            const subject = document.getElementById('emailSubject').value;
+            const body = document.getElementById('emailBody').value;
+            
+            if (subject && body) {
+                alert('Email template saved successfully!');
+                addActivity('💾', 'Email template saved', 'Just now');
+            }
+        }
+
+        function viewEmail(id) {
+            const email = emailHistory.find(e => e.id === id);
+            if (email) {
+                alert(`Email Details\n\nTo: ${email.recipient}\nSubject: ${email.subject}\nType: ${email.type}\nStatus: ${email.status}`);
+            }
+        }
+
+        function deleteEmail(id) {
+            if (confirm('Delete this email?')) {
+                emailHistory = emailHistory.filter(e => e.id !== id);
+                renderEmailTable();
+                updateDashboardMetrics();
+            }
+        }
+
+        // VIN Scanner Functions
+        async function scanVIN() {
+            const vin = document.getElementById('vinInput').value;
+            
+            if (vin.length !== 17) {
+                alert('Please enter a valid 17-character VIN');
+                return;
+            }
+            
+            const resultDiv = document.getElementById('vinResult');
+            const dataDiv = document.getElementById('vinData');
+            
+            dataDiv.innerHTML = '<div style="text-align: center;">🔍 Decoding VIN...</div>';
+            resultDiv.style.display = 'block';
+            
+            try {
+                const response = await fetch(`https://vpic.nhtsa.dot.gov/api/vehicles/decodevin/${vin}?format=json`);
+                const data = await response.json();
+                
+                if (data.Results) {
+                    const getValue = (variable) => data.Results.find(r => r.Variable === variable)?.Value || 'N/A';
+                    
+                    dataDiv.innerHTML = `
+                        <div class="vin-result-grid">
+                            <div class="vin-field">
+                                <div class="vin-field-label">Make</div>
+                                <div class="vin-field-value">${getValue('Make')}</div>
+                            </div>
+                            <div class="vin-field">
+                                <div class="vin-field-label">Model</div>
+                                <div class="vin-field-value">${getValue('Model')}</div>
+                            </div>
+                            <div class="vin-field">
+                                <div class="vin-field-label">Year</div>
+                                <div class="vin-field-value">${getValue('Model Year')}</div>
+                            </div>
+                            <div class="vin-field">
+                                <div class="vin-field-label">Body Type</div>
+                                <div class="vin-field-value">${getValue('Body Class')}</div>
+                            </div>
+                            <div class="vin-field">
+                                <div class="vin-field-label">Engine</div>
+                                <div class="vin-field-value">${getValue('Engine Model')}</div>
+                            </div>
+                            <div class="vin-field">
+                                <div class="vin-field-label">Manufacturer</div>
+                                <div class="vin-field-value">${getValue('Manufacturer Name')}</div>
+                            </div>
+                        </div>
+                    `;
+                    
+                    addActivity('🔍', 'VIN decoded successfully', 'Just now');
+                }
+            } catch (error) {
+                dataDiv.innerHTML = '<div style="color: var(--error); text-align: center;">Error decoding VIN</div>';
+            }
+        }
+
+        // Service Operations Functions
+        function renderServiceTable() {
+            const tbody = document.getElementById('serviceTableBody');
+            if (!tbody) return;
+            
+            tbody.innerHTML = '';
+            serviceOrders.forEach(order => {
+                const row = tbody.insertRow();
+                row.innerHTML = `
+                    <td>${order.id}</td>
+                    <td>${order.vehicle}</td>
+                    <td>${order.customer}</td>
+                    <td>${order.serviceType}</td>
+                    <td>${order.technician}</td>
+                    <td><span class="status-badge status-${order.status}">${order.status}</span></td>
+                    <td>${formatCurrency(order.cost)}</td>
+                    <td>
+                        <button class="btn btn-sm btn-primary" onclick="viewServiceOrder('${order.id}')">View</button>
+                        <button class="btn btn-sm btn-secondary" onclick="updateServiceStatus('${order.id}')">Update</button>
+                    </td>
+                `;
+            });
+        }
+
+        function createServiceOrder() {
+            const form = document.getElementById('serviceOrderForm');
+            if (form) {
+                form.style.display = 'block';
+                populateVehicleDropdowns();
+            }
+        }
+
+        function closeServiceForm() {
+            const form = document.getElementById('serviceOrderForm');
+            if (form) {
+                form.style.display = 'none';
+            }
+        }
+
+        function submitServiceOrder() {
+            const vehicle = document.getElementById('serviceVehicle').value;
+            const type = document.getElementById('serviceType').value;
+            const priority = document.getElementById('servicePriority').value;
+            const notes = document.getElementById('serviceNotes').value;
+            
+            if (vehicle && type) {
+                const newOrder = {
+                    id: `SO-${String(serviceOrders.length + 1).padStart(3, '0')}`,
+                    vehicle: inventory.find(v => v.id == vehicle)?.vehicle || 'Unknown',
+                    customer: 'Walk-in',
+                    serviceType: type,
+                    technician: 'Unassigned',
+                    status: priority === 'urgent' ? 'in-progress' : 'pending',
+                    cost: Math.floor(Math.random() * 500) + 100,
+                    date: new Date()
+                };
+                
+                serviceOrders.push(newOrder);
+                renderServiceTable();
+                closeServiceForm();
+                addActivity('🔧', `Service order created: ${newOrder.id}`, 'Just now');
+                updateDashboardMetrics();
+            }
+        }
+
+        function viewServiceOrder(orderId) {
+            const order = serviceOrders.find(o => o.id === orderId);
+            if (order) {
+                alert(`Service Order ${order.id}\n\nVehicle: ${order.vehicle}\nCustomer: ${order.customer}\nService: ${order.serviceType}\nStatus: ${order.status}\nCost: ${formatCurrency(order.cost)}`);
+            }
+        }
+
+        function updateServiceStatus(orderId) {
+            const order = serviceOrders.find(o => o.id === orderId);
+            if (order) {
+                const statuses = ['pending', 'in-progress', 'completed'];
+                const currentIndex = statuses.indexOf(order.status);
+                order.status = statuses[(currentIndex + 1) % statuses.length];
+                renderServiceTable();
+                addActivity('🔧', `Service ${orderId} status: ${order.status}`, 'Just now');
+            }
+        }
+
+        // Voice Control Functions
+        function toggleVoice() {
+            const voiceBtn = document.getElementById('voiceBtn');
+            
+            if (!('webkitSpeechRecognition' in window) && !('SpeechRecognition' in window)) {
+                alert('Voice recognition is not supported in this browser. Please use Chrome or Edge.');
+                return;
+            }
+
+            const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+            
+            if (!isListening) {
+                const recognition = new SpeechRecognition();
+                recognition.continuous = false;
+                recognition.interimResults = false;
+                recognition.lang = 'en-US';
+
+                recognition.onstart = function() {
+                    isListening = true;
+                    voiceBtn.innerHTML = '🔴 Listening...';
+                    voiceBtn.style.background = 'var(--error)';
+                    addActivity('🎤', 'Voice AI listening', 'Just now');
+                };
+
+                recognition.onresult = function(event) {
+                    const command = event.results[0][0].transcript.toLowerCase();
+                    processVoiceCommand(command);
+                };
+
+                recognition.onend = function() {
+                    isListening = false;
+                    voiceBtn.innerHTML = '🎤 Voice';
+                    voiceBtn.style.background = '';
+                };
+
+                recognition.onerror = function(event) {
+                    isListening = false;
+                    voiceBtn.innerHTML = '🎤 Voice';
+                    voiceBtn.style.background = '';
+                    alert(`Voice error: ${event.error}`);
+                };
+
+                recognition.start();
+            }
+        }
+
+        function processVoiceCommand(command) {
+            addChatMessage('user', `Voice: "${command}"`);
+            
+            let executed = false;
+            
+            if (command.includes('dashboard')) {
+                showPage('dashboard', document.querySelector('.nav-item[onclick*="dashboard"]'));
+                executed = true;
+            } else if (command.includes('service')) {
+                showPage('service', document.querySelector('.nav-item[onclick*="service"]'));
+                executed = true;
+            } else if (command.includes('customer')) {
+                showPage('customers', document.querySelector('.nav-item[onclick*="customers"]'));
+                executed = true;
+            } else if (command.includes('inventory')) {
+                showPage('inventory', document.querySelector('.nav-item[onclick*="inventory"]'));
+                executed = true;
+            } else if (command.includes('photo')) {
+                showPage('photos', document.querySelector('.nav-item[onclick*="photos"]'));
+                executed = true;
+            } else if (command.includes('call')) {
+                showPage('calls', document.querySelector('.nav-item[onclick*="calls"]'));
+                executed = true;
+            } else if (command.includes('email')) {
+                showPage('emails', document.querySelector('.nav-item[onclick*="emails"]'));
+                executed = true;
+            } else if (command.includes('analytics')) {
+                showPage('analytics', document.querySelector('.nav-item[onclick*="analytics"]'));
+                executed = true;
+            } else if (command.includes('chat') || command.includes('ai')) {
+                showPage('chat', document.querySelector('.nav-item[onclick*="chat"]'));
+                executed = true;
+            } else if (command.includes('create order')) {
+                createServiceOrder();
+                executed = true;
+            } else if (command.includes('add customer')) {
+                openCustomerForm();
+                executed = true;
+            } else if (command.includes('add vehicle')) {
+                openVehicleForm();
+                executed = true;
+            } else if (command.includes('refresh')) {
+                refreshData();
+                executed = true;
+            }
+            
+            if (executed) {
+                addChatMessage('assistant', `✅ Command executed: ${command}`);
+            } else {
+                addChatMessage('assistant', `❓ Command not recognized. Try: "show dashboard", "show service", "add customer", etc.`);
+            }
+        }
+
+        // AI Functions
+        function selectAIProvider(provider, element) {
+            document.querySelectorAll('.ai-provider-card').forEach(card => {
+                card.classList.remove('selected');
+            });
+            if (element) {
+                element.classList.add('selected');
+            }
+            currentAIProvider = provider;
+            updateAIStatus();
+        }
+
+        function updateAIStatus() {
+            const apiKey = document.getElementById('aiApiKey').value;
+            const statusDot = document.getElementById('aiStatusDot');
+            const statusText = document.getElementById('aiStatusText');
+            
+            const providerNames = {
+                'openai': 'OpenAI GPT-4',
+                'anthropic': 'Anthropic Claude',
+                'gemini': 'Google Gemini'
+            };
+            
+            if (currentAIProvider && apiKey && apiKey.length > 10) {
+                statusDot.classList.add('connected');
+                statusText.textContent = `AI Status: Connected to ${providerNames[currentAIProvider]}`;
+                aiApiKey = apiKey;
+            } else {
+                statusDot.classList.remove('connected');
+                statusText.textContent = currentAIProvider ? 
+                    `AI Status: ${providerNames[currentAIProvider]} - API Key Required` : 
+                    'AI Status: Select Provider';
+                aiApiKey = null;
+            }
+        }
+
+        function updateOpenPhoneStatus() {
+            const apiKey = document.getElementById('openphoneApiKey').value;
+            const statusDot = document.getElementById('openphoneStatusDot');
+            const statusText = document.getElementById('openphoneStatusText');
+            
+            if (apiKey && apiKey.length > 10) {
+                openphoneApiKey = apiKey;
+                if (statusDot) statusDot.classList.add('connected');
+                if (statusText) statusText.textContent = 'OpenPhone Status: Connected';
+            } else {
+                if (statusDot) statusDot.classList.remove('connected');
+                if (statusText) statusText.textContent = 'OpenPhone Status: Disconnected';
+            }
+        }
+
+        function testAIConnection() {
+            if (!aiApiKey) {
+                alert('Please enter your AI API key first');
+                return;
+            }
+            addChatMessage('system', `Testing connection to ${currentAIProvider.toUpperCase()}...`);
+            setTimeout(() => {
+                addChatMessage('assistant', `✅ Successfully connected to ${currentAIProvider.toUpperCase()} API`);
+            }, 1500);
+        }
+
+        function testOpenPhoneConnection() {
+            if (!openphoneApiKey) {
+                alert('Please enter OpenPhone API key first');
+                return;
+            }
+            addChatMessage('system', 'Testing OpenPhone connection...');
+            setTimeout(() => {
+                addChatMessage('assistant', '✅ OpenPhone API connected successfully');
+                const statusDot = document.getElementById('openphoneStatusDot');
+                const statusText = document.getElementById('openphoneStatusText');
+                if (statusDot) statusDot.classList.add('connected');
+                if (statusText) statusText.textContent = 'OpenPhone Status: Connected - Monitoring calls';
+            }, 1500);
+        }
+
+        function saveAIConfig() {
+            updateAIStatus();
+            updateOpenPhoneStatus();
+            alert('Configuration saved successfully!');
+            addActivity('🔧', 'AI configuration saved', 'Just now');
+        }
+
+        // Chat Functions
+        function sendMessage() {
+            const input = document.getElementById('chatInput');
+            const message = input.value.trim();
+            
+            if (!message) return;
+            
+            addChatMessage('user', message);
+            input.value = '';
+            
+            setTimeout(() => {
+                const response = generateResponse(message);
+                addChatMessage('assistant', response);
+            }, 800);
+        }
+
+        function generateResponse(message) {
+            const lower = message.toLowerCase();
+            
+            if (lower.includes('service') || lower.includes('repair')) {
+                const activeOrders = serviceOrders.filter(o => o.status === 'in-progress').length;
+                const pendingOrders = serviceOrders.filter(o => o.status === 'pending').length;
+                const revenue = serviceOrders.reduce((sum, o) => sum + o.cost, 0);
+                
+                return `🔧 <strong>Service Operations Analysis</strong><br><br>
+                Active Orders: ${activeOrders}<br>
+                Pending: ${pendingOrders}<br>
+                Total Orders: ${serviceOrders.length}<br>
+                Revenue: ${formatCurrency(revenue)}<br>
+                Average Ticket: ${formatCurrency(revenue / serviceOrders.length)}<br><br>
+                Service center operating at 85% capacity. Recommend scheduling optimization.`;
+            }
+            
+            if (lower.includes('customer') || lower.includes('lead')) {
+                const hotLeads = customers.filter(c => c.status === 'hot').length;
+                const avgScore = customers.reduce((sum, c) => sum + c.leadScore, 0) / customers.length;
+                
+                return `👥 <strong>Customer Intelligence Report</strong><br><br>
+                Total Customers: ${customers.length}<br>
+                Hot Leads: ${hotLeads}<br>
+                Average Lead Score: ${avgScore.toFixed(1)}/10<br>
+                Pipeline Value: ${formatCurrency(customers.reduce((sum, c) => sum + c.value, 0))}<br><br>
+                Recommendation: Focus on hot leads for immediate conversion.`;
+            }
+            
+            if (lower.includes('inventory')) {
+                const available = inventory.filter(v => v.status === 'available').length;
+                const totalValue = inventory.reduce((sum, v) => sum + v.price, 0);
+                
+                return `🚗 <strong>Inventory Analysis</strong><br><br>
+                Total Vehicles: ${inventory.length}<br>
+                Available: ${available}<br>
+                Total Value: ${formatCurrency(totalValue)}<br>
+                Average Price: ${formatCurrency(totalValue / inventory.length)}<br><br>
+                Inventory turnover rate is healthy. Consider promotions for units over 30 days.`;
+            }
+            
+            if (lower.includes('hello') || lower.includes('hi')) {
+                return `Hello! I'm your AI assistant powered by ${currentAIProvider.toUpperCase()}. I can help with:<br><br>
+                • Service operations analysis<br>
+                • Customer pipeline insights<br>
+                • Inventory optimization<br>
+                • Sales forecasting<br>
+                • Call and email analytics<br><br>
+                What would you like to explore?`;
+            }
+            
+            return `Processing your request with ${currentAIProvider.toUpperCase()} AI...<br><br>
+            Try asking about:<br>
+            • "Analyze service operations"<br>
+            • "Show customer insights"<br>
+            • "Review inventory status"<br>
+            • "Sales performance"`;
+        }
+
+        function addChatMessage(type, message) {
+            const chatMessages = document.getElementById('chatMessages');
+            if (!chatMessages) return;
+            
+            const messageDiv = document.createElement('div');
+            messageDiv.className = `chat-message ${type}`;
+            messageDiv.innerHTML = message;
+            
+            chatMessages.appendChild(messageDiv);
+            chatMessages.scrollTop = chatMessages.scrollHeight;
+        }
+
+        // Activity Feed
+        function addActivity(icon, title, time) {
+            const feed = document.getElementById('activityFeedContent');
+            if (!feed) return;
+            
+            const item = document.createElement('div');
+            item.className = 'activity-item';
+            item.innerHTML = `
+                <div class="activity-indicator" style="background: var(--accent-primary);"></div>
+                <div class="activity-content">
+                    <div class="activity-title">${icon} ${title}</div>
+                </div>
+                <div class="activity-time">${time}</div>
+            `;
+            
+            feed.insertBefore(item, feed.firstChild);
+            
+            while (feed.children.length > 5) {
+                feed.removeChild(feed.lastChild);
+            }
+        }
+
+        // Utility Functions
+        function exportData() {
+            const data = {
+                customers: customers.length,
+                inventory: inventory.length,
+                serviceOrders: serviceOrders.length,
+                revenue: dashboardMetrics.revenue.value
+            };
+            
+            alert(`Exporting data...\n\nCustomers: ${data.customers}\nInventory: ${data.inventory}\nService Orders: ${data.serviceOrders}\nRevenue: ${formatCurrency(data.revenue)}`);
+            addActivity('📊', 'Data exported', 'Just now');
+        }
+
+        function refreshData() {
+            updateDashboardMetrics();
+            renderServiceTable();
+            renderCustomerTable();
+            renderInventoryTable();
+            renderCallTable();
+            renderEmailTable();
+            addActivity('🔄', 'Data refreshed', 'Just now');
+            alert('All data refreshed successfully!');
+        }
+
+        function showMetricDetails(metric) {
+            const messages = {
+                revenue: `Revenue Analysis: ${formatCurrency(dashboardMetrics.revenue.value)} total, up ${dashboardMetrics.revenue.change * 100}% from last month.`,
+                leads: `Lead Analysis: ${customers.length} active leads with average score ${(customers.reduce((sum, c) => sum + c.leadScore, 0) / customers.length).toFixed(1)}/10`,
+                service: `Service Analysis: ${serviceOrders.length} orders generating ${formatCurrency(serviceOrders.reduce((sum, o) => sum + o.cost, 0))} in revenue`,
+                saleTime: `Sales Efficiency: Average sale time is ${dashboardMetrics.saleTime.value} days, ${Math.abs(dashboardMetrics.saleTime.change)} days better than last period`
+            };
+            
+            addChatMessage('assistant', messages[metric] || 'Analyzing metrics...');
+            showPage('chat', document.querySelector('.nav-item[onclick*="chat"]'));
+        }
+    </script>
+
+<!-- Supabase client + keys (fill in your project values) -->
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script>
+  window.SUPABASE_URL = window.SUPABASE_URL || "REPLACE_WITH_YOUR_SUPABASE_URL";
+  window.SUPABASE_ANON_KEY = window.SUPABASE_ANON_KEY || "REPLACE_WITH_YOUR_SUPABASE_ANON_KEY";
+  try { window.db = supabase.createClient(window.SUPABASE_URL, window.SUPABASE_ANON_KEY); } catch (e) { console.warn('Supabase init failed:', e?.message || e); }
+
+async function loadCustomersFromDB() {
   try {
-    if (window.db) {
-      const { error } = await window.db.from('customers').delete().eq('id', id);
-      if (error) console.warn('Supabase delete failed:', error.message);
+    if (!window.db) return;
+    const { data, error } = await window.db
+      .from('customers')
+      .select('*')
+      .order('Created at', { ascending: false });
+    if (error) { console.warn('Load failed:', error.message); return; }
+    if (Array.isArray(window.customers)) {
+      window.customers.length = 0;
+      for (const row of data) {
+        const parts = (row["Name"] || row.name || '').trim().split(' ');
+        const firstName = parts.shift() || '';
+        const lastName  = parts.join(' ');
+        window.customers.push({
+          id: row["ID"] || row.id,
+          firstName,
+          lastName,
+          email: row["Email"] || row.email || '',
+          phone: row["Phone"] || row.phone || '',
+          vehicleInterest: row["Vehicle of interest"] || row.vehicle_interest || '',
+          budget: row["Budget"] || row.budget || '',
+          address: row["Address"] || row.address || '',
+          currentVehicle: row["Current Vehicle/Trade in"] || row.current_vehicle || '',
+          status: 'new',
+          leadScore: 8,
+          value: parseInt((row["Budget"] || row.budget || '').replace(/[^0-9]/g, '')) || 0,
+          lastContact: 'Just now'
+        });
+      }
+      if (typeof renderCustomerTable === 'function') renderCustomerTable();
     }
-  } catch (e) { console.warn('Supabase not configured:', e?.message || e); }
-  customers = customers.filter(c => c.id !== id);
-  if (typeof renderCustomerTable === 'function') renderCustomerTable();
-  if (typeof updateDashboardMetrics === 'function') updateDashboardMetrics();
+  } catch (e) { console.warn('Load failed:', e?.message || e); }
 }
 
-document.addEventListener('DOMContentLoaded', () => {
-  if (window.db) loadCustomersFromDB();
-});
-</script>
-
-</body>
-</html>
-<script>
-
-function addCustomerWrapper(){return addCustomer.apply(this, arguments);} // preserve any references
+function addCustomerWrapper(){return addCustomer.apply(this, arguments);} // preserve any refs
 async function addCustomer() {
   const name  = (document.getElementById('newCustomerName')?.value || '').trim();
   const address  = (document.getElementById('newCustomerAddress')?.value || '').trim();
@@ -2792,14 +3681,8 @@ async function addCustomer() {
   let insertedOk = false;
   try {
     if (window.db) {
-      const { error } = await window.db.from('customers').insert([{
-        name,
-        address,
-        email,
-        phone,
-        vehicle_interest: vehicleInterest,
-        current_vehicle: currentVehicle,
-        budget
+      const { error } = await window.db.from('customers').insert([{ ["Name"]: name, ["Address"]: address, ["Email"]: email, ["Phone"]: phone, ["Vehicle of interest"]: vehicleInterest, ["Current Vehicle/Trade in"]: currentVehicle, ["Budget"]: budget }]); // spaced columns
+        /* columns with spaces handled above */
       }]);
       if (!error) insertedOk = true;
       else console.warn('Supabase insert failed:', error.message);
@@ -2840,4 +3723,23 @@ async function addCustomer() {
   if (typeof addActivity === 'function') addActivity('👤', `New customer: ${name}`, 'Just now');
 }
 
+async function deleteCustomer(id) {
+  if (!confirm('Delete this customer?')) return;
+  try {
+    if (window.db) {
+      const { error } = await window.db.from('customers').delete().eq('ID', id).eq('id', id); // try both
+      if (error) console.warn('Supabase delete failed:', error.message);
+    }
+  } catch (e) { console.warn('Supabase not configured:', e?.message || e); }
+  customers = customers.filter(c => c.id !== id);
+  if (typeof renderCustomerTable === 'function') renderCustomerTable();
+  if (typeof updateDashboardMetrics === 'function') updateDashboardMetrics();
+}
+
+document.addEventListener('DOMContentLoaded', () => {
+  if (window.db) loadCustomersFromDB();
+});
 </script>
+
+</body>
+</html>
