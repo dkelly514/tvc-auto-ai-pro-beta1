@@ -2692,6 +2692,20 @@
             });
         }
 
+        function filterCustomers() {
+  const q = (document.getElementById('customerSearch')?.value || '')
+              .toLowerCase()
+              .trim();
+
+  const rows = document.querySelectorAll('#customerTableBody tr');
+
+  rows.forEach(row => {
+    const text = row.textContent.toLowerCase();
+    row.style.display = (!q || text.includes(q)) ? '' : 'none';
+  });
+}
+
+
         function openCustomerForm() {
             document.getElementById('addCustomerForm').style.display = 'block';
         }
@@ -3619,55 +3633,53 @@
 <!-- Supabase client + keys (fill in your project values) -->
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script>
-  // ✅ keep your real URL/key here
+  // Keep your real URL/key here
   window.SUPABASE_URL = window.SUPABASE_URL || "https://zpgdsgutiheilshgrnwl.supabase.co";
   window.SUPABASE_ANON_KEY = window.SUPABASE_ANON_KEY || "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InpwZ2RzZ3V0aWhlaWxzaGdybndsIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTUwMjA3NDMsImV4cCI6MjA3MDU5Njc0M30.LC-ro-E2k_Xb7UK337QP8V2HddpftjV5g1ZsI6D0c8k";
   try { window.db = supabase.createClient(window.SUPABASE_URL, window.SUPABASE_ANON_KEY); } catch (e) { console.warn('Supabase init failed:', e?.message || e); }
 
   async function loadCustomersFromDB() {
     try {
-      if (!window.db) return;
+      if (!window.db) return false;
 
-      // Try "Created at" (spaced) first, then fall back to created_at (snake_case)
-      let resp = await window.db.from('customers').select('*').order('Created at', { ascending: false });
-      if (resp.error) {
-        console.warn('Order by "Created at" failed, retrying with created_at:', resp.error.message);
-        resp = await window.db.from('customers').select('*').order('created_at', { ascending: false });
+      // Try both column names for ordering
+      let { data, error } = await window.db.from('customers').select('*').order('Created at', { ascending: false });
+      if (error) {
+        console.warn('Order by "Created at" failed, retrying created_at:', error.message);
+        ({ data, error } = await window.db.from('customers').select('*').order('created_at', { ascending: false }));
       }
+      if (error) { console.warn('Load failed (likely RLS SELECT policy):', error.message); return false; }
 
-      const { data, error } = resp;
-      if (error) { console.warn('Load failed:', error.message); return; }
-
-      if (Array.isArray(window.customers)) {
-        window.customers.length = 0;
-        for (const row of data) {
-          const nameField = row["Name"] ?? row.name ?? '';
-          const parts = String(nameField).trim().split(/\s+/);
-          const firstName = parts.shift() || '';
-          const lastName  = parts.join(' ');
-          window.customers.push({
-            id: row["ID"] ?? row.id,
-            firstName,
-            lastName,
-            email: row["Email"] ?? row.email ?? '',
-            phone: row["Phone"] ?? row.phone ?? '',
-            vehicleInterest: row["Vehicle of interest"] ?? row.vehicle_interest ?? '',
-            budget: row["Budget"] ?? row.budget ?? '',
-            address: row["Address"] ?? row.address ?? '',
-            currentVehicle: row["Current Vehicle/Trade in"] ?? row.current_vehicle ?? '',
-            status: 'new',
-            leadScore: 8,
-            value: parseInt(String(row["Budget"] ?? row.budget ?? '').replace(/[^0-9]/g, '')) || 0,
-            lastContact: 'Just now'
-          });
-        }
-        if (typeof renderCustomerTable === 'function') renderCustomerTable();
-        if (typeof updateDashboardMetrics === 'function') updateDashboardMetrics();
+      if (!Array.isArray(window.customers)) window.customers = [];
+      window.customers.length = 0;
+      for (const row of data) {
+        const nameField = row["Name"] ?? row.name ?? '';
+        const parts = String(nameField).trim().split(/\s+/);
+        const firstName = parts.shift() || '';
+        const lastName  = parts.join(' ');
+        window.customers.push({
+          id: row["ID"] ?? row.id,
+          firstName,
+          lastName,
+          email: row["Email"] ?? row.email ?? '',
+          phone: row["Phone"] ?? row.phone ?? '',
+          vehicleInterest: row["Vehicle of interest"] ?? row.vehicle_interest ?? '',
+          budget: row["Budget"] ?? row.budget ?? '',
+          address: row["Address"] ?? row.address ?? '',
+          currentVehicle: row["Current Vehicle/Trade in"] ?? row.current_vehicle ?? '',
+          status: 'new',
+          leadScore: 8,
+          value: parseInt(String(row["Budget"] ?? row.budget ?? '').replace(/[^0-9]/g, '')) || 0,
+          lastContact: 'Just now'
+        });
       }
-    } catch (e) { console.warn('Load failed:', e?.message || e); }
+      if (typeof renderCustomerTable === 'function') renderCustomerTable();
+      if (typeof updateDashboardMetrics === 'function') updateDashboardMetrics();
+      return true;
+    } catch (e) { console.warn('Load failed:', e?.message || e); return false; }
   }
 
-  // ✅ Override any earlier legacy version that used wrong input IDs
+  // Override addCustomer to always update the UI immediately
   window.addCustomer = async function addCustomer() {
     const name  = (document.getElementById('newCustomerName')?.value || '').trim();
     const address  = (document.getElementById('newCustomerAddress')?.value || '').trim();
@@ -3680,11 +3692,11 @@
 
     if (!name) { alert('Please enter a name'); return; }
 
-    let insertedOk = false;
+    let insertedRow = null;
     try {
       if (window.db) {
         // Try spaced/capitalized column names
-        let { error } = await window.db.from('customers').insert([{
+        let resp = await window.db.from('customers').insert([{
           ["Name"]: name,
           ["Address"]: address,
           ["Email"]: email,
@@ -3692,41 +3704,53 @@
           ["Vehicle of interest"]: vehicleInterest,
           ["Current Vehicle/Trade in"]: currentVehicle,
           ["Budget"]: budget
-        }]);
+        }]).select().single();
 
-        // Fallback to snake_case schema if that’s what your table uses
-        if (error) {
-          console.warn('Insert with spaced columns failed, retrying snake_case:', error.message);
-          ({ error } = await window.db.from('customers').insert([{
+        // Fallback to snake_case schema
+        if (resp.error) {
+          console.warn('Insert with spaced columns failed, retrying snake_case:', resp.error.message);
+          resp = await window.db.from('customers').insert([{
             name, address, email, phone,
             vehicle_interest: vehicleInterest,
             current_vehicle: currentVehicle,
             budget
-          }]));
+          }]).select().single();
         }
 
-        if (!error) insertedOk = true;
-        else console.warn('Supabase insert failed:', error.message);
+        if (!resp.error) insertedRow = resp.data;
+        else console.warn('Supabase insert failed:', resp.error.message);
       }
     } catch (e) { console.warn('Supabase not configured:', e?.message || e); }
 
-    if (insertedOk) {
-      await loadCustomersFromDB();
+    // Build a UI row so the table updates instantly even if SELECT is blocked
+    const [firstName, ...rest] = name.split(/\s+/);
+    const lastName = rest.join(' ');
+    const uiCustomer = {
+      id: insertedRow?.ID ?? insertedRow?.id ?? Date.now(),
+      firstName, lastName, email, phone,
+      vehicleInterest, budget, status, address, currentVehicle,
+      leadScore: Math.floor(Math.random() * 4) + 6,
+      value: parseInt(budget.replace(/[^0-9]/g, '')) || 0,
+      lastContact: 'Just now'
+    };
+
+    // Try to reload from DB; if blocked, add locally
+    const loaded = await loadCustomersFromDB();
+    if (!loaded) {
+      if (!Array.isArray(window.customers)) window.customers = [];
+      const exists = window.customers.some(c =>
+        (c.email && email && c.email === email) ||
+        (c.phone && phone && c.phone === phone) ||
+        (`${c.firstName} ${c.lastName}`.trim() === name)
+      );
+      if (!exists) {
+        window.customers.push(uiCustomer);
+        if (typeof renderCustomerTable === 'function') renderCustomerTable();
+        if (typeof updateDashboardMetrics === 'function') updateDashboardMetrics();
+        if (typeof addActivity === 'function') addActivity('ℹ️', 'Showing new customer locally (database read is locked)', 'Just now');
+      }
     } else {
-      // Local fallback – still updates the table so the UI isn't dead
-      const [firstName, ...rest] = name.split(' ');
-      const lastName = rest.join(' ');
-      const newCustomer = {
-        id: Date.now(),
-        firstName, lastName, email, phone,
-        vehicleInterest, budget, status, address, currentVehicle,
-        leadScore: Math.floor(Math.random() * 4) + 6,
-        value: parseInt(budget.replace(/[^0-9]/g, '')) || 0,
-        lastContact: 'Just now'
-      };
-      if (Array.isArray(window.customers)) window.customers.push(newCustomer);
-      if (typeof renderCustomerTable === 'function') renderCustomerTable();
-      if (typeof updateDashboardMetrics === 'function') updateDashboardMetrics();
+      if (typeof addActivity === 'function') addActivity('👤', `New customer: ${name}`, 'Just now');
     }
 
     // Reset + close
@@ -3735,7 +3759,6 @@
      .forEach(id => { const el = document.getElementById(id); if (el) el.value=''; });
     const statusEl = document.getElementById('newCustomerStatus'); if (statusEl) statusEl.value = 'new';
     if (typeof closeCustomerForm === 'function') closeCustomerForm();
-    if (typeof addActivity === 'function') addActivity('👤', `New customer: ${name}`, 'Just now');
   };
 
   // Delete tries both "ID" and "id"
