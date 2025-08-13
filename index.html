@@ -3626,8 +3626,8 @@
 <!-- Supabase client + keys (fill in your project values) -->
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script>
-  window.SUPABASE_URL = window.SUPABASE_URL || "REPLACE_WITH_YOUR_SUPABASE_URL";
-  window.SUPABASE_ANON_KEY = window.SUPABASE_ANON_KEY || "REPLACE_WITH_YOUR_SUPABASE_ANON_KEY";
+  window.SUPABASE_URL = window.SUPABASE_URL || "https://zpgdsgutiheilshgrnwl.supabase.co";
+  window.SUPABASE_ANON_KEY = window.SUPABASE_ANON_KEY || "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InpwZ2RzZ3V0aWhlaWxzaGdybndsIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTUwMjA3NDMsImV4cCI6MjA3MDU5Njc0M30.LC-ro-E2k_Xb7UK337QP8V2HddpftjV5g1ZsI6D0c8k";
   try { window.db = supabase.createClient(window.SUPABASE_URL, window.SUPABASE_ANON_KEY); } catch (e) { console.warn('Supabase init failed:', e?.message || e); }
 
 async function loadCustomersFromDB() {
