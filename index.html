@@ -3608,16 +3608,17 @@
             addActivity('📊', 'Data exported', 'Just now');
         }
 
-        function refreshData() {
-            updateDashboardMetrics();
-            renderServiceTable();
-            renderCustomerTable();
-            renderInventoryTable();
-            renderCallTable();
-            renderEmailTable();
-            addActivity('🔄', 'Data refreshed', 'Just now');
-            alert('All data refreshed successfully!');
-        }
+      async function refreshData() {
+  if (window.db) await loadCustomersFromDB(); // <— fetch from Supabase first
+  updateDashboardMetrics();
+  renderServiceTable();
+  renderCustomerTable();
+  renderInventoryTable();
+  renderCallTable();
+  renderEmailTable();
+  addActivity('🔄', 'Data refreshed', 'Just now');
+  alert('All data refreshed successfully!');
+}
 
         function showMetricDetails(metric) {
             const messages = {
