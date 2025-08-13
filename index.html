@@ -1959,27 +1959,20 @@
                 <div id="customers" class="page-content">
                     <div class="data-table-container">
                         <div class="table-header">
-                            <div class="table-title">Customer Pipeline Management</div>
-                            <button class="btn btn-primary" onclick="openCustomerForm()">+ Add Customer</button>
-                        </div>
-                        <table class="data-table" id="customerTable">
-                            <thead>
-                                <tr>
-                                    <th>Customer</th>
-                                    <th>Contact Info</th>
-                                    <th>Status</th>
-                                    <th>Lead Score</th>
-                                    <th>Potential Value</th>
-                                    <th>Vehicle Interest</th>
-                                    <th>Last Contact</th>
-                                    <th>Actions</th>
-                                </tr>
-                            </thead>
-                            <tbody id="customerTableBody">
-                                <!-- Customer data populated by JS -->
-                            </tbody>
-                        </table>
-                    </div>
+                           <div class="table-header">
+  <div class="table-title">Customer Pipeline Management</div>
+  <div style="display: flex; gap: 8px; align-items: center;">
+    <input id="customerSearch" type="text" class="form-input"
+           placeholder="Search name, email, or phone..."
+           style="width: 220px;" oninput="filterCustomers()">
+    <button class="btn btn-secondary btn-sm"
+            onclick="document.getElementById('customerSearch').value=''; filterCustomers();">
+      Clear
+    </button>
+    <button class="btn btn-primary" onclick="openCustomerForm()">+ Add Customer</button>
+  </div>
+</div>
+
 
                     <div id="addCustomerForm" class="form-container" style="display: none; margin-top: 20px;">
   <div class="widget-header" style="margin: 0 0 20px 0;">
