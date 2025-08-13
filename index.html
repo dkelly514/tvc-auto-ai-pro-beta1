@@ -1956,15 +1956,17 @@
                 </div>
 
                 <!-- Customers Page -->
-                <div id="customers" class="page-content">
-                    <div class="data-table-container">
-                        <div class="table-header">
-                           <div class="table-header">
+              <div class="table-header">
   <div class="table-title">Customer Pipeline Management</div>
-  <div style="display: flex; gap: 8px; align-items: center;">
-    <input id="customerSearch" type="text" class="form-input"
-           placeholder="Search name, email, or phone..."
-           style="width: 220px;" oninput="filterCustomers()">
+  <div style="display:flex; gap:8px; align-items:center;">
+    <input
+      type="text"
+      id="customerSearch"
+      class="form-input"
+      placeholder="Search name, email, or phone..."
+      style="width:280px;"
+      oninput="filterCustomers()"
+    />
     <button class="btn btn-secondary btn-sm"
             onclick="document.getElementById('customerSearch').value=''; filterCustomers();">
       Clear
