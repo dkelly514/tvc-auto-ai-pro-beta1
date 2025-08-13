@@ -3635,30 +3635,44 @@
 <!-- Supabase client + keys (fill in your project values) -->
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script>
-  // Keep your real URL/key here
+  // Keep your real values here (you already have them)
   window.SUPABASE_URL = window.SUPABASE_URL || "https://zpgdsgutiheilshgrnwl.supabase.co";
-  window.SUPABASE_ANON_KEY = window.SUPABASE_ANON_KEY || "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InpwZ2RzZ3V0aWhlaWxzaGdybndsIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTUwMjA3NDMsImV4cCI6MjA3MDU5Njc0M30.LC-ro-E2k_Xb7UK337QP8V2HddpftjV5g1ZsI6D0c8k";
-  try { window.db = supabase.createClient(window.SUPABASE_URL, window.SUPABASE_ANON_KEY); } catch (e) { console.warn('Supabase init failed:', e?.message || e); }
+  window.SUPABASE_ANON_KEY = window.SUPABASE_ANON_KEY || "YOUR_ANON_KEY";
 
+  // Create client safely
+  window.db = (() => {
+    try { return supabase.createClient(window.SUPABASE_URL, window.SUPABASE_ANON_KEY); }
+    catch (e) { console.warn('Supabase init failed:', e?.message || e); return null; }
+  })();
+
+  // 1) Load customers from Supabase into the in‑memory `customers` array used by the table
   async function loadCustomersFromDB() {
-    try {
-      if (!window.db) return false;
+    if (!window.db) return;
 
-      // Try both column names for ordering
-      let { data, error } = await window.db.from('customers').select('*').order('Created at', { ascending: false });
-      if (error) {
-        console.warn('Order by "Created at" failed, retrying created_at:', error.message);
-        ({ data, error } = await window.db.from('customers').select('*').order('created_at', { ascending: false }));
+    try {
+      // Try to order by created_at; if the column doesn't exist, fall back to no order.
+      let { data, error } = await window.db
+        .from('customers')
+        .select('id, "ID", "Name", name, "Email", email, "Phone", phone, "Vehicle of interest", vehicle_interest, "Current Vehicle/Trade in", current_vehicle, "Budget", budget, "Address", address, created_at')
+        .order('created_at', { ascending: false });
+
+      if (error && /created_at/.test(error.message)) {
+        // created_at column doesn't exist—retry without order
+        ({ data, error } = await window.db
+          .from('customers')
+          .select('id, "ID", "Name", name, "Email", email, "Phone", phone, "Vehicle of interest", vehicle_interest, "Current Vehicle/Trade in", current_vehicle, "Budget", budget, "Address", address'));
       }
-      if (error) { console.warn('Load failed (likely RLS SELECT policy):', error.message); return false; }
+      if (error) { console.warn('Load failed:', error.message); return; }
 
       if (!Array.isArray(window.customers)) window.customers = [];
       window.customers.length = 0;
-      for (const row of data) {
-        const nameField = row["Name"] ?? row.name ?? '';
-        const parts = String(nameField).trim().split(/\s+/);
+
+      for (const row of (data || [])) {
+        const fullName = (row["Name"] ?? row.name ?? '').toString().trim();
+        const parts = fullName.split(/\s+/);
         const firstName = parts.shift() || '';
         const lastName  = parts.join(' ');
+
         window.customers.push({
           id: row["ID"] ?? row.id,
           firstName,
@@ -3672,17 +3686,20 @@
           status: 'new',
           leadScore: 8,
           value: parseInt(String(row["Budget"] ?? row.budget ?? '').replace(/[^0-9]/g, '')) || 0,
-          lastContact: 'Just now'
+          lastContact: '—'
         });
       }
+
       if (typeof renderCustomerTable === 'function') renderCustomerTable();
       if (typeof updateDashboardMetrics === 'function') updateDashboardMetrics();
-      return true;
-    } catch (e) { console.warn('Load failed:', e?.message || e); return false; }
+      console.info('Loaded from Supabase:', window.customers.length, 'customers');
+    } catch (e) {
+      console.warn('Load crashed:', e?.message || e);
+    }
   }
 
-  // Override addCustomer to always update the UI immediately
-  window.addCustomer = async function addCustomer() {
+  // 2) Override the "Add Customer" handler to insert into Supabase, then reload
+  async function addCustomer() {
     const name  = (document.getElementById('newCustomerName')?.value || '').trim();
     const address  = (document.getElementById('newCustomerAddress')?.value || '').trim();
     const email = (document.getElementById('newCustomerEmail')?.value || '').trim();
@@ -3694,89 +3711,52 @@
 
     if (!name) { alert('Please enter a name'); return; }
 
-    let insertedRow = null;
-    try {
-      if (window.db) {
-        // Try spaced/capitalized column names
-        let resp = await window.db.from('customers').insert([{
-          ["Name"]: name,
-          ["Address"]: address,
-          ["Email"]: email,
-          ["Phone"]: phone,
-          ["Vehicle of interest"]: vehicleInterest,
-          ["Current Vehicle/Trade in"]: currentVehicle,
-          ["Budget"]: budget
-        }]).select().single();
-
-        // Fallback to snake_case schema
-        if (resp.error) {
-          console.warn('Insert with spaced columns failed, retrying snake_case:', resp.error.message);
-          resp = await window.db.from('customers').insert([{
-            name, address, email, phone,
-            vehicle_interest: vehicleInterest,
-            current_vehicle: currentVehicle,
-            budget
-          }]).select().single();
-        }
-
-        if (!resp.error) insertedRow = resp.data;
-        else console.warn('Supabase insert failed:', resp.error.message);
+    let insertedOk = false;
+    if (window.db) {
+      const { error } = await window.db.from('customers').insert([{
+        ["Name"]: name,
+        ["Address"]: address,
+        ["Email"]: email,
+        ["Phone"]: phone,
+        ["Vehicle of interest"]: vehicleInterest,
+        ["Current Vehicle/Trade in"]: currentVehicle,
+        ["Budget"]: budget
+      }]);
+      if (error) {
+        console.warn('Supabase insert failed:', error.message);
+      } else {
+        insertedOk = true;
       }
-    } catch (e) { console.warn('Supabase not configured:', e?.message || e); }
-
-    // Build a UI row so the table updates instantly even if SELECT is blocked
-    const [firstName, ...rest] = name.split(/\s+/);
-    const lastName = rest.join(' ');
-    const uiCustomer = {
-      id: insertedRow?.ID ?? insertedRow?.id ?? Date.now(),
-      firstName, lastName, email, phone,
-      vehicleInterest, budget, status, address, currentVehicle,
-      leadScore: Math.floor(Math.random() * 4) + 6,
-      value: parseInt(budget.replace(/[^0-9]/g, '')) || 0,
-      lastContact: 'Just now'
-    };
-
-    // Try to reload from DB; if blocked, add locally
-    const loaded = await loadCustomersFromDB();
-    if (!loaded) {
-      if (!Array.isArray(window.customers)) window.customers = [];
-      const exists = window.customers.some(c =>
-        (c.email && email && c.email === email) ||
-        (c.phone && phone && c.phone === phone) ||
-        (`${c.firstName} ${c.lastName}`.trim() === name)
-      );
-      if (!exists) {
-        window.customers.push(uiCustomer);
-        if (typeof renderCustomerTable === 'function') renderCustomerTable();
-        if (typeof updateDashboardMetrics === 'function') updateDashboardMetrics();
-        if (typeof addActivity === 'function') addActivity('ℹ️', 'Showing new customer locally (database read is locked)', 'Just now');
-      }
-    } else {
-      if (typeof addActivity === 'function') addActivity('👤', `New customer: ${name}`, 'Just now');
     }
 
-    // Reset + close
+    if (insertedOk) {
+      await loadCustomersFromDB();
+    } else {
+      // Fallback to in-memory only
+      const [firstName, ...rest] = name.split(' ');
+      const lastName = rest.join(' ');
+      const newCustomer = {
+        id: Date.now(),
+        firstName, lastName, email, phone, vehicleInterest, budget, status, address, currentVehicle,
+        leadScore: Math.floor(Math.random() * 4) + 6,
+        value: parseInt(budget.replace(/[^0-9]/g, '')) || 0,
+        lastContact: 'Just now'
+      };
+      if (!Array.isArray(window.customers)) window.customers = [];
+      window.customers.push(newCustomer);
+      if (typeof renderCustomerTable === 'function') renderCustomerTable();
+    }
+
+    // Clear & close form
     ['newCustomerName','newCustomerAddress','newCustomerEmail','newCustomerPhone',
      'newCustomerVehicleInterest','newCustomerCurrentVehicle','newCustomerBudget']
      .forEach(id => { const el = document.getElementById(id); if (el) el.value=''; });
     const statusEl = document.getElementById('newCustomerStatus'); if (statusEl) statusEl.value = 'new';
     if (typeof closeCustomerForm === 'function') closeCustomerForm();
-  };
+    if (typeof addActivity === 'function') addActivity('👤', `New customer: ${name}`, 'Just now');
+  }
 
-  // Delete tries both "ID" and "id"
-  window.deleteCustomer = async function deleteCustomer(id) {
-    if (!confirm('Delete this customer?')) return;
-    try {
-      if (window.db) {
-        const { error } = await window.db.from('customers').delete().or(`ID.eq.${id},id.eq.${id}`);
-        if (error) console.warn('Supabase delete failed:', error.message);
-      }
-    } catch (e) { console.warn('Supabase not configured:', e?.message || e); }
-    window.customers = (window.customers || []).filter(c => c.id !== id);
-    if (typeof renderCustomerTable === 'function') renderCustomerTable();
-    if (typeof updateDashboardMetrics === 'function') updateDashboardMetrics();
-  };
-
+  // 3) Load on startup
   document.addEventListener('DOMContentLoaded', () => {
     if (window.db) loadCustomersFromDB();
   });
