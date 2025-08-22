@@ -2,951 +2,694 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover" />
-  <title>TVC Auto AI Pro - Advanced Dealership Intelligence Terminal</title>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet" />
-  <style>
-    /* ====== THEME ====== */
-    :root {
-      --bg-primary:#0a0a0a; --bg-secondary:#141418; --bg-tertiary:#1e1e24; --bg-quaternary:#28282f; --bg-hover:#32323a;
-      --accent-primary:#8b6914; --accent-secondary:#6b5210; --accent-tertiary:#a57c1e; --accent-glow:rgba(139,105,20,.3); --accent-bright:#b8901f;
-      --text-primary:#f5f5f7; --text-secondary:#a1a1aa; --text-muted:#71717a;
-      --border-color:#27272a; --border-accent:#3f3f46; --glass-bg:rgba(20,20,24,.8); --glass-border:rgba(255,255,255,.1);
-      --success:#10b981; --warning:#f59e0b; --error:#ef4444; --info:#3b82f6;
-      --shadow-sm:0 1px 2px rgba(0,0,0,.5); --shadow-md:0 4px 6px rgba(0,0,0,.3); --shadow-lg:0 10px 15px rgba(0,0,0,.4); --shadow-xl:0 20px 25px rgba(0,0,0,.5);
+  <meta name="viewport" content="width=device-width,initial-scale=1.0,maximum-scale=1" />
+  <title>TVC Auto AI Pro</title>
 
-      /* spacing used on mobile so content doesn't sit under bottom tab bar */
-      --safe-bottom: env(safe-area-inset-bottom, 0px);
-      --bottom-nav-h: 62px;
+  <!-- Fonts -->
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet" />
+
+  <style>
+    /* ========== THEME ========== */
+    :root{
+      --bg-primary:#0a0a0a; --bg-secondary:#141418; --bg-tertiary:#1e1e24; --bg-quaternary:#28282f; --bg-hover:#32323a;
+      --accent-primary:#8b6914; --accent-secondary:#6b5210; --accent-tertiary:#a57c1e; --accent-bright:#b8901f; --accent-glow:rgba(139,105,20,.3);
+      --text-primary:#f5f5f7; --text-secondary:#a1a1aa; --text-muted:#71717a;
+      --border:#2a2a2e; --glass:#ffffff14;
+      --success:#10b981; --warning:#f59e0b; --error:#ef4444; --info:#3b82f6;
     }
-    *{margin:0;padding:0;box-sizing:border-box}
+    *{box-sizing:border-box;margin:0;padding:0}
     html,body{height:100%}
     body{
-      -webkit-tap-highlight-color: transparent;
-      font-family:'Inter',-apple-system,BlinkMacSystemFont,system-ui,sans-serif;
-      background:linear-gradient(135deg,#0a0a0a 0%,#141418 100%);
-      color:var(--text-primary); line-height:1.5; overflow-x:hidden; font-size:13px; min-height:100vh;
+      font-family:'Inter',system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif;
+      background:linear-gradient(135deg,#0a0a0a,#141418);
+      color:var(--text-primary); font-size:13px; line-height:1.5; overflow-x:hidden;
     }
-    @media (prefers-reduced-motion: reduce){
-      *{animation:none !important; transition:none !important}
-    }
-    body::before{
-      content:''; position:fixed; inset:0; pointer-events:none; z-index:0;
+    body::before{content:'';position:fixed;inset:0;pointer-events:none;
       background-image:
-        radial-gradient(circle at 20% 50%, var(--accent-glow) 0%, transparent 50%),
-        radial-gradient(circle at 80% 80%, rgba(16,185,129,.1) 0%, transparent 50%),
-        radial-gradient(circle at 40% 20%, rgba(59,130,246,.05) 0%, transparent 50%);
-    }
-    .terminal-container{
-      display:grid; grid-template-columns:260px 1fr; grid-template-rows:65px 1fr;
-      height:100vh; gap:1px; background:var(--border-color); position:relative; z-index:1;
+      radial-gradient(600px 600px at 8% 35%,rgba(139,105,20,.25),transparent),
+      radial-gradient(600px 600px at 90% 80%,rgba(16,185,129,.12),transparent);
     }
 
-    /* ====== TOP BAR ====== */
-    .top-bar{
-      grid-column:1 / -1; background:var(--glass-bg); backdrop-filter:blur(20px); -webkit-backdrop-filter:blur(20px);
-      border-bottom:1px solid var(--glass-border); display:flex; align-items:center; justify-content:space-between; padding:0 16px; box-shadow:var(--shadow-md);
-    }
-    .logo-section{display:flex; align-items:center; gap:12px}
-    .logo-icon{width:36px;height:36px;border-radius:10px;display:flex;align-items:center;justify-content:center;font-weight:bold;background:linear-gradient(135deg,var(--accent-primary),var(--accent-tertiary)); box-shadow:0 0 20px var(--accent-glow), var(--shadow-md)}
-    .logo-text{font-size:17px;font-weight:700;background:linear-gradient(135deg,var(--text-primary),var(--accent-bright));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
-    .market-data{display:flex;align-items:center;gap:12px;font-size:12px;overflow:auto;padding:6px 0}
-    .market-item{display:flex;align-items:center;gap:8px;padding:6px 10px;background:var(--bg-secondary);border-radius:8px;border:1px solid var(--border-color);white-space:nowrap}
-    .market-value{font-weight:600}
-    .market-change{font-weight:500;padding:2px 6px;border-radius:4px;font-size:11px}
-    .positive{color:var(--success);background:rgba(16,185,129,.1)}
-    .negative{color:var(--error);background:rgba(239,68,68,.1)}
-    .top-actions{display:flex;align-items:center;gap:8px}
-    .status-indicator{display:none;align-items:center;gap:8px;font-size:11px;font-weight:600;color:var(--success);padding:6px 12px;background:rgba(16,185,129,.1);border:1px solid rgba(16,185,129,.3);border-radius:20px}
-    .status-dot{width:6px;height:6px;border-radius:50%;background:var(--success);box-shadow:0 0 10px var(--success)}
+    /* ===== LAYOUT ===== */
+    .terminal{display:grid;grid-template-columns:260px 1fr;grid-template-rows:60px 1fr;height:100vh;gap:1px;background:var(--border)}
+    .topbar{grid-column:1/-1;display:flex;align-items:center;justify-content:space-between;padding:0 14px;background:#141418cc;border-bottom:1px solid var(--glass);backdrop-filter:blur(18px)}
+    .brand{display:flex;align-items:center;gap:10px}
+    .logo{width:34px;height:34px;border-radius:10px;display:flex;align-items:center;justify-content:center;background:linear-gradient(135deg,var(--accent-primary),var(--accent-tertiary));font-weight:800;box-shadow:0 0 18px var(--accent-glow)}
+    .brand-title{font-weight:800;font-size:16px;background:linear-gradient(135deg,#fff,var(--accent-bright));-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent}
+    .menu-btn{display:none;border:1px solid var(--glass);background:transparent;color:#fff;border-radius:8px;padding:8px 10px;cursor:pointer}
+    .top-actions{display:flex;gap:8px;align-items:center}
+    .pill{display:flex;align-items:center;gap:6px;padding:6px 10px;border-radius:999px;border:1px solid var(--glass);font-size:11px;background:#0f1115}
+    .pill .dot{width:6px;height:6px;border-radius:50%;background:var(--success);box-shadow:0 0 10px var(--success)}
 
-    /* ====== BUTTONS ====== */
-    .btn{padding:10px 14px;border:none;border-radius:10px;font-size:13px;font-weight:600;cursor:pointer;transition:.2s;display:inline-flex;align-items:center;gap:8px}
-    .btn:focus-visible{outline:2px solid var(--accent-bright); outline-offset:2px}
-    .btn-primary{background:linear-gradient(135deg,var(--accent-primary),var(--accent-tertiary));color:#fff;box-shadow:0 4px 15px var(--accent-glow)}
-    .btn-primary:hover{transform:translateY(-2px)}
-    .btn-secondary{background:var(--bg-quaternary);color:var(--text-secondary);border:1px solid var(--border-accent)}
-    .btn-secondary:hover{background:var(--bg-hover);color:var(--text-primary);transform:translateY(-2px)}
-    .btn-sm{padding:6px 10px;font-size:12px}
-    .btn-glass{background:var(--glass-bg);backdrop-filter:blur(10px);border:1px solid var(--glass-border);color:var(--text-primary)}
+    .sidebar{background:var(--bg-secondary);padding:16px 10px;border-right:1px solid var(--border);overflow:auto}
+    .nav-section{margin-bottom:18px}
+    .nav-title{font-size:10px;color:var(--text-muted);text-transform:uppercase;letter-spacing:.08em;margin:4px 10px 8px}
+    .nav-item{display:flex;align-items:center;gap:10px;padding:10px 12px;margin:4px 6px;border-radius:10px;color:var(--text-secondary);cursor:pointer;transition:.2s}
+    .nav-item:hover{background:var(--bg-tertiary);color:#fff;transform:translateX(2px)}
+    .nav-item.active{background:linear-gradient(135deg,var(--accent-primary),var(--accent-secondary));color:#fff}
+    .badge{margin-left:auto;background:var(--error);color:#fff;font-size:10px;font-weight:700;padding:2px 7px;border-radius:12px;min-width:18px;text-align:center}
 
-    /* ====== LAYOUT ====== */
-    .sidebar{background:var(--bg-secondary);border-right:1px solid var(--border-color);padding:20px 12px;overflow:auto}
-    .nav-section{margin-bottom:24px}
-    .nav-title{font-size:10px;font-weight:700;color:var(--text-muted);text-transform:uppercase;letter-spacing:1px;margin-bottom:10px;padding:0 12px;display:flex;align-items:center;gap:8px}
-    .nav-title::after{content:'';flex:1;height:1px;background:var(--border-color)}
-    .nav-item{display:flex;align-items:center;gap:12px;padding:12px 14px;border-radius:12px;cursor:pointer;transition:.2s;margin-bottom:6px;font-size:13px;font-weight:600;color:var(--text-secondary)}
-    .nav-item:hover{background:var(--bg-tertiary);color:var(--text-primary);transform:translateX(4px)}
-    .nav-item.active{background:linear-gradient(135deg,var(--accent-primary),var(--accent-secondary));color:#fff;box-shadow:0 4px 15px var(--accent-glow)}
-    .nav-badge{margin-left:auto;background:var(--error);color:#fff;font-size:10px;font-weight:700;padding:2px 7px;border-radius:12px;min-width:18px;text-align:center}
+    .content{background:var(--bg-primary);display:flex;flex-direction:column;overflow:hidden}
+    .content-header{display:flex;align-items:center;justify-content:space-between;padding:12px 16px;border-bottom:1px solid var(--border);background:#101214a6;backdrop-filter:blur(8px)}
+    .content-title{font-weight:800}
+    .btn{padding:9px 14px;border:none;border-radius:8px;background:var(--bg-quaternary);color:var(--text-secondary);border:1px solid var(--glass);cursor:pointer;transition:.2s;font-weight:600}
+    .btn:hover{background:var(--bg-hover);color:#fff}
+    .btn-primary{background:linear-gradient(135deg,var(--accent-primary),var(--accent-tertiary));color:#fff;border:none}
+    .btn-sm{padding:6px 10px;font-size:11px}
 
-    .main-content{background:var(--bg-primary);overflow:hidden;display:flex;flex-direction:column}
-    .content-header{background:var(--glass-bg);backdrop-filter:blur(10px);border-bottom:1px solid var(--border-color);padding:12px 16px;display:flex;justify-content:space-between;align-items:center}
-    .content-title{font-size:20px;font-weight:800;letter-spacing:.2px}
-    .content-body{flex:1;padding:16px;overflow:auto;background:linear-gradient(180deg,transparent,rgba(139,105,20,.02)); padding-bottom:16px}
-
-    .page-content{display:none;animation:fade .25s ease}
-    .page-content.active{display:block}
+    .content-body{flex:1;overflow:auto;padding:14px}
+    .page{display:none;animation:fade .25s ease}
+    .page.active{display:block}
     @keyframes fade{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:translateY(0)}}
 
-    /* ====== CARDS / TABLES ====== */
-    .dashboard-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:16px;margin-bottom:16px}
-    .metric-card{background:var(--bg-secondary);border:1px solid var(--border-color);border-radius:14px;padding:16px;transition:.2s}
-    .metric-card:hover{border-color:var(--accent-primary);background:var(--bg-tertiary);transform:translateY(-3px);box-shadow:0 10px 30px rgba(139,105,20,.2)}
-    .metric-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:10px}
-    .metric-label{font-size:11px;font-weight:700;color:var(--text-muted);text-transform:uppercase}
-    .metric-trend{font-size:11px;font-weight:800;padding:3px 8px;border-radius:10px}
-    .trend-up{background:rgba(16,185,129,.15);color:var(--success);border:1px solid rgba(16,185,129,.3)}
-    .metric-value{font-size:26px;font-weight:900;background:linear-gradient(135deg,var(--text-primary),var(--accent-bright));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
-
-    .data-table-container{background:var(--bg-secondary);border:1px solid var(--border-color);border-radius:14px;overflow:hidden;margin-bottom:16px;box-shadow:var(--shadow-md)}
-    .table-header{background:var(--bg-tertiary);padding:12px 14px;border-bottom:1px solid var(--border-color);display:flex;justify-content:space-between;align-items:center;gap:8px;flex-wrap:wrap}
-    .table-title{font-size:15px;font-weight:800}
-    .data-table{width:100%;border-collapse:collapse}
-    .data-table th{background:var(--bg-quaternary);padding:10px 12px;text-align:left;font-size:11px;font-weight:900;color:var(--text-muted);text-transform:uppercase;letter-spacing:.5px;border-bottom:1px solid var(--border-color)}
-    .data-table td{padding:12px;border-bottom:1px solid var(--border-color);font-size:13px;vertical-align:top}
-
-    .status-badge{padding:4px 10px;border-radius:10px;font-size:10px;font-weight:900;text-transform:uppercase;display:inline-block}
+    .card{background:var(--bg-secondary);border:1px solid var(--border);border-radius:12px;box-shadow:0 10px 30px rgba(0,0,0,.25);overflow:hidden;margin-bottom:14px}
+    .card-head{display:flex;align-items:center;justify-content:space-between;padding:12px 14px;background:var(--bg-tertiary);border-bottom:1px solid var(--border)}
+    .table{width:100%;border-collapse:collapse}
+    .table th{font-size:11px;color:var(--text-muted);text-transform:uppercase;letter-spacing:.04em;background:var(--bg-quaternary);padding:10px;border-bottom:1px solid var(--border)}
+    .table td{padding:12px;border-bottom:1px solid var(--border)}
+    .status{padding:4px 8px;border-radius:6px;font-size:10px;font-weight:700;text-transform:uppercase;display:inline-block}
+    .status-new,.status-follow{background:rgba(245,158,11,.15);color:var(--warning);border:1px solid rgba(245,158,11,.4)}
     .status-hot{background:rgba(239,68,68,.15);color:var(--error);border:1px solid rgba(239,68,68,.4)}
     .status-qualified{background:rgba(16,185,129,.15);color:var(--success);border:1px solid rgba(16,185,129,.4)}
-    .status-follow,.status-new{background:rgba(245,158,11,.15);color:var(--warning);border:1px solid rgba(245,158,11,.4)}
-    .status-available{background:rgba(16,185,129,.15);color:var(--success);border:1px solid rgba(16,185,129,.4)}
-    .status-sold{background:rgba(239,68,68,.15);color:var(--error);border:1px solid rgba(239,68,68,.4)}
-    .status-reserved,.status-incoming{background:rgba(245,158,11,.15);color:var(--warning);border:1px solid rgba(245,158,11,.4)}
-    .status-transcribed{background:rgba(139,105,20,.15);color:var(--accent-primary);border:1px solid rgba(139,105,20,.4)}
-    .status-processing{background:rgba(245,158,11,.15);color:var(--warning);border:1px solid rgba(245,158,11,.4)}
-    .status-delivered,.status-opened{background:rgba(16,185,129,.15);color:var(--success);border:1px solid rgba(16,185,129,.4)}
-    .status-pending,.status-scheduled{background:rgba(59,130,246,.15);color:var(--info);border:1px solid rgba(59,130,246,.4)}
-    .status-completed{background:rgba(16,185,129,.15);color:var(--success);border:1px solid rgba(16,185,129,.4)}
-    .status-in-progress{background:rgba(245,158,11,.15);color:var(--warning);border:1px solid rgba(245,158,11,.4)}
 
-    /* ====== FORM ====== */
-    .form-container{background:var(--bg-secondary);border:1px solid var(--border-color);border-radius:14px;padding:16px;max-width:720px;margin:0 auto;box-shadow:var(--shadow-lg)}
-    .form-group{margin-bottom:14px}
-    .form-label{display:block;font-size:12px;font-weight:800;margin-bottom:6px;text-transform:uppercase;letter-spacing:.5px}
-    .form-input,.form-select,.form-textarea{
-      width:100%;padding:12px 14px;background:var(--bg-tertiary);border:1px solid var(--border-color);border-radius:10px;color:var(--text-primary);font-size:14px
-    }
-
-    /* ====== CHAT ====== */
-    .chat-container{background:var(--bg-secondary);border:1px solid var(--border-color);border-radius:14px;height:550px;display:flex;flex-direction:column;max-width:900px;margin:0 auto;box-shadow:var(--shadow-xl);overflow:hidden}
-    .chat-messages{flex:1;padding:16px;overflow:auto;display:flex;flex-direction:column;gap:12px;background:linear-gradient(180deg,var(--bg-secondary),var(--bg-tertiary))}
-    .chat-message{max-width:80%;padding:12px 14px;border-radius:12px;font-size:13px;line-height:1.45}
-    .chat-message.user{align-self:flex-end;background:linear-gradient(135deg,var(--accent-primary),var(--accent-tertiary));color:#fff}
-    .chat-message.assistant{align-self:flex-start;background:var(--bg-quaternary);border:1px solid var(--border-accent)}
-
-    /* ====== MOBILE (enterprise patterns) ====== */
-    @media (max-width:1200px){.dashboard-grid{grid-template-columns:repeat(2,1fr)}}
-    @media (max-width:900px){ .status-indicator{display:flex} }
-    @media (max-width:768px){
-      .terminal-container{grid-template-columns:1fr; grid-template-rows:65px 1fr}
-      .sidebar{display:none}
-      .content-body{padding-bottom:calc(var(--bottom-nav-h) + var(--safe-bottom) + 10px);}
-      .dashboard-grid{grid-template-columns:1fr}
-      .market-item:nth-child(n+3){display:none} /* keep top 2 stats visible on small phones */
-
-      /* Table → Card pattern */
-      .data-table thead{display:none}
-      .data-table tr{display:block;margin:10px;border:1px solid var(--border-color);border-radius:12px;background:var(--bg-tertiary)}
-      .data-table td{display:flex;justify-content:space-between;gap:8px;border-bottom:1px solid var(--border-color)}
-      .data-table td:last-child{border-bottom:none}
-      .data-table td::before{content:attr(data-label);font-weight:800;color:var(--text-muted)}
-      .table-header{gap:6px}
-      .form-container{padding:14px}
-      .chat-container{height:70vh}
-    }
-
-    /* ====== Bottom Tab Bar (mobile) ====== */
-    .bottom-nav{
-      position:fixed; left:0; right:0; bottom:0; height:var(--bottom-nav-h);
-      background:rgba(20,20,24,.9); backdrop-filter:blur(8px); border-top:1px solid var(--glass-border);
-      display:none; grid-template-columns:repeat(5,1fr); gap:4px; padding:6px 8px calc(6px + var(--safe-bottom));
-      z-index:50;
-    }
-    .bn-item{
-      display:flex; flex-direction:column; align-items:center; justify-content:center; gap:4px;
-      font-size:11px; color:var(--text-secondary); border:none; background:transparent; border-radius:10px; padding:6px 8px; cursor:pointer;
-    }
-    .bn-item:focus-visible{outline:2px solid var(--accent-bright); outline-offset:2px}
-    .bn-item.active{color:#fff; background:var(--bg-quaternary); border:1px solid var(--border-accent)}
-    @media (max-width:768px){ .bottom-nav{display:grid} }
-    
-    /* lead score chips */
-    .lead-score{padding:4px 10px;border-radius:20px;font-size:11px;font-weight:800;display:inline-block}
+    .lead{padding:4px 10px;border-radius:20px;font-size:11px;font-weight:700;display:inline-block}
     .score-high{background:rgba(16,185,129,.15);color:var(--success);border:1px solid rgba(16,185,129,.4)}
     .score-medium{background:rgba(245,158,11,.15);color:var(--warning);border:1px solid rgba(245,158,11,.4)}
     .score-low{background:rgba(239,68,68,.15);color:var(--error);border:1px solid rgba(239,68,68,.4)}
+
+    .form{padding:14px}
+    .group{margin-bottom:12px}
+    .label{display:block;font-size:11px;text-transform:uppercase;color:var(--text-muted);margin-bottom:6px;font-weight:700}
+    .input,.select,.textarea{width:100%;padding:10px 12px;background:var(--bg-tertiary);border:1px solid var(--border);border-radius:8px;color:#fff}
+
+    /* ===== MOBILE ===== */
+    @media (max-width: 900px){
+      .terminal{grid-template-columns:1fr}
+      .sidebar{position:fixed;z-index:40;top:60px;bottom:0;left:0;right:0;max-width:320px;transform:translateX(-100%);transition:.25s}
+      .sidebar.open{transform:translateX(0)}
+      .menu-btn{display:inline-flex}
+    }
   </style>
 </head>
+
 <body>
-  <div class="terminal-container">
-    <!-- ============ TOP BAR ============ -->
-    <div class="top-bar">
-      <div class="logo-section">
-        <div class="logo-icon">⚡</div>
-        <div class="logo-text">TVC Auto AI Pro</div>
-      </div>
-      <div class="market-data" aria-label="KPI quick stats">
-        <div class="market-item"><span>Revenue</span><span class="market-value" id="topBarRevenue">$487K</span><span class="market-change positive" id="topBarRevenueChange">+12%</span></div>
-        <div class="market-item"><span>Leads</span><span class="market-value" id="topBarLeads">0</span><span class="market-change positive" id="topBarLeadsChange">+0</span></div>
-        <div class="market-item"><span>Calls</span><span class="market-value" id="topBarCalls">12</span><span class="market-change positive" id="topBarCallsChange">+3</span></div>
-        <div class="market-item"><span>Service</span><span class="market-value" id="topBarService">8</span><span class="market-change positive" id="topBarServiceChange">+2</span></div>
+  <div class="terminal">
+    <!-- ===== TOP BAR ===== -->
+    <div class="topbar">
+      <div class="brand">
+        <button class="menu-btn" onclick="toggleSidebar()">☰ Menu</button>
+        <div class="logo">⚡</div>
+        <div class="brand-title">TVC Auto AI Pro</div>
       </div>
       <div class="top-actions">
-        <div class="status-indicator" aria-live="polite"><div class="status-dot"></div><span>LIVE DATA</span></div>
-        <button class="btn btn-glass" id="voiceBtn" onclick="toggleVoice()" aria-pressed="false" aria-label="Toggle Voice Assistant">🎤 Voice</button>
-        <button class="btn btn-primary" onclick="showPage('chat', document.querySelector('.nav-item[onclick*=\'chat\']'))">🤖 AI Terminal</button>
+        <div class="pill"><span class="dot"></span> LIVE DATA</div>
+        <button class="btn" id="voiceBtn" onclick="toggleVoice()">🎤 Voice</button>
+        <button class="btn btn-primary" onclick="showPage('chat', findNav('chat'))">🤖 AI Terminal</button>
       </div>
     </div>
 
-    <!-- ============ SIDEBAR (desktop) ============ -->
-    <div class="sidebar" aria-label="Main navigation">
+    <!-- ===== SIDEBAR ===== -->
+    <div class="sidebar" id="sidebar">
       <div class="nav-section">
         <div class="nav-title">Overview</div>
-        <div class="nav-item active" onclick="showPage('dashboard', this)"><div class="nav-icon">📊</div>Dashboard</div>
-        <div class="nav-item" onclick="showPage('analytics', this)"><div class="nav-icon">📈</div>Analytics</div>
+        <div class="nav-item active" onclick="showPage('dashboard', this)"><span>📊</span>Dashboard</div>
+        <div class="nav-item" onclick="showPage('analytics', this)"><span>📈</span>Analytics</div>
       </div>
       <div class="nav-section">
         <div class="nav-title">Operations</div>
-        <div class="nav-item" onclick="showPage('customers', this)"><div class="nav-icon">👥</div>Customers<div class="nav-badge" id="customerBadge">0</div></div>
-        <div class="nav-item" onclick="showPage('inventory', this)"><div class="nav-icon">🚗</div>Inventory<div class="nav-badge" id="inventoryBadge" style="background:var(--success);">0</div></div>
-        <div class="nav-item" onclick="showPage('service', this)"><div class="nav-icon">🔧</div>Service Center<div class="nav-badge" id="serviceBadge" style="background:var(--warning);">8</div></div>
-        <div class="nav-item" onclick="showPage('photos', this)"><div class="nav-icon">📸</div>Photo Manager<div class="nav-badge" id="photoBadge" style="background:var(--accent-primary);">0</div></div>
+        <div class="nav-item" onclick="showPage('customers', this)"><span>👥</span>Customers <span class="badge" id="customerBadge">0</span></div>
+        <div class="nav-item" onclick="showPage('inventory', this)"><span>🚗</span>Inventory <span class="badge" id="inventoryBadge" style="background:var(--success)">0</span></div>
+        <div class="nav-item" onclick="showPage('service', this)"><span>🔧</span>Service Center <span class="badge" id="serviceBadge" style="background:var(--warning)">0</span></div>
       </div>
       <div class="nav-section">
-        <div class="nav-title">Communication</div>
-        <div class="nav-item" onclick="showPage('calls', this)"><div class="nav-icon">📞</div>Call Center<div class="nav-badge" id="callBadge" style="background:var(--accent-primary);">12</div></div>
-        <div class="nav-item" onclick="showPage('emails', this)"><div class="nav-icon">📧</div>Email Center<div class="nav-badge" id="emailBadge" style="background:var(--success);">5</div></div>
+        <div class="nav-title">Comms</div>
+        <div class="nav-item" onclick="showPage('calls', this)"><span>📞</span>Call Center <span class="badge" id="callBadge" style="background:var(--accent-primary)">0</span></div>
+        <div class="nav-item" onclick="showPage('emails', this)"><span>📧</span>Email Center <span class="badge" id="emailBadge" style="background:var(--success)">0</span></div>
       </div>
       <div class="nav-section">
         <div class="nav-title">Intelligence</div>
-        <div class="nav-item" onclick="showPage('vin', this)"><div class="nav-icon">🔍</div>VIN Scanner</div>
-        <div class="nav-item" onclick="showPage('chat', this)"><div class="nav-icon">🤖</div>AI Terminal</div>
+        <div class="nav-item" onclick="showPage('vin', this)"><span>🔍</span>VIN Scanner</div>
+        <div class="nav-item" onclick="showPage('chat', this)"><span>🤖</span>AI Terminal</div>
       </div>
     </div>
 
-    <!-- ============ MAIN CONTENT ============ -->
-    <div class="main-content">
+    <!-- ===== CONTENT ===== -->
+    <div class="content">
       <div class="content-header">
-        <div class="content-title" id="contentTitle">Executive Dashboard</div>
-        <div class="content-actions">
-          <button class="btn btn-glass" onclick="exportData()">📊 Export</button>
-          <button class="btn btn-glass" onclick="refreshData()">🔄 Refresh</button>
+        <div class="content-title" id="title">Executive Dashboard</div>
+        <div>
+          <button class="btn" onclick="exportData()">📊 Export</button>
+          <button class="btn" onclick="refreshData()">🔄 Refresh</button>
         </div>
       </div>
 
       <div class="content-body">
+
         <!-- DASHBOARD -->
-        <div id="dashboard" class="page-content active">
-          <div class="dashboard-grid">
-            <div class="metric-card" onclick="showMetricDetails('revenue')" role="button" tabindex="0">
-              <div class="metric-header"><div class="metric-label">Total Revenue</div><div class="metric-trend trend-up" id="dashboardRevenueTrend">+12%</div></div>
-              <div class="metric-value" id="dashboardRevenue">$487K</div>
-              <div class="metric-subtitle" id="dashboardRevenueSubtitle">vs $435K last month</div>
-            </div>
-            <div class="metric-card" onclick="showMetricDetails('leads')" role="button" tabindex="0">
-              <div class="metric-header"><div class="metric-label">Active Leads</div><div class="metric-trend trend-up" id="dashboardLeadsTrend">+33%</div></div>
-              <div class="metric-value" id="dashboardLeads">0</div>
-              <div class="metric-subtitle" id="dashboardLeadsSubtitle">pipeline</div>
-            </div>
-            <div class="metric-card" onclick="showMetricDetails('service')" role="button" tabindex="0">
-              <div class="metric-header"><div class="metric-label">Service Orders</div><div class="metric-trend trend-up" id="dashboardServiceTrend">+25%</div></div>
-              <div class="metric-value" id="dashboardService">8</div>
-              <div class="metric-subtitle" id="dashboardServiceSubtitle">5 active • 3 pending</div>
-            </div>
-            <div class="metric-card" onclick="showMetricDetails('saleTime')" role="button" tabindex="0">
-              <div class="metric-header"><div class="metric-label">Avg Sale Time</div><div class="metric-trend trend-up">-7d</div></div>
-              <div class="metric-value" id="dashboardSaleTime">14</div>
-              <div class="metric-subtitle" id="dashboardSaleTimeSubtitle">days (industry: 21d)</div>
-            </div>
-          </div>
-
-          <div class="data-table-container">
-            <div class="table-header"><div class="table-title">Live Activity</div></div>
-            <div id="activityFeedContent" style="max-height:320px; overflow:auto; padding:10px 0 0 0;">
-              <div style="padding:14px 18px; color:var(--text-muted);">System ready.</div>
-            </div>
-          </div>
-        </div>
-
-        <!-- SERVICE -->
-        <div id="service" class="page-content">
-          <div class="data-table-container">
-            <div class="table-header">
-              <div class="table-title">Service Work Orders</div>
-              <button class="btn btn-primary" onclick="createServiceOrder()">+ New Service Order</button>
-            </div>
-            <table class="data-table" id="serviceTable" aria-label="Service orders">
-              <thead><tr><th>Order #</th><th>Vehicle</th><th>Customer</th><th>Service Type</th><th>Technician</th><th>Status</th><th>Est. Cost</th><th>Actions</th></tr></thead>
-              <tbody id="serviceTableBody"></tbody>
-            </table>
-          </div>
-
-          <div id="serviceOrderForm" class="form-container" style="display:none; margin-top:12px;">
-            <div class="table-header" style="margin:0 0 12px 0;"><div class="table-title">Create Service Order</div></div>
-            <div class="form-group"><label class="form-label">Vehicle</label><select id="serviceVehicle" class="form-select"><option value="">Select vehicle...</option></select></div>
-            <div class="form-group"><label class="form-label">Service Type</label><select id="serviceType" class="form-select"><option value="reconditioning">Reconditioning</option><option value="oil-change">Oil Change</option><option value="inspection">Inspection</option><option value="brake-service">Brake Service</option><option value="tire-rotation">Tire Rotation</option><option value="major-repair">Major Repair</option><option value="warranty">Warranty Service</option></select></div>
-            <div class="form-group"><label class="form-label">Priority</label><select id="servicePriority" class="form-select"><option value="normal">Normal</option><option value="high">High</option><option value="urgent">Urgent</option></select></div>
-            <div class="form-group"><label class="form-label">Notes</label><textarea id="serviceNotes" class="form-textarea" rows="4" placeholder="Service notes..."></textarea></div>
-            <button class="btn btn-primary" onclick="submitServiceOrder()" style="width:100%;">Create Order</button>
-            <button class="btn btn-secondary" onclick="closeServiceForm()" style="width:100%; margin-top:8px;">Cancel</button>
-          </div>
-        </div>
-
-        <!-- AI TERMINAL -->
-        <div id="chat" class="page-content">
-          <div class="form-container" style="margin-bottom:12px;">
-            <div class="table-header" style="margin:0 0 10px 0;"><div class="table-title">AI Configuration</div></div>
-            <div style="display:grid; grid-template-columns:1fr 1fr; gap:12px;">
-              <div class="form-group"><label class="form-label">AI API Key</label><input type="password" id="aiApiKey" class="form-input" placeholder="Enter your AI API key..." onchange="updateAIStatus()"></div>
-              <div class="form-group"><label class="form-label">OpenPhone API Key</label><input type="password" id="openphoneApiKey" class="form-input" placeholder="Enter OpenPhone API key..." onchange="updateOpenPhoneStatus()"></div>
-            </div>
-            <div style="display:flex; gap:10px; flex-wrap:wrap;"><button class="btn btn-primary" onclick="testAIConnection()">🔗 Test AI</button><button class="btn btn-primary" onclick="testOpenPhoneConnection()">📞 Test OpenPhone</button><button class="btn btn-glass" onclick="saveAIConfig()">💾 Save Configuration</button></div>
-            <div style="margin-top:8px; display:flex; align-items:center; gap:10px;"><div id="aiStatusDot" style="width:10px;height:10px;border-radius:50%;background:var(--error);"></div><div id="aiStatusText">AI Status: API Key Required</div></div>
-          </div>
-
-          <div class="chat-container">
-            <div class="table-header"><div class="table-title">AI Terminal Interface</div><div style="font-size:11px;color:var(--text-muted);">Say/Type: “show customers”, “find customers for dennis”, “view customer dennis kelly”, “open inventory”, “add customer”.</div></div>
-            <div class="chat-messages" id="chatMessages">
-              <div class="chat-message assistant">🤖 <strong>TVC AI Terminal Online</strong><br><br>Ask about service, customers, or inventory.</div>
-            </div>
-            <div style="padding:12px; border-top:1px solid var(--border-color); display:flex; gap:10px; background:var(--bg-tertiary);">
-              <input type="text" id="chatInput" class="form-input" placeholder="Ask for insights… e.g., find customers for dennis" onkeypress="if(event.key==='Enter') sendMessage()">
-              <button class="btn btn-primary" onclick="sendMessage()">Execute</button>
+        <div id="dashboard" class="page active">
+          <div class="card">
+            <div class="card-head"><div>Live Activity</div></div>
+            <div id="activity" style="max-height:340px;overflow:auto;padding:8px 6px">
+              <div style="padding:12px;color:var(--text-muted)">System ready.</div>
             </div>
           </div>
         </div>
 
         <!-- CUSTOMERS -->
-        <div id="customers" class="page-content">
-          <div class="data-table-container">
-            <div class="table-header">
-              <div class="table-title">Customer Pipeline Management</div>
-              <div style="display:flex; gap:8px; align-items:center; flex-wrap:wrap;">
-                <input type="text" id="customerSearch" class="form-input" placeholder="Search name, email, or phone…" style="width:280px; max-width:100%;" oninput="filterCustomers()" />
-                <button class="btn btn-secondary btn-sm" onclick="document.getElementById('customerSearch').value=''; filterCustomers();">Clear</button>
+        <div id="customers" class="page">
+          <div class="card">
+            <div class="card-head">
+              <div>Customer Pipeline</div>
+              <div style="display:flex;gap:8px;align-items:center">
+                <input id="customerSearch" class="input" placeholder="Search name, email, or phone…" style="width:260px" oninput="filterCustomers()"/>
+                <button class="btn btn-sm" onclick="customerSearch.value='';filterCustomers()">Clear</button>
                 <button class="btn btn-primary" onclick="openCustomerForm()">+ Add Customer</button>
               </div>
             </div>
-            <table class="data-table" id="customerTable" aria-label="Customer leads">
-              <thead>
-                <tr>
-                  <th>Customer</th><th>Contact</th><th>Status</th><th>Lead Score</th><th>Potential Value</th><th>Interest</th><th>Last Contact</th><th>Actions</th>
-                </tr>
-              </thead>
-              <tbody id="customerTableBody">
-                <tr><td colspan="8" style="color:var(--text-muted); padding:14px;">Loading…</td></tr>
-              </tbody>
+            <table class="table">
+              <thead><tr>
+                <th>Customer</th><th>Contact</th><th>Status</th><th>Lead</th><th>Potential</th><th>Interest</th><th>Last Contact</th><th>Actions</th>
+              </tr></thead>
+              <tbody id="customerRows"><tr><td colspan="8" style="padding:16px;color:var(--text-muted)">Loading…</td></tr></tbody>
             </table>
           </div>
 
-          <div id="addCustomerForm" class="form-container" style="display:none; margin-top:12px;">
-            <div class="table-header" style="margin:0 0 12px 0;"><div class="table-title">Add New Customer</div></div>
-            <div class="form-group"><label class="form-label">Name</label><input type="text" id="newCustomerName" class="form-input" placeholder="John Smith" required></div>
-            <div class="form-group"><label class="form-label">Address</label><input type="text" id="newCustomerAddress" class="form-input" placeholder="123 Main St, City, ST"></div>
-            <div class="form-group"><label class="form-label">Email</label><input type="email" id="newCustomerEmail" class="form-input" placeholder="john@example.com"></div>
-            <div class="form-group"><label class="form-label">Phone</label><input type="tel" id="newCustomerPhone" class="form-input" placeholder="555-123-4567"></div>
-            <div class="form-group"><label class="form-label">Vehicle of Interest</label><input type="text" id="newCustomerVehicleInterest" class="form-input" placeholder="2024 BMW X5"></div>
-            <div class="form-group"><label class="form-label">Current Vehicle</label><input type="text" id="newCustomerCurrentVehicle" class="form-input" placeholder="2018 Honda Accord"></div>
-            <div class="form-group"><label class="form-label">Budget</label><input type="text" id="newCustomerBudget" class="form-input" placeholder="$50,000–$70,000"></div>
-            <div class="form-group"><label class="form-label">Status</label>
-              <select id="newCustomerStatus" class="form-select">
-                <option value="new">New Inquiry</option><option value="hot">Hot Lead</option><option value="qualified">Qualified</option><option value="follow">Follow Up</option>
-              </select>
+          <div id="customerForm" class="card" style="display:none">
+            <div class="card-head"><div>Add New Customer</div></div>
+            <div class="form">
+              <div class="group"><label class="label">Name</label><input id="c_name" class="input" placeholder="John Smith"></div>
+              <div class="group"><label class="label">Address</label><input id="c_address" class="input" placeholder="123 Main St"></div>
+              <div class="group"><label class="label">Email</label><input id="c_email" class="input" placeholder="john@example.com"></div>
+              <div class="group"><label class="label">Phone</label><input id="c_phone" class="input" placeholder="555-123-4567"></div>
+              <div class="group"><label class="label">Vehicle of Interest</label><input id="c_interest" class="input" placeholder="2024 BMW X5"></div>
+              <div class="group"><label class="label">Current Vehicle</label><input id="c_current" class="input" placeholder="2018 Honda Accord"></div>
+              <div class="group"><label class="label">Budget</label><input id="c_budget" class="input" placeholder="$50,000–$70,000"></div>
+              <div style="display:flex;gap:8px;flex-wrap:wrap">
+                <button class="btn btn-primary" onclick="addCustomer()">Add Customer</button>
+                <button class="btn" onclick="closeCustomerForm()">Cancel</button>
+              </div>
             </div>
-            <button class="btn btn-primary" onclick="addCustomer()" style="width:100%;">Add Customer</button>
-            <button class="btn btn-secondary" onclick="closeCustomerForm()" style="width:100%; margin-top:8px;">Cancel</button>
           </div>
         </div>
 
         <!-- INVENTORY -->
-        <div id="inventory" class="page-content">
-          <div class="data-table-container">
-            <div class="table-header">
-              <div class="table-title">Vehicle Inventory Management</div>
-              <div style="display:flex; gap:8px; flex-wrap:wrap;">
-                <input type="text" id="inventoryFilter" class="form-input" placeholder="Filter…" style="width:200px; max-width:100%;" oninput="filterInventory()">
+        <div id="inventory" class="page">
+          <div class="card">
+            <div class="card-head">
+              <div>Vehicle Inventory</div>
+              <div style="display:flex;gap:8px">
+                <input id="invFilter" class="input" placeholder="Filter…" style="width:220px" oninput="filterInventory()">
                 <button class="btn btn-primary" onclick="openVehicleForm()">+ Add Vehicle</button>
               </div>
             </div>
-            <table class="data-table" id="inventoryTable" aria-label="Vehicle inventory">
-              <thead><tr><th>Vehicle</th><th>VIN</th><th>Status</th><th>Price</th><th>Days in Stock</th><th>Service Status</th><th>Actions</th></tr></thead>
-              <tbody id="inventoryTableBody"></tbody>
+            <table class="table">
+              <thead><tr><th>Vehicle</th><th>VIN</th><th>Status</th><th>Price</th><th>Days</th><th>Service</th><th>Actions</th></tr></thead>
+              <tbody id="invRows"></tbody>
             </table>
           </div>
 
-          <div id="addVehicleForm" class="form-container" style="display:none; margin-top:12px;">
-            <div class="table-header" style="margin:0 0 12px 0;"><div class="table-title">Add New Vehicle</div></div>
-            <div class="form-group"><label class="form-label">VIN</label>
-              <div style="display:flex; gap:8px; flex-wrap:wrap;"><input type="text" id="newVehicleVIN" class="form-input" placeholder="Enter 17-character VIN" maxlength="17"><button class="btn btn-primary" onclick="decodeVIN()">Decode</button></div>
-            </div>
-            <div class="form-group"><label class="form-label">Make</label><input type="text" id="newVehicleMake" class="form-input" placeholder="Toyota"></div>
-            <div class="form-group"><label class="form-label">Model</label><input type="text" id="newVehicleModel" class="form-input" placeholder="Camry"></div>
-            <div class="form-group"><label class="form-label">Year</label><input type="number" id="newVehicleYear" class="form-input" placeholder="2024"></div>
-            <div class="form-group"><label class="form-label">Price</label><input type="number" id="newVehiclePrice" class="form-input" placeholder="32000"></div>
-            <div class="form-group"><label class="form-label">Status</label>
-              <select id="newVehicleStatus" class="form-select"><option value="available">Available</option><option value="reserved">Reserved</option><option value="sold">Sold</option><option value="incoming">Incoming</option></select>
-            </div>
-            <button class="btn btn-primary" onclick="addVehicle()" style="width:100%;">Add Vehicle</button>
-            <button class="btn btn-secondary" onclick="closeVehicleForm()" style="width:100%; margin-top:8px;">Cancel</button>
-          </div>
-        </div>
-
-        <!-- PHOTOS -->
-        <div id="photos" class="page-content">
-          <div class="form-container">
-            <div class="table-header" style="margin:0 0 12px 0;"><div class="table-title">Vehicle Photo Management</div></div>
-            <div style="display:flex; gap:10px; margin-bottom:12px; flex-wrap:wrap;">
-              <button class="btn btn-primary" onclick="startCamera()">📷 Start Camera</button>
-              <button class="btn btn-secondary" onclick="stopCamera()">⏹️ Stop Camera</button>
-              <button class="btn btn-primary" onclick="capturePhoto()" id="captureBtn" disabled>📸 Capture</button>
-              <input type="file" id="fileInput" accept="image/*" style="display:none" onchange="handleFileUpload(event)">
-              <button class="btn btn-secondary" onclick="document.getElementById('fileInput').click()">📁 Upload</button>
-            </div>
-            <div style="display:flex; gap:12px; align-items:flex-start; flex-wrap:wrap;">
-              <video id="cameraFeed" style="display:none; width:100%; max-width:360px; height:auto; background:var(--bg-tertiary); border:2px solid var(--border-accent); border-radius:12px;" autoplay playsinline></video>
-              <canvas id="photoCanvas" style="display:none;"></canvas>
-              <div style="flex:1; min-width:220px;">
-                <div class="form-group"><label class="form-label">Select Vehicle</label><select id="vehicleSelect" class="form-select"><option value="">Choose vehicle...</option></select></div>
-                <div class="form-group"><label class="form-label">Photo Type</label><select id="photoType" class="form-select"><option value="exterior">Exterior</option><option value="interior">Interior</option><option value="engine">Engine</option><option value="damage">Damage/Issues</option></select></div>
+          <div id="vehicleForm" class="card" style="display:none">
+            <div class="card-head"><div>Add New Vehicle</div></div>
+            <div class="form">
+              <div class="group"><label class="label">VIN</label>
+                <div style="display:flex;gap:8px;align-items:center">
+                  <input id="v_vin" class="input" placeholder="17-char VIN" maxlength="17" style="flex:1">
+                  <button class="btn btn-primary" onclick="decodeVIN()">Decode</button>
+                </div>
+              </div>
+              <div class="group"><label class="label">Make</label><input id="v_make" class="input" placeholder="Toyota"></div>
+              <div class="group"><label class="label">Model</label><input id="v_model" class="input" placeholder="Camry"></div>
+              <div class="group"><label class="label">Year</label><input id="v_year" type="number" class="input" placeholder="2024"></div>
+              <div class="group"><label class="label">Price</label><input id="v_price" type="number" class="input" placeholder="32000"></div>
+              <div class="group"><label class="label">Status</label>
+                <select id="v_status" class="select"><option value="available">Available</option><option value="reserved">Reserved</option><option value="sold">Sold</option><option value="incoming">Incoming</option></select>
+              </div>
+              <div style="display:flex;gap:8px;flex-wrap:wrap">
+                <button class="btn btn-primary" onclick="addVehicle()">Add Vehicle</button>
+                <button class="btn" onclick="closeVehicleForm()">Cancel</button>
               </div>
             </div>
           </div>
-          <div class="data-table-container">
-            <div class="table-header"><div class="table-title">Photo Gallery</div></div>
-            <div id="photoGallery" style="display:grid; grid-template-columns:repeat(auto-fill, minmax(150px, 1fr)); gap:12px; padding:12px;">
-              <div style="grid-column:1 / -1; text-align:center; color:var(--text-muted); padding:36px;">No photos yet. Use the camera or upload button to add photos.</div>
+        </div>
+
+        <!-- SERVICE -->
+        <div id="service" class="page">
+          <div class="card">
+            <div class="card-head">
+              <div>Service Orders</div>
+              <button class="btn btn-primary" onclick="openServiceForm()">+ New Service Order</button>
+            </div>
+            <table class="table">
+              <thead><tr><th>Order #</th><th>Vehicle</th><th>Customer</th><th>Service</th><th>Tech</th><th>Status</th><th>Est. Cost</th><th>Actions</th></tr></thead>
+              <tbody id="svcRows"></tbody>
+            </table>
+          </div>
+
+          <div id="serviceForm" class="card" style="display:none">
+            <div class="card-head"><div>Create Service Order</div></div>
+            <div class="form">
+              <div class="group"><label class="label">Vehicle</label>
+                <select id="svc_vehicle" class="select"><option value="">Select…</option></select>
+              </div>
+              <div class="group"><label class="label">Service Type</label>
+                <select id="svc_type" class="select">
+                  <option value="reconditioning">Reconditioning</option><option value="oil-change">Oil Change</option><option value="inspection">Inspection</option>
+                  <option value="brake-service">Brake Service</option><option value="tire-rotation">Tire Rotation</option><option value="major-repair">Major Repair</option>
+                </select>
+              </div>
+              <div class="group"><label class="label">Priority</label>
+                <select id="svc_priority" class="select"><option value="normal">Normal</option><option value="high">High</option><option value="urgent">Urgent</option></select>
+              </div>
+              <div class="group"><label class="label">Notes</label><textarea id="svc_notes" class="textarea" rows="4" placeholder="Service notes…"></textarea></div>
+              <div style="display:flex;gap:8px;flex-wrap:wrap">
+                <button class="btn btn-primary" onclick="submitServiceOrder()">Create</button>
+                <button class="btn" onclick="closeServiceForm()">Cancel</button>
+              </div>
             </div>
           </div>
         </div>
 
-        <!-- CALLS -->
-        <div id="calls" class="page-content">
-          <div class="data-table-container">
-            <div class="table-header"><div class="table-title">Call History & Transcripts</div><button class="btn btn-primary" onclick="simulateNewCall()">📞 Simulate Call</button></div>
-            <table class="data-table" id="callTable" aria-label="Call history">
-              <thead><tr><th>Date/Time</th><th>Phone Number</th><th>Customer</th><th>Duration</th><th>Lead Score</th><th>Status</th><th>Actions</th></tr></thead>
-              <tbody id="callTableBody"></tbody>
-            </table>
+        <!-- CALLS (demo) -->
+        <div id="calls" class="page">
+          <div class="card">
+            <div class="card-head">
+              <div>Call History</div>
+              <button class="btn btn-primary" onclick="simulateNewCall()">📞 Simulate Call</button>
+            </div>
+            <table class="table"><thead><tr><th>Date</th><th>Phone</th><th>Customer</th><th>Duration</th><th>Lead</th><th>Status</th><th>Actions</th></tr></thead>
+              <tbody id="callRows"></tbody></table>
           </div>
         </div>
 
-        <!-- EMAILS -->
-        <div id="emails" class="page-content">
-          <div class="data-table-container">
-            <div class="table-header"><div class="table-title">Email Campaign History</div><button class="btn btn-primary" onclick="createEmailCampaign()">✉️ New Campaign</button></div>
-            <table class="data-table" id="emailTable" aria-label="Email campaigns">
-              <thead><tr><th>Date</th><th>Recipient</th><th>Subject</th><th>Type</th><th>Status</th><th>Actions</th></tr></thead>
-              <tbody id="emailTableBody"></tbody>
-            </table>
-          </div>
-          <div class="form-container">
-            <div class="table-header" style="margin:0 0 12px 0;"><div class="table-title">Email Templates</div></div>
-            <div class="form-group"><label class="form-label">Template Type</label><select id="templateType" class="form-select"><option value="follow-up">Follow-up</option><option value="service">Service Reminder</option><option value="promotion">Promotion</option></select></div>
-            <div class="form-group"><label class="form-label">Subject</label><input type="text" id="emailSubject" class="form-input" placeholder="Email subject..."></div>
-            <div class="form-group"><label class="form-label">Body</label><textarea id="emailBody" class="form-textarea" rows="6" placeholder="Email content..."></textarea></div>
-            <button class="btn btn-primary" onclick="saveEmailTemplate()">💾 Save Template</button>
+        <!-- EMAILS (demo) -->
+        <div id="emails" class="page">
+          <div class="card">
+            <div class="card-head"><div>Email Campaigns</div><button class="btn btn-primary" onclick="createEmailCampaign()">✉️ New</button></div>
+            <table class="table"><thead><tr><th>Date</th><th>Recipient</th><th>Subject</th><th>Type</th><th>Status</th><th>Actions</th></tr></thead>
+              <tbody id="emailRows"></tbody></table>
           </div>
         </div>
 
         <!-- VIN -->
-        <div id="vin" class="page-content">
-          <div class="form-container">
-            <div class="table-header" style="margin:0 0 12px 0;"><div class="table-title">VIN Intelligence Scanner</div><div style="font-size:11px;color:var(--text-muted);">Powered by NHTSA API</div></div>
-            <div class="form-group"><label class="form-label">Vehicle Identification Number</label><input type="text" id="vinInput" class="form-input" placeholder="Enter 17-character VIN" maxlength="17"></div>
-            <button class="btn btn-primary" onclick="scanVIN()" style="width:100%;">🔍 Decode VIN</button>
-            <div id="vinResult" style="display:none;"><div style="margin-top:12px; background:linear-gradient(135deg, var(--bg-tertiary), var(--bg-quaternary)); border:1px solid var(--accent-primary); border-radius:12px; padding:16px;"><div id="vinData"></div></div></div>
+        <div id="vin" class="page">
+          <div class="card">
+            <div class="card-head"><div>VIN Intelligence Scanner</div></div>
+            <div class="form">
+              <div class="group"><label class="label">VIN</label><input id="vinInput" class="input" placeholder="Enter 17-character VIN" maxlength="17"></div>
+              <button class="btn btn-primary" onclick="scanVIN()" style="width:100%">🔍 Decode</button>
+              <div id="vinResult" style="display:none;margin-top:14px"><div id="vinData" class="form"></div></div>
+            </div>
           </div>
         </div>
 
-        <!-- ANALYTICS -->
-        <div id="analytics" class="page-content">
-          <div class="dashboard-grid">
-            <div class="metric-card"><div class="metric-header"><div class="metric-label">Revenue Growth</div><div class="metric-trend trend-up">+18.2%</div></div><div class="metric-value">📈</div><div class="metric-subtitle">YoY performance</div></div>
-            <div class="metric-card"><div class="metric-header"><div class="metric-label">Service Revenue</div><div class="metric-trend trend-up">+22%</div></div><div class="metric-value">$47.5K</div><div class="metric-subtitle">This month</div></div>
-            <div class="metric-card"><div class="metric-header"><div class="metric-label">Customer Satisfaction</div><div class="metric-trend trend-up">+2%</div></div><div class="metric-value">96%</div><div class="metric-subtitle">Excellent rating</div></div>
-            <div class="metric-card"><div class="metric-header"><div class="metric-label">Market Share</div><div class="metric-trend trend-up">+1.3%</div></div><div class="metric-value">15.2%</div><div class="metric-subtitle">Regional market</div></div>
+        <!-- AI TERMINAL -->
+        <div id="chat" class="page">
+          <div class="card" style="margin-bottom:10px">
+            <div class="card-head"><div>AI Configuration</div></div>
+            <div class="form" style="display:grid;grid-template-columns:1fr 1fr;gap:10px">
+              <div><label class="label">AI API Key</label><input id="aiApiKey" type="password" class="input" placeholder="sk-… (OpenAI key)" onchange="updateAIStatus()"></div>
+              <div><label class="label">OpenPhone API Key</label><input id="openphoneApiKey" type="password" class="input" placeholder="(optional)" onchange="updateOpenPhoneStatus()"></div>
+            </div>
+            <div class="form" style="display:flex;gap:8px;align-items:center;flex-wrap:wrap">
+              <button class="btn btn-primary" onclick="testAIConnection()">🔗 Test AI</button>
+              <button class="btn" onclick="saveAIConfig()">💾 Save</button>
+              <div class="pill"><span id="aiDot" class="dot" style="background:var(--error)"></span><span id="aiText">AI Status: API Key Required</span></div>
+            </div>
+          </div>
+
+          <div class="card">
+            <div class="card-head"><div>AI Terminal Interface</div><div style="font-size:11px;color:var(--text-muted)">Try: “show customers”, “search customers for dennis”, “open inventory”.</div></div>
+            <div id="chatBox" style="height:420px;overflow:auto;padding:12px;display:flex;flex-direction:column;gap:12px;background:linear-gradient(180deg,rgba(255,255,255,.03),transparent)">
+              <div class="assistant" style="align-self:flex-start;background:var(--bg-quaternary);border:1px solid var(--border);padding:12px;border-radius:12px">🤖 <b>TVC AI</b> is online.</div>
+            </div>
+            <div class="form" style="display:flex;gap:8px;background:var(--bg-tertiary);border-top:1px solid var(--border)">
+              <input id="chatInput" class="input" placeholder="Ask for insights…" onkeypress="if(event.key==='Enter') sendMessage()">
+              <button class="btn btn-primary" onclick="sendMessage()">Execute</button>
+            </div>
           </div>
         </div>
+
+        <!-- ANALYTICS (demo) -->
+        <div id="analytics" class="page">
+          <div class="card"><div class="card-head"><div>Analytics</div></div>
+            <div class="form">Coming soon.</div>
+          </div>
+        </div>
+
       </div>
     </div>
   </div>
 
-  <!-- Bottom Tab Bar (mobile) -->
-  <div class="bottom-nav" role="tablist" aria-label="Mobile navigation">
-    <button class="bn-item active" onclick="showPage('dashboard', document.querySelector('.nav-item[onclick*=\\'dashboard\\'])); setActiveTab(this)" aria-label="Dashboard">🏠<span>Home</span></button>
-    <button class="bn-item" onclick="showPage('customers', document.querySelector('.nav-item[onclick*=\\'customers\\'])); setActiveTab(this)" aria-label="Customers">👥<span>Customers</span></button>
-    <button class="bn-item" onclick="showPage('inventory', document.querySelector('.nav-item[onclick*=\\'inventory\\'])); setActiveTab(this)" aria-label="Inventory">🚗<span>Inventory</span></button>
-    <button class="bn-item" onclick="toggleVoice()" aria-label="Voice">🎤<span>Voice</span></button>
-    <button class="bn-item" onclick="showPage('chat', document.querySelector('.nav-item[onclick*=\\'chat\\'])); setActiveTab(this)" aria-label="AI">🤖<span>AI</span></button>
-  </div>
-
-  <!-- ============ APP SCRIPT ============ -->
-  <script>
-    /* ====== STATE ====== */
-    let cameraStream=null, isListening=false, currentAIProvider='local-nlu', aiApiKey=null, openphoneApiKey=null, vehiclePhotos=[];
-    let dashboardMetrics={revenue:{value:487000,change:.12,prevValue:435000},leads:{value:0,change:1,prevValue:0},service:{value:8,change:2,prevValue:6},saleTime:{value:14,change:-7,prevValue:21},calls:{value:12,change:3,prevValue:9}};
-    let customers=[];            // Supabase fills it
-    window.customers = customers; // keep reference stable
-
-    let serviceOrders=[
-      {id:'SO-001',vehicle:'2024 Honda Accord',customer:'John Smith',serviceType:'Oil Change',technician:'Mike Tech',status:'in-progress',cost:85,date:new Date()},
-      {id:'SO-002',vehicle:'2024 BMW X5',customer:'Sarah Johnson',serviceType:'Reconditioning',technician:'Steve Expert',status:'pending',cost:1250,date:new Date()},
-      {id:'SO-003',vehicle:'2024 Toyota Camry',customer:'Mike Wilson',serviceType:'30K Service',technician:'Tom Pro',status:'scheduled',cost:450,date:new Date()},
-    ];
-
-    let inventory=[
-      {id:101,vehicle:'2024 Toyota Camry',vin:'1HGBH41JXMN109186',status:'available',price:32000,daysInStock:15,serviceStatus:'ready',make:'Toyota',model:'Camry',year:2024},
-      {id:102,vehicle:'2024 Honda Accord',vin:'2HGBH41JXMN109187',status:'sold',price:35000,daysInStock:8,serviceStatus:'completed',make:'Honda',model:'Accord',year:2024},
-      {id:103,vehicle:'2024 Ford F-150',vin:'3HGBH41JXMN109188',status:'reserved',price:45000,daysInStock:21,serviceStatus:'pending',make:'Ford',model:'F-150',year:2024},
-    ];
-
-    let callHistory=[
-      {id:1,dateTime:new Date(Date.now()-2*60*60*1000),phoneNumber:'555-0123',customer:'John Smith',duration:'12:45',leadScore:9,status:'transcribed'},
-      {id:2,dateTime:new Date(Date.now()-4*60*60*1000),phoneNumber:'555-0124',customer:'Sarah Johnson',duration:'8:32',leadScore:8,status:'transcribed'},
-    ];
-    let emailHistory=[
-      {id:1,date:new Date(),recipient:'john@email.com',subject:'Your BMW X5 Inquiry',type:'follow-up',status:'delivered'},
-      {id:2,date:new Date(),recipient:'sarah@email.com',subject:'Tesla Model Y Information',type:'follow-up',status:'opened'},
-    ];
-
-    /* ====== INIT ====== */
-    document.addEventListener('DOMContentLoaded', () => {
-      updateDashboardMetrics();
-      renderServiceTable();
-      renderCustomerTable();
-      renderInventoryTable();
-      renderCallTable();
-      renderEmailTable();
-      populateVehicleDropdowns();
-      initVoice(); // Voice AI ready
-    });
-
-    /* ====== UTILS ====== */
-    const formatCurrency=v=>'$'+Number(v||0).toLocaleString();
-    function getLeadScoreClass(s){if(s>=8)return'score-high';if(s>=6)return'score-medium';return'score-low';}
-    function addActivity(icon,title,time){const feed=document.getElementById('activityFeedContent');if(!feed)return;const item=document.createElement('div');item.style.padding='14px 18px';item.innerHTML=`${icon} ${title} <span style="color:var(--text-muted);float:right">${time}</span>`;feed.prepend(item);while(feed.children.length>10)feed.removeChild(feed.lastChild);}
-    function setActiveTab(btn){document.querySelectorAll('.bottom-nav .bn-item').forEach(b=>b.classList.remove('active')); if(btn) btn.classList.add('active');}
-    const navEl = id => document.querySelector(`.nav-item[onclick*="${id}"]`);
-
-    /* ====== NAV ====== */
-    function showPage(pageId, el){
-      document.querySelectorAll('.page-content').forEach(p=>p.classList.remove('active'));
-      document.getElementById(pageId)?.classList.add('active');
-      document.querySelectorAll('.nav-item').forEach(i=>i.classList.remove('active'));
-      if(el) el.classList.add('active');
-      const titles={dashboard:'Executive Dashboard',service:'Service Center Operations',customers:'Customer Pipeline',inventory:'Inventory Management',photos:'Photo Manager',vin:'VIN Intelligence',analytics:'Performance Analytics',chat:'AI Terminal',calls:'Call Center Management',emails:'Email Campaign Center'};
-      document.getElementById('contentTitle').textContent=titles[pageId]||'Dashboard';
-      if(pageId==='photos') populateVehicleDropdowns();
-    }
-
-    /* ====== DASHBOARD ====== */
-    function updateDashboardMetrics(){
-      document.getElementById('topBarRevenue').textContent=formatCurrency(dashboardMetrics.revenue.value);
-      document.getElementById('topBarRevenueChange').textContent=`+${dashboardMetrics.revenue.change*100}%`;
-      document.getElementById('topBarLeads').textContent=customers.length;
-      document.getElementById('topBarLeadsChange').textContent=`+${dashboardMetrics.leads.change}`;
-      document.getElementById('topBarCalls').textContent=callHistory.length;
-      document.getElementById('topBarCallsChange').textContent=`+${dashboardMetrics.calls.change}`;
-      document.getElementById('topBarService').textContent=serviceOrders.length;
-      document.getElementById('topBarServiceChange').textContent=`+${dashboardMetrics.service.change}`;
-
-      document.getElementById('dashboardRevenue').textContent=formatCurrency(dashboardMetrics.revenue.value);
-      document.getElementById('dashboardRevenueTrend').textContent=`+${dashboardMetrics.revenue.change*100}%`;
-      document.getElementById('dashboardRevenueSubtitle').textContent=`vs ${formatCurrency(dashboardMetrics.revenue.prevValue)} last month`;
-      document.getElementById('dashboardLeads').textContent=customers.length;
-      const hot=customers.filter(c=>c.status==='hot').length, q=customers.filter(c=>c.status==='qualified').length, f=customers.filter(c=>c.status==='follow').length;
-      document.getElementById('dashboardLeadsSubtitle').textContent=`${hot} hot • ${q} qualified • ${f} follow-up`;
-      document.getElementById('dashboardService').textContent=serviceOrders.length;
-      const active=serviceOrders.filter(o=>o.status==='in-progress').length, pending=serviceOrders.filter(o=>o.status==='pending').length;
-      document.getElementById('dashboardServiceSubtitle').textContent=`${active} active • ${pending} pending`;
-      document.getElementById('dashboardSaleTime').textContent=dashboardMetrics.saleTime.value;
-
-      document.getElementById('customerBadge').textContent=customers.length;
-      document.getElementById('inventoryBadge').textContent=inventory.filter(v=>v.status==='available').length;
-      document.getElementById('serviceBadge').textContent=serviceOrders.length;
-      document.getElementById('callBadge').textContent=callHistory.length;
-      document.getElementById('emailBadge').textContent=emailHistory.length;
-      document.getElementById('photoBadge').textContent=vehiclePhotos.length;
-    }
-    function showMetricDetails(metric){
-      const messages={
-        revenue:`Revenue Analysis: ${formatCurrency(dashboardMetrics.revenue.value)} total, up ${dashboardMetrics.revenue.change*100}% from last month.`,
-        leads:`Lead Analysis: ${customers.length} active leads with average score ${(customers.reduce((s,c)=>s+(c.leadScore||7),0)/(customers.length||1)).toFixed(1)}/10`,
-        service:`Service: ${serviceOrders.length} orders, revenue ${formatCurrency(serviceOrders.reduce((s,o)=>s+o.cost,0))}`,
-        saleTime:`Sales Efficiency: ${dashboardMetrics.saleTime.value} days`
-      };
-      addChatMessage('assistant', messages[metric]||'Analyzing metrics...'); showPage('chat', navEl('chat'));
-    }
-
-    /* ====== CUSTOMERS ====== */
-    function renderCustomerTable(){
-      const tbody=document.getElementById('customerTableBody'); if(!tbody) return;
-      tbody.innerHTML='';
-      if(!Array.isArray(customers) || customers.length===0){
-        tbody.innerHTML='<tr><td colspan="8" style="color:var(--text-muted); padding:14px;">No customers yet.</td></tr>'; return;
-      }
-      customers.forEach(c=>{
-        const row=tbody.insertRow();
-        row.innerHTML=`
-          <td data-label="Customer">${c.firstName||''} ${c.lastName||''}</td>
-          <td data-label="Contact">${c.email||''}<br><span style="font-size:11px;">${c.phone||''}</span></td>
-          <td data-label="Status"><span class="status-badge status-${c.status||'new'}">${c.status||'new'}</span></td>
-          <td data-label="Lead Score"><span class="lead-score ${getLeadScoreClass(c.leadScore||7)}">${c.leadScore||7}</span></td>
-          <td data-label="Potential Value">${formatCurrency(c.value||0)}</td>
-          <td data-label="Interest">${c.vehicleInterest||''}<br><span style="font-size:11px;">${c.budget||''}</span></td>
-          <td data-label="Last Contact">${c.lastContact||'—'}</td>
-          <td data-label="Actions">
-            <button class="btn btn-sm btn-primary" onclick="viewCustomer('${String(c.id)}')">View</button>
-            <button class="btn btn-sm btn-secondary" onclick="deleteCustomer('${String(c.id)}')">Delete</button>
-          </td>`;
-      });
-    }
-    function filterCustomers(){
-      const q=(document.getElementById('customerSearch')?.value||'').toLowerCase().trim();
-      document.querySelectorAll('#customerTableBody tr').forEach(row=>{
-        const text=row.textContent.toLowerCase(); row.style.display=(!q || text.includes(q))?'':'none';
-      });
-    }
-    function openCustomerForm(){document.getElementById('addCustomerForm').style.display='block'}
-    function closeCustomerForm(){document.getElementById('addCustomerForm').style.display='none'}
-    function viewCustomer(id){
-      const c=customers.find(x=>String(x.id)===String(id)); if(!c){alert('Customer not found');return;}
-      alert(`Customer Details:\n\nName: ${c.firstName||''} ${c.lastName||''}\nEmail: ${c.email||''}\nPhone: ${c.phone||''}\nInterest: ${c.vehicleInterest||''}\nBudget: ${c.budget||''}\nLead Score: ${c.leadScore||'-'}`);
-    }
-    async function deleteCustomer(id){
-      if (window.db) {
-        try {
-          let { error } = await window.db.from('customers').delete().eq('id', id);
-          if (error && /column "id"/i.test(error.message)) {
-            ({ error } = await window.db.from('customers').delete().eq('ID', id));
-          }
-        } catch(_) {}
-      }
-      customers = customers.filter(x=>String(x.id)!==String(id));
-      renderCustomerTable(); updateDashboardMetrics();
-    }
-
-    /* ====== INVENTORY ====== */
-    function renderInventoryTable(){
-      const tbody=document.getElementById('inventoryTableBody'); if(!tbody) return;
-      tbody.innerHTML='';
-      inventory.forEach(v=>{
-        const r=tbody.insertRow();
-        r.innerHTML=`
-          <td data-label="Vehicle">${v.vehicle}</td>
-          <td data-label="VIN" style="font-family:monospace;font-size:11px;">${v.vin}</td>
-          <td data-label="Status"><span class="status-badge status-${v.status}">${v.status}</span></td>
-          <td data-label="Price">${formatCurrency(v.price)}</td>
-          <td data-label="Days in Stock">${v.daysInStock}</td>
-          <td data-label="Service Status"><span class="status-badge status-${v.serviceStatus==='ready'?'completed':v.serviceStatus}">${v.serviceStatus}</span></td>
-          <td data-label="Actions"><button class="btn btn-sm btn-primary" onclick="viewVehicle(${v.id})">View</button><button class="btn btn-sm btn-secondary" onclick="deleteVehicle(${v.id})">Delete</button></td>`;
-      });
-    }
-    function filterInventory(){
-      const f=(document.getElementById('inventoryFilter')?.value||'').toLowerCase();
-      document.querySelectorAll('#inventoryTableBody tr').forEach(r=>{const t=r.textContent.toLowerCase(); r.style.display=t.includes(f)?'':''})
-    }
-    function openVehicleForm(){document.getElementById('addVehicleForm').style.display='block'}
-    function closeVehicleForm(){document.getElementById('addVehicleForm').style.display='none'}
-    function addVehicle(){
-      const vin=newVehicleVIN.value, make=newVehicleMake.value, model=newVehicleModel.value, year=newVehicleYear.value, price=newVehiclePrice.value, status=newVehicleStatus.value;
-      if(make&&model&&year&&price){
-        const v={id:Date.now(),vehicle:`${year} ${make} ${model}`,vin:vin||'PENDING',status,price:parseInt(price),daysInStock:0,serviceStatus:'pending',make,model,year:parseInt(year)};
-        inventory.push(v); renderInventoryTable(); updateDashboardMetrics(); closeVehicleForm(); addActivity('🚗',`New vehicle: ${v.vehicle}`,'Just now');
-        newVehicleVIN.value=newVehicleMake.value=newVehicleModel.value=newVehicleYear.value=newVehiclePrice.value=''
-      }
-    }
-    async function decodeVIN(){
-      const vin=newVehicleVIN.value; if(vin.length!==17){alert('Please enter a valid 17-character VIN');return;}
-      try{const r=await fetch(`https://vpic.nhtsa.dot.gov/api/vehicles/decodevin/${vin}?format=json`); const d=await r.json(); const g=v=>d.Results.find(x=>x.Variable===v)?.Value||''; newVehicleMake.value=g('Make'); newVehicleModel.value=g('Model'); newVehicleYear.value=g('Model Year'); alert('VIN decoded successfully!'); }catch(e){alert('Error decoding VIN. Please enter details manually.');}
-    }
-    function viewVehicle(id){const v=inventory.find(x=>x.id===id); if(v) alert(`Vehicle Details:\n\n${v.vehicle}\nVIN: ${v.vin}\nPrice: ${formatCurrency(v.price)}\nStatus: ${v.status}\nDays in Stock: ${v.daysInStock}\nService: ${v.serviceStatus}`)}
-    function deleteVehicle(id){if(confirm('Delete this vehicle?')){inventory=inventory.filter(v=>v.id!==id); renderInventoryTable(); updateDashboardMetrics();}}
-    function populateVehicleDropdowns(){
-      const sel=document.getElementById('vehicleSelect'), serv=document.getElementById('serviceVehicle');
-      if(sel){sel.innerHTML='<option value="">Choose vehicle...</option>'; inventory.forEach(v=>{const o=document.createElement('option'); o.value=v.id; o.textContent=v.vehicle; sel.appendChild(o);});}
-      if(serv){serv.innerHTML='<option value="">Select vehicle...</option>'; inventory.forEach(v=>{const o=document.createElement('option'); o.value=v.id; o.textContent=v.vehicle; serv.appendChild(o);});}
-    }
-
-    /* ====== PHOTOS ====== */
-    async function startCamera(){try{cameraStream=await navigator.mediaDevices.getUserMedia({video:{facingMode:'environment'}}); const v=document.getElementById('cameraFeed'); v.srcObject=cameraStream; v.style.display='block'; document.getElementById('captureBtn').disabled=false; addActivity('📷','Camera started','Just now');}catch(e){alert('Camera access denied.')}} 
-    function stopCamera(){if(cameraStream){cameraStream.getTracks().forEach(t=>t.stop()); cameraStream=null; const v=document.getElementById('cameraFeed'); v.style.display='none'; document.getElementById('captureBtn').disabled=true; addActivity('📷','Camera stopped','Just now');}}
-    function capturePhoto(){
-      const video=document.getElementById('cameraFeed'); const canvas=document.getElementById('photoCanvas'); const vehicleId=document.getElementById('vehicleSelect').value; const type=document.getElementById('photoType').value;
-      if(!vehicleId){alert('Select a vehicle first');return;}
-      canvas.width=video.videoWidth; canvas.height=video.videoHeight; const ctx=canvas.getContext('2d'); ctx.drawImage(video,0,0); const data=canvas.toDataURL('image/jpeg');
-      const vehicle=inventory.find(v=>v.id==vehicleId); const photo={id:Date.now(),vehicleId,vehicleName:vehicle.vehicle,type,data,timestamp:new Date()};
-      vehiclePhotos.push(photo); displayPhotos(); updateDashboardMetrics(); addActivity('📸',`Photo captured: ${vehicle.vehicle}`,'Just now');
-    }
-    function handleFileUpload(e){
-      const file=e.target.files[0]; const vehicleId=document.getElementById('vehicleSelect').value; const type=document.getElementById('photoType').value;
-      if(!vehicleId){alert('Select a vehicle first');return;}
-      if(file){const r=new FileReader(); r.onload=function(x){const vehicle=inventory.find(v=>v.id==vehicleId); const photo={id:Date.now(),vehicleId,vehicleName:vehicle.vehicle,type,data:x.target.result,timestamp:new Date()}; vehiclePhotos.push(photo); displayPhotos(); updateDashboardMetrics(); addActivity('📸',`Photo uploaded: ${vehicle.vehicle}`,'Just now');}; r.readAsDataURL(file);}
-    }
-    function displayPhotos(){
-      const g=document.getElementById('photoGallery'); if(!g)return;
-      if(vehiclePhotos.length===0){g.innerHTML='<div style="grid-column:1 / -1; text-align:center; color:var(--text-muted); padding:36px;">No photos yet. Use the camera or upload button to add photos.</div>'; return;}
-      g.innerHTML=''; vehiclePhotos.forEach(p=>{const d=document.createElement('div'); d.style.position='relative'; d.style.border='2px solid var(--border-accent)'; d.style.borderRadius='12px'; d.style.overflow='hidden'; d.innerHTML=`<img src="${p.data}" alt="${p.type}" style="width:100%;height:100%;object-fit:cover"><div style="position:absolute;bottom:0;left:0;right:0;background:linear-gradient(transparent,rgba(0,0,0,.8));padding:8px;color:#fff;font-size:10px;">${p.vehicleName} — ${p.type}</div><button onclick="deletePhoto(${p.id})" style="position:absolute;top:4px;right:4px;background:var(--error);color:#fff;border:none;border-radius:50%;width:20px;height:20px;cursor:pointer">×</button>`; g.appendChild(d);});
-    }
-    function deletePhoto(id){if(confirm('Delete this photo?')){vehiclePhotos=vehiclePhotos.filter(p=>p.id!==id); displayPhotos(); updateDashboardMetrics();}}
-
-    /* ====== SERVICE ====== */
-    function renderServiceTable(){
-      const tbody=document.getElementById('serviceTableBody'); if(!tbody)return; tbody.innerHTML='';
-      serviceOrders.forEach(o=>{
-        const r=tbody.insertRow(); r.innerHTML=`<td data-label="Order #">${o.id}</td><td data-label="Vehicle">${o.vehicle}</td><td data-label="Customer">${o.customer}</td><td data-label="Service Type">${o.serviceType}</td><td data-label="Technician">${o.technician}</td><td data-label="Status"><span class="status-badge status-${o.status}">${o.status}</span></td><td data-label="Est. Cost">${formatCurrency(o.cost)}</td><td data-label="Actions"><button class="btn btn-sm btn-primary" onclick="viewServiceOrder('${o.id}')">View</button><button class="btn btn-sm btn-secondary" onclick="updateServiceStatus('${o.id}')">Update</button></td>`;
-      });
-    }
-    function createServiceOrder(){const f=document.getElementById('serviceOrderForm'); if(f){f.style.display='block'; populateVehicleDropdowns();}}
-    function closeServiceForm(){const f=document.getElementById('serviceOrderForm'); if(f) f.style.display='none';}
-    function submitServiceOrder(){
-      const vehicle=serviceVehicle.value, type=serviceType.value, priority=servicePriority.value;
-      if(vehicle&&type){const v=inventory.find(x=>x.id==vehicle)?.vehicle||'Unknown'; const o={id:`SO-${String(serviceOrders.length+1).padStart(3,'0')}`,vehicle:v,customer:'Walk-in',serviceType:type,technician:'Unassigned',status:priority==='urgent'?'in-progress':'pending',cost:Math.floor(Math.random()*500)+100,date:new Date()};
-        serviceOrders.push(o); renderServiceTable(); closeServiceForm(); addActivity('🔧',`Service order created: ${o.id}`,'Just now'); updateDashboardMetrics();}
-    }
-    function viewServiceOrder(id){const o=serviceOrders.find(x=>x.id===id); if(o) alert(`Service Order ${o.id}\n\nVehicle: ${o.vehicle}\nCustomer: ${o.customer}\nService: ${o.serviceType}\nStatus: ${o.status}\nCost: ${formatCurrency(o.cost)}`)}
-    function updateServiceStatus(id){const o=serviceOrders.find(x=>x.id===id); if(o){const s=['pending','in-progress','completed']; o.status=s[(s.indexOf(o.status)+1)%s.length]; renderServiceTable(); addActivity('🔧',`Service ${id} status: ${o.status}`,'Just now');}}
-
-    /* ====== CALLS / EMAILS ====== */
-    function renderCallTable(){const tbody=document.getElementById('callTableBody'); if(!tbody)return; tbody.innerHTML=''; callHistory.forEach(c=>{const r=tbody.insertRow(); r.innerHTML=`<td data-label="Date/Time">${c.dateTime.toLocaleDateString()}<br><span style="font-size:11px;">${c.dateTime.toLocaleTimeString()}</span></td><td data-label="Phone Number">${c.phoneNumber}</td><td data-label="Customer">${c.customer}</td><td data-label="Duration">${c.duration}</td><td data-label="Lead Score"><span class="lead-score ${getLeadScoreClass(c.leadScore)}">${c.leadScore}</span></td><td data-label="Status"><span class="status-badge status-${c.status}">${c.status}</span></td><td data-label="Actions"><button class="btn btn-sm btn-primary" onclick="viewCallTranscript(${c.id})">Transcript</button><button class="btn btn-sm btn-secondary" onclick="deleteCall(${c.id})">Delete</button></td>`;});}
-    function simulateNewCall(){const c={id:Date.now(),dateTime:new Date(),phoneNumber:'555-'+Math.floor(Math.random()*9000+1000),customer:'New Customer',duration:Math.floor(Math.random()*15)+':'+String(Math.floor(Math.random()*60)).padStart(2,'0'),leadScore:Math.floor(Math.random()*4)+6,status:'transcribed'}; callHistory.unshift(c); renderCallTable(); updateDashboardMetrics(); addActivity('📞','New call received','Just now'); alert('New call simulated successfully!');}
-    function viewCallTranscript(id){const c=callHistory.find(x=>x.id===id); if(c) alert(`Call Transcript\n\nCustomer: ${c.customer}\nPhone: ${c.phoneNumber}\nDuration: ${c.duration}\nLead Score: ${c.leadScore}/10\n\n[Transcript here]`)}
-    function deleteCall(id){if(confirm('Delete this call record?')){callHistory=callHistory.filter(c=>c.id!==id); renderCallTable(); updateDashboardMetrics();}}
-    function renderEmailTable(){const tbody=document.getElementById('emailTableBody'); if(!tbody)return; tbody.innerHTML=''; emailHistory.forEach(e=>{const r=tbody.insertRow(); r.innerHTML=`<td data-label="Date">${e.date.toLocaleDateString()}<br><span style="font-size:11px;">${e.date.toLocaleTimeString()}</span></td><td data-label="Recipient">${e.recipient}</td><td data-label="Subject">${e.subject}</td><td data-label="Type"><span class="status-badge status-${e.type}">${e.type}</span></td><td data-label="Status"><span class="status-badge status-${e.status}">${e.status}</span></td><td data-label="Actions"><button class="btn btn-sm btn-primary" onclick="viewEmail(${e.id})">View</button><button class="btn btn-sm btn-secondary" onclick="deleteEmail(${e.id})">Delete</button></td>`;});}
-    function createEmailCampaign(){const subject=prompt('Email subject:'); if(subject){const e={id:Date.now(),date:new Date(),recipient:'all@customers.com',subject,type:'campaign',status:'sent'}; emailHistory.unshift(e); renderEmailTable(); updateDashboardMetrics(); addActivity('📧','Email campaign sent','Just now'); alert('Email campaign created!');}}
-    function saveEmailTemplate(){const s=emailSubject.value,b=emailBody.value; if(s&&b){alert('Email template saved successfully!'); addActivity('💾','Email template saved','Just now');}}
-    function viewEmail(id){const e=emailHistory.find(x=>x.id===id); if(e) alert(`Email Details\n\nTo: ${e.recipient}\nSubject: ${e.subject}\nType: ${e.type}\nStatus: ${e.status}`)}
-    function deleteEmail(id){if(confirm('Delete this email?')){emailHistory=emailHistory.filter(e=>e.id!==id); renderEmailTable(); updateDashboardMetrics();}}
-
-    /* ====== VIN ====== */
-    async function scanVIN(){
-      const vin=vinInput.value; if(vin.length!==17){alert('Please enter a valid 17-character VIN');return;}
-      const wrap=document.getElementById('vinResult'), box=document.getElementById('vinData'); box.innerHTML='<div style="text-align:center;">🔍 Decoding VIN...</div>'; wrap.style.display='block';
-      try{const r=await fetch(`https://vpic.nhtsa.dot.gov/api/vehicles/decodevin/${vin}?format=json`); const d=await r.json(); const g=v=>d.Results.find(x=>x.Variable===v)?.Value||'N/A'; box.innerHTML=`<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:12px;"><div><div style="font-size:10px;color:var(--text-muted);text-transform:uppercase;">Make</div><div style="font-size:14px;font-weight:600;">${g('Make')}</div></div><div><div style="font-size:10px;color:var(--text-muted);text-transform:uppercase;">Model</div><div style="font-size:14px;font-weight:600;">${g('Model')}</div></div><div><div style="font-size:10px;color:var(--text-muted);text-transform:uppercase;">Year</div><div style="font-size:14px;font-weight:600;">${g('Model Year')}</div></div><div><div style="font-size:10px;color:var(--text-muted);text-transform:uppercase;">Body Type</div><div style="font-size:14px;font-weight:600;">${g('Body Class')}</div></div><div><div style="font-size:10px;color:var(--text-muted);text-transform:uppercase;">Engine</div><div style="font-size:14px;font-weight:600;">${g('Engine Model')}</div></div><div><div style="font-size:10px;color:var(--text-muted);text-transform:uppercase;">Manufacturer</div><div style="font-size:14px;font-weight:600;">${g('Manufacturer Name')}</div></div></div>`; addActivity('🔍','VIN decoded successfully','Just now'); }catch(e){box.innerHTML='<div style="color:var(--error); text-align:center;">Error decoding VIN</div>';}
-    }
-
-    /* ====== CHAT / VOICE (UNIFIED AI ROUTER) ====== */
-    function addChatMessage(type,html){
-      const box=document.getElementById('chatMessages'); const d=document.createElement('div'); d.className=`chat-message ${type}`; d.innerHTML=html; box.appendChild(d); box.scrollTop=box.scrollHeight;
-    }
-    async function ensureCustomersLoaded(){ if(customers.length===0 && window.db){ try{ await loadCustomersFromDB(); }catch(_){ } } }
-
-    async function processAIQuery(raw, {speak=false}={}){
-      const text = (raw||'').trim();
-      const say = (t) => { addChatMessage('assistant', t); if(speak) try{ window.speechSynthesis.cancel(); const u=new SpeechSynthesisUtterance(t.replace(/<[^>]+>/g,'')); u.lang='en-US'; window.speechSynthesis.speak(u);}catch(_){} };
-
-      if(!text){ say('Please type a request. Example: <b>find customers for dennis</b>.'); return; }
-      const t = text.toLowerCase();
-
-      // NAVIGATION
-      if (/(show|open|go to)\s+(customers?|inventory|service|dashboard|chat|terminal|ai|emails?|calls?|photos|vin|analytics)/.test(t)) {
-        const map={customer:'customers',customers:'customers',inventory:'inventory',service:'service',dashboard:'dashboard',chat:'chat',terminal:'chat',ai:'chat',email:'emails',emails:'emails',call:'calls',calls:'calls',photos:'photos',vin:'vin',analytics:'analytics'};
-        const key=t.match(/(customers?|inventory|service|dashboard|chat|terminal|ai|emails?|calls?|photos|vin|analytics)/)[1];
-        const page=map[key];
-        showPage(page, navEl(page));
-        if(page==='customers'){ await ensureCustomersLoaded(); say(`Opened Customers. You have <b>${customers.length}</b> customers.`); }
-        else if(page==='inventory'){ say(`Opened Inventory. Total vehicles: <b>${inventory.length}</b>.`); }
-        else { say(`Opened <b>${page}</b>.`); }
-        return;
-      }
-
-      // CUSTOMER SEARCH
-      let m = t.match(/^(search|find)\s+(customers?|customer)\s+(for\s+)?(.+)/);
-      if (m && m[4]) {
-        await ensureCustomersLoaded();
-        const q = m[4].trim();
-        showPage('customers', navEl('customers'));
-        const box = document.getElementById('customerSearch'); if (box) { box.value = q; filterCustomers(); }
-        const visible = [...document.querySelectorAll('#customerTableBody tr')].filter(r=>r.style.display!=='none').length;
-        say(`Customer search for "<b>${q}</b>": <b>${visible}</b> result(s).`);
-        return;
-      }
-
-      // VIEW A CUSTOMER BY NAME
-      m = t.match(/^(view|open|show)\s+customer\s+(.+)/);
-      if (m && m[2]) {
-        await ensureCustomersLoaded();
-        const q = m[2].trim();
-        showPage('customers', navEl('customers'));
-        const found = customers.find(c => (`${c.firstName} ${c.lastName}`.toLowerCase()).includes(q.toLowerCase()));
-        if (found) { viewCustomer(found.id); say(`Opening <b>${found.firstName} ${found.lastName}</b>.`); }
-        else { say(`I couldn't find a customer named "<b>${q}</b>".`); }
-        return;
-      }
-
-      // QUICK SUMMARY
-      if (/^(summary|summarize)\s+(customers?|inventory)/.test(t)) {
-        await ensureCustomersLoaded();
-        const top = customers.slice(0,3).map(c=>`${c.firstName} ${c.lastName}`.trim()||'—').join(', ') || '—';
-        say(`Customers: <b>${customers.length}</b>. Top: ${top}. Inventory: <b>${inventory.length}</b> vehicles.`);
-        return;
-      }
-
-      // INVENTORY SEARCH
-      m = t.match(/^(search|find)\s+inventory\s+(for\s+)?(.+)/);
-      if (m && m[3]) {
-        const q = m[3].trim().toLowerCase();
-        showPage('inventory', navEl('inventory'));
-        const box = document.getElementById('inventoryFilter'); if (box) { box.value = q; filterInventory(); }
-        const visible = [...document.querySelectorAll('#inventoryTableBody tr')].filter(r=>r.style.display!=='none').length;
-        say(`Inventory search for "<b>${q}</b>": <b>${visible}</b> result(s).`);
-        return;
-      }
-
-      // ADD CUSTOMER (opens form)
-      if (/^(add|new)\s+customer/.test(t)) {
-        showPage('customers', navEl('customers')); openCustomerForm();
-        say('Add Customer form opened. Fill the fields and press <b>Add Customer</b>.');
-        return;
-      }
-
-      // HELP
-      say('Try: <b>show customers</b>, <b>find customers for dennis</b>, <b>view customer dennis kelly</b>, <b>open inventory</b>, <b>search inventory for camry</b>, or <b>add customer</b>.');
-    }
-
-    async function sendMessage(){
-      const i=document.getElementById('chatInput');
-      const m=i.value.trim();
-      if(!m) return;
-      addChatMessage('user', m);
-      i.value='';
-      await processAIQuery(m, {speak:false});
-    }
-
-    /* ====== VOICE AI ====== */
-    let recognition=null;
-    function initVoice(){
-      const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
-      if (!SR) { console.warn('Web Speech API not available.'); return; }
-      recognition = new SR(); recognition.lang = 'en-US'; recognition.interimResults = true; recognition.continuous = true;
-
-      recognition.onresult = (event) => {
-        let finalText = '';
-        for (let i = event.resultIndex; i < event.results.length; i++) {
-          const transcript = event.results[i][0].transcript;
-          if (event.results[i].isFinal) finalText += transcript;
-        }
-        if (finalText.trim()) {
-          addChatMessage('user','🎙️ ' + finalText.trim());
-          processAIQuery(finalText.trim(), {speak:true});
-        }
-      };
-      recognition.onerror = (e) => {
-        console.warn('Voice error:', e.error);
-        if (e.error === 'not-allowed' || e.error === 'service-not-allowed') {
-          try{ window.speechSynthesis.cancel(); const u=new SpeechSynthesisUtterance('Mic permission blocked. Please allow microphone access.'); u.lang='en-US'; window.speechSynthesis.speak(u);}catch(_){}
-          stopVoice();
-        }
-      };
-      recognition.onend = () => { if (isListening) { try{ recognition.start(); }catch(_){} } else updateVoiceUI(); };
-    }
-    function updateVoiceUI(){
-      const btn=document.getElementById('voiceBtn');
-      if(!btn) return;
-      btn.setAttribute('aria-pressed', isListening ? 'true' : 'false');
-      btn.textContent = isListening ? '🎙️ Listening… (tap to stop)' : '🎤 Voice';
-      btn.style.border = isListening ? '1px solid var(--success)' : '1px solid var(--glass-border)';
-      btn.style.boxShadow = isListening ? '0 0 0 3px rgba(16,185,129,.2)' : 'none';
-    }
-    function startVoice(){
-      if(!recognition){ alert('Your browser needs the Web Speech API (Chrome/Edge).'); return; }
-      try{
-        recognition.start(); isListening=true; updateVoiceUI();
-        addActivity('🎙️','Voice listening started','Just now');
-        try{ window.speechSynthesis.cancel(); const u=new SpeechSynthesisUtterance('Voice on. You can say: show customers, search customers for Dennis, open inventory, or add customer.'); u.lang='en-US'; window.speechSynthesis.speak(u);}catch(_){}
-      }catch(e){ console.warn(e); }
-    }
-    function stopVoice(){ if(recognition){ try{ recognition.stop(); }catch(_){ } } isListening=false; updateVoiceUI(); addActivity('🎙️','Voice stopped','Just now'); }
-    function toggleVoice(){ isListening ? stopVoice() : startVoice(); }
-  </script>
-
-  <!-- ============ SUPABASE ============ -->
+  <!-- ========== APP SCRIPT ========== -->
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script>
-    // 1) Connect to Supabase (keep these)
+    /* ---------- STATE ---------- */
     const SUPABASE_URL = "https://zpgdsgutiheilshgrnwl.supabase.co";
     const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InpwZ2RzZ3V0aWhlaWxzaGdybndsIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTUwMjA3NDMsImV4cCI6MjA3MDU5Njc0M30.LC-ro-E2k_Xb7UK337QP8V2HddpftjV5g1ZsI6D0c8k";
     const db = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
     window.db = db;
 
-    // 2) Map DB row -> UI object (handles your mixed column names)
+    let isListening=false, recognition=null, aiApiKey=null, openphoneApiKey=null;
+    let customers=[], inventory=[], serviceOrders=[];
+    let callHistory=[{id:1,dateTime:new Date(),phoneNumber:'555-0123',customer:'John Smith',duration:'12:45',leadScore:9,status:'transcribed'}];
+    let emailHistory=[{id:1,date:new Date(),recipient:'john@email.com',subject:'Your BMW X5 Inquiry',type:'follow-up',status:'delivered'}];
+    const $ = (id)=>document.getElementById(id);
+
+    /* ---------- NAV ---------- */
+    function findNav(id){ return document.querySelector(`.nav-item[onclick*="${id}"]`); }
+    function showPage(id, el){
+      document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
+      document.getElementById(id).classList.add('active');
+      document.querySelectorAll('.nav-item').forEach(n=>n.classList.remove('active'));
+      if(el) el.classList.add('active');
+      $('title').textContent = ({
+        dashboard:'Executive Dashboard', customers:'Customer Pipeline', inventory:'Inventory', service:'Service Center',
+        calls:'Call Center', emails:'Email Center', vin:'VIN Intelligence', chat:'AI Terminal', analytics:'Analytics'
+      })[id] || 'Dashboard';
+      if(window.innerWidth<=900) toggleSidebar(false);
+      if(id==='service') populateVehicleDropdowns();
+    }
+    function toggleSidebar(force){ const s=$('sidebar'); s.classList[force===false?'remove':'toggle']('open'); }
+
+    /* ---------- UTIL ---------- */
+    function addActivity(icon,text,time='Just now'){ const box=$('activity'); const div=document.createElement('div'); div.style.padding='10px 12px'; div.innerHTML=`${icon} ${text} <span style="float:right;color:#999">${time}</span>`; box.prepend(div); while(box.children.length>18) box.removeChild(box.lastChild); }
+    function currency(n){ return '$'+Number(n||0).toLocaleString(); }
+    function leadClass(n){ if(n>=8) return 'score-high'; if(n>=6) return 'score-medium'; return 'score-low'; }
+
+    /* ---------- CUSTOMERS UI ---------- */
+    function renderCustomers(){
+      const tbody=$('customerRows'); tbody.innerHTML='';
+      if(customers.length===0){ tbody.innerHTML='<tr><td colspan="8" style="padding:16px;color:#999">No customers yet.</td></tr>'; return; }
+      customers.forEach(c=>{
+        const tr=document.createElement('tr');
+        tr.innerHTML=`
+          <td>${c.firstName||''} ${c.lastName||''}</td>
+          <td>${c.email||''}<br><span style="font-size:11px">${c.phone||''}</span></td>
+          <td><span class="status status-${c.status||'new'}">${c.status||'new'}</span></td>
+          <td><span class="lead ${leadClass(c.leadScore||7)}">${c.leadScore||7}</span></td>
+          <td>${currency(c.value||0)}</td>
+          <td>${c.vehicleInterest||''}<br><span style="font-size:11px">${c.budget||''}</span></td>
+          <td>${c.lastContact||'—'}</td>
+          <td><button class="btn btn-sm" onclick="viewCustomer('${c.id}')">View</button> <button class="btn btn-sm" onclick="removeCustomer('${c.id}')">Delete</button></td>
+        `;
+        tbody.appendChild(tr);
+      });
+      $('customerBadge').textContent=String(customers.length);
+    }
+    function filterCustomers(){
+      const q=($('customerSearch').value||'').toLowerCase().trim();
+      document.querySelectorAll('#customerRows tr').forEach(r=>{
+        r.style.display = q ? (r.textContent.toLowerCase().includes(q)?'':'none') : '';
+      });
+    }
+    function openCustomerForm(){ $('customerForm').style.display='block'; }
+    function closeCustomerForm(){ $('customerForm').style.display='none'; }
+    function viewCustomer(id){
+      const c=customers.find(x=>String(x.id)===String(id)); if(!c){ alert('Customer not found'); return; }
+      alert(`Customer\n\n${c.firstName||''} ${c.lastName||''}\nEmail: ${c.email||''}\nPhone: ${c.phone||''}\nInterest: ${c.vehicleInterest||''}\nBudget: ${c.budget||''}`);
+    }
+
+    /* ---------- INVENTORY UI ---------- */
+    function renderInventory(){
+      const tbody=$('invRows'); tbody.innerHTML='';
+      inventory.forEach(v=>{
+        const tr=document.createElement('tr');
+        tr.innerHTML=`
+          <td>${v.vehicle}</td><td style="font-family:monospace;font-size:11px">${v.vin||'PENDING'}</td>
+          <td><span class="status status-${v.status}">${v.status}</span></td>
+          <td>${currency(v.price)}</td><td>${v.daysInStock||0}</td>
+          <td><span class="status status-${v.serviceStatus==='ready'?'qualified':v.serviceStatus}">${v.serviceStatus}</span></td>
+          <td><button class="btn btn-sm" onclick="viewVehicle(${JSON.stringify(v.id)})">View</button> <button class="btn btn-sm" onclick="deleteVehicle(${JSON.stringify(v.id)})">Delete</button></td>`;
+        tbody.appendChild(tr);
+      });
+      $('inventoryBadge').textContent=String(inventory.filter(v=>v.status==='available').length);
+    }
+    function filterInventory(){
+      const q=($('invFilter').value||'').toLowerCase();
+      document.querySelectorAll('#invRows tr').forEach(r=>{ r.style.display = r.textContent.toLowerCase().includes(q)?'':''; });
+    }
+    function openVehicleForm(){ $('vehicleForm').style.display='block'; }
+    function closeVehicleForm(){ $('vehicleForm').style.display='none'; }
+    function viewVehicle(id){ const v=inventory.find(x=>String(x.id)===String(id)); if(v) alert(`${v.vehicle}\nVIN: ${v.vin}\nPrice: ${currency(v.price)}\nStatus: ${v.status}\nService: ${v.serviceStatus}`); }
+
+    /* ---------- SERVICE UI ---------- */
+    function renderService(){
+      const tbody=$('svcRows'); tbody.innerHTML='';
+      serviceOrders.forEach(o=>{
+        const tr=document.createElement('tr');
+        tr.innerHTML=`
+          <td>${o.id}</td><td>${o.vehicle}</td><td>${o.customer}</td><td>${o.serviceType}</td>
+          <td>${o.technician}</td><td><span class="status status-${o.status}">${o.status}</span></td>
+          <td>${currency(o.cost)}</td>
+          <td><button class="btn btn-sm" onclick="viewService('${o.id}')">View</button></td>`;
+        tbody.appendChild(tr);
+      });
+      $('serviceBadge').textContent=String(serviceOrders.length);
+    }
+    function openServiceForm(){ $('serviceForm').style.display='block'; populateVehicleDropdowns(); }
+    function closeServiceForm(){ $('serviceForm').style.display='none'; }
+    function populateVehicleDropdowns(){
+      const sel=$('svc_vehicle'); if(!sel) return;
+      sel.innerHTML = '<option value="">Select…</option>' + inventory.map(v=>`<option value="${v.id}">${v.vehicle}</option>`).join('');
+    }
+    function viewService(id){ const o=serviceOrders.find(x=>String(x.id)===String(id)); if(o) alert(`Service ${o.id}\n\n${o.vehicle}\n${o.serviceType}\nStatus: ${o.status}\nCost: ${currency(o.cost)}`); }
+
+    /* ---------- CALLS/EMAILS (demo render) ---------- */
+    function renderCalls(){
+      const tbody=$('callRows'); tbody.innerHTML='';
+      callHistory.forEach(c=>{
+        const tr=document.createElement('tr'); tr.innerHTML=`
+          <td>${c.dateTime.toLocaleDateString()} ${c.dateTime.toLocaleTimeString()}</td>
+          <td>${c.phoneNumber}</td><td>${c.customer}</td><td>${c.duration}</td>
+          <td><span class="lead ${leadClass(c.leadScore)}">${c.leadScore}</span></td>
+          <td><span class="status status-${c.status}">${c.status}</span></td>
+          <td><button class="btn btn-sm" onclick="alert('Transcript…')">Transcript</button></td>`;
+        tbody.appendChild(tr);
+      });
+    }
+    function simulateNewCall(){ callHistory.unshift({id:Date.now(),dateTime:new Date(),phoneNumber:'555-'+Math.floor(Math.random()*9000+1000),customer:'New Customer',duration:'5:'+String(Math.floor(Math.random()*60)).padStart(2,'0'),leadScore:8,status:'transcribed'}); renderCalls(); addActivity('📞','New call received'); }
+    function renderEmails(){ const tbody=$('emailRows'); tbody.innerHTML=''; emailHistory.forEach(e=>{ const tr=document.createElement('tr'); tr.innerHTML=`<td>${e.date.toLocaleString()}</td><td>${e.recipient}</td><td>${e.subject}</td><td><span class="status status-${e.type}">${e.type}</span></td><td><span class="status status-${e.status}">${e.status}</span></td><td><button class="btn btn-sm" onclick="alert('Email view…')">View</button></td>`; tbody.appendChild(tr); }); }
+    function createEmailCampaign(){ const subject=prompt('Subject?'); if(subject){ emailHistory.unshift({id:Date.now(),date:new Date(),recipient:'all@customers.com',subject,type:'campaign',status:'sent'}); renderEmails(); addActivity('📧','Email campaign sent'); } }
+
+    /* ---------- VIN ---------- */
+    async function decodeVIN(){
+      const vin=$('v_vin').value.trim(); if(vin.length!==17){ alert('Enter a 17‑char VIN'); return; }
+      try{ const r=await fetch(`https://vpic.nhtsa.dot.gov/api/vehicles/decodevin/${vin}?format=json`); const d=await r.json(); const get=v=>d.Results.find(x=>x.Variable===v)?.Value||''; $('v_make').value=get('Make'); $('v_model').value=get('Model'); $('v_year').value=get('Model Year'); alert('VIN decoded!'); }catch{ alert('VIN decode error'); }
+    }
+    async function scanVIN(){
+      const vin=$('vinInput').value.trim(); if(vin.length!==17){ alert('Enter 17‑char VIN'); return; }
+      const wrap=$('vinResult'), box=$('vinData'); wrap.style.display='block'; box.innerHTML='Decoding…';
+      try{ const r=await fetch(`https://vpic.nhtsa.dot.gov/api/vehicles/decodevin/${vin}?format=json`); const d=await r.json(); const g=v=>d.Results.find(x=>x.Variable===v)?.Value||'—'; box.innerHTML=`<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:10px"><div><div class="label">Make</div>${g('Make')}</div><div><div class="label">Model</div>${g('Model')}</div><div><div class="label">Year</div>${g('Model Year')}</div><div><div class="label">Body</div>${g('Body Class')}</div><div><div class="label">Engine</div>${g('Engine Model')}</div></div>`; addActivity('🔍','VIN decoded'); }catch{ box.innerHTML='<span style="color:#f66">VIN decode failed</span>'; }
+    }
+
+    /* ---------- EXPORT/REFRESH ---------- */
+    function exportData(){ alert(`Export\n\nCustomers: ${customers.length}\nVehicles: ${inventory.length}\nService Orders: ${serviceOrders.length}`); }
+    async function refreshData(){
+      await Promise.all([ loadCustomersFromDB(), loadInventoryFromDB(), loadServiceFromDB() ]);
+      renderCustomers(); renderInventory(); renderService(); renderCalls(); renderEmails();
+      addActivity('🔄','Data refreshed'); alert('Refreshed!');
+    }
+
+    /* ---------- SUPABASE: MAP HELPERS ---------- */
     function mapRowToCustomer(row){
-      const full = (row["Name"] ?? row.name ?? "").toString().trim();
-      const [first, ...rest] = full.split(/\s+/);
-      const last = rest.join(" ");
-      const budgetStr = String(row["Budget"] ?? row.budget ?? "");
-      const numeric = parseInt(budgetStr.replace(/[^0-9]/g, "")) || 0;
+      const name=(row["Name"]??row.name??"").toString().trim();
+      const [first,...rest]=name.split(/\s+/); const last=rest.join(' ');
+      const b=String(row["Budget"]??row.budget??''); const val=parseInt(b.replace(/[^0-9]/g,''))||0;
       return {
         id: row.id ?? row.ID ?? row.uuid ?? row["ID"] ?? Date.now(),
-        firstName:first||"", lastName:last||"",
-        email: row["Email"] ?? row.email ?? "",
-        phone: row["Phone"] ?? row.phone ?? "",
-        vehicleInterest: row["Vehicle of interest"] ?? row.vehicle_interest ?? "",
-        budget: row["Budget"] ?? row.budget ?? "",
-        address: row["Address"] ?? row.address ?? "",
-        currentVehicle: row["Current Vehicle/Trade in"] ?? row.current_vehicle ?? "",
-        status:"new", leadScore:8, value:numeric, lastContact:"—"
+        firstName:first||'', lastName:last||'',
+        email:row["Email"]??row.email??'', phone:row["Phone"]??row.phone??'',
+        vehicleInterest:row["Vehicle of interest"]??row.vehicle_interest??'',
+        budget:row["Budget"]??row.budget??'', address:row["Address"]??row.address??'',
+        currentVehicle:row["Current Vehicle/Trade in"]??row.current_vehicle??'',
+        status:'new', leadScore:8, value:val, lastContact:'—'
+      };
+    }
+    function mapRowToVehicle(row){
+      return {
+        id: row.id, vin: row.vin||'PENDING', make:row.make||'', model:row.model||'', year:row.year,
+        vehicle: `${row.year||''} ${row.make||''} ${row.model||''}`.trim(),
+        status: row.status||'available', price:Number(row.price)||0, daysInStock:row.days_in_stock??0,
+        serviceStatus: row.service_status||'pending'
+      };
+    }
+    function mapRowToService(row){
+      return {
+        id: row.order_no || row.id, vehicle: row.vehicle||'Unknown', customer: row.customer||'Walk-in',
+        serviceType: row.service_type||'inspection', technician: row.technician||'Unassigned',
+        status: row.status||'pending', cost:Number(row.cost)||0, date: row.created_at?new Date(row.created_at):new Date()
       };
     }
 
-    // 3) Read customers
+    /* ---------- SUPABASE: LOAD ---------- */
     async function loadCustomersFromDB(){
       try{
-        let query = db.from("customers").select("*");
-        let { data, error } = await query.order("created_at", { ascending:false });
-        if (error) { ({ data, error } = await db.from("customers").select("*")); }
-        if (error) throw error;
-
-        window.customers.length = 0; (data||[]).forEach(r => window.customers.push(mapRowToCustomer(r)));
-        if (typeof renderCustomerTable === "function") renderCustomerTable();
-        if (typeof updateDashboardMetrics === "function") updateDashboardMetrics();
-        console.info("Supabase → loaded customers:", window.customers.length);
-      }catch(e){
-        console.error("loadCustomersFromDB failed:", e);
-        alert("Could not load customers from Supabase (check RLS policies).");
-      }
+        let { data, error } = await db.from('customers').select('*').order('created_at',{ascending:false});
+        if(error){ ({data,error} = await db.from('customers').select('*')); }
+        if(error) throw error;
+        customers.length=0; (data||[]).forEach(r=>customers.push(mapRowToCustomer(r)));
+      }catch(e){ console.warn('customers load:', e.message||e); }
+    }
+    async function loadInventoryFromDB(){
+      try{
+        const { data, error } = await db.from('vehicles').select('*').order('created_at',{ascending:false});
+        if(error) throw error;
+        inventory.length=0; (data||[]).forEach(r=>inventory.push(mapRowToVehicle(r)));
+      }catch(e){ console.warn('vehicles load:', e.message||e); }
+    }
+    async function loadServiceFromDB(){
+      try{
+        const { data, error } = await db.from('service_orders').select('*').order('created_at',{ascending:false});
+        if(error) throw error;
+        serviceOrders.length=0; (data||[]).forEach(r=>serviceOrders.push(mapRowToService(r)));
+      }catch(e){ console.warn('service load:', e.message||e); }
     }
 
-    // 4) Create customer
+    /* ---------- SUPABASE: CREATE/DELETE ---------- */
     async function addCustomer(){
-      const name  = (document.getElementById("newCustomerName")?.value || "").trim();
-      const address  = (document.getElementById("newCustomerAddress")?.value || "").trim();
-      const email = (document.getElementById("newCustomerEmail")?.value || "").trim();
-      const phone = (document.getElementById("newCustomerPhone")?.value || "").trim();
-      const vehicleInterest = (document.getElementById("newCustomerVehicleInterest")?.value || "").trim();
-      const currentVehicle  = (document.getElementById("newCustomerCurrentVehicle")?.value || "").trim();
-      const budget = (document.getElementById("newCustomerBudget")?.value || "").trim();
-
-      if (!name) { alert("Please enter a name"); return; }
-
-      try {
-        const { error } = await db.from("customers").insert([{
-          ["Name"]: name,
-          ["Address"]: address,
-          ["Email"]: email,
-          ["Phone"]: phone,
-          ["Vehicle of interest"]: vehicleInterest,
-          ["Current Vehicle/Trade in"]: currentVehicle,
-          ["Budget"]: budget
-        }]);
-        if (error) throw error;
-
-        await loadCustomersFromDB();
-
-        ["newCustomerName","newCustomerAddress","newCustomerEmail","newCustomerPhone","newCustomerVehicleInterest","newCustomerCurrentVehicle","newCustomerBudget"].forEach(id => { const el=document.getElementById(id); if(el) el.value=""; });
-        const statusEl=document.getElementById("newCustomerStatus"); if(statusEl) statusEl.value="new";
-        if (typeof closeCustomerForm === "function") closeCustomerForm();
-        if (typeof addActivity === "function") addActivity("👤", `New customer: ${name}`, "Just now");
-      } catch(e) {
-        const msg = /row level|rls/i.test(String(e.message)) ? "RLS policy is blocking INSERT. Add an anon INSERT policy." : (e.message || e);
-        console.error("Insert failed:", e);
-        alert("Could not save to Supabase: " + msg);
+      const name=$('c_name').value.trim(); if(!name){ alert('Enter a name'); return; }
+      const row={
+        ["Name"]:name, ["Address"]:$('c_address').value.trim(), ["Email"]:$('c_email').value.trim(),
+        ["Phone"]:$('c_phone').value.trim(), ["Vehicle of interest"]:$('c_interest').value.trim(),
+        ["Current Vehicle/Trade in"]:$('c_current').value.trim(), ["Budget"]:$('c_budget').value.trim()
+      };
+      try{
+        const { error } = await db.from('customers').insert([row]);
+        if(error) throw error;
+        await loadCustomersFromDB(); renderCustomers();
+        ['c_name','c_address','c_email','c_phone','c_interest','c_current','c_budget'].forEach(id=>$(id).value='');
+        closeCustomerForm(); addActivity('👤',`New customer: ${name}`);
+      }catch(e){
+        alert('Could not save customer: '+(e.message||e));
       }
     }
+    async function removeCustomer(id){
+      if(!confirm('Delete this customer?')) return;
+      try{
+        let { error } = await db.from('customers').delete().eq('id', id);
+        if(error && /column "id"/i.test(error.message)) ({ error } = await db.from('customers').delete().eq('ID', id));
+      }catch(_){}
+      customers = customers.filter(c=>String(c.id)!==String(id)); renderCustomers();
+    }
 
-    // 5) Auto-load on first paint
-    document.addEventListener("DOMContentLoaded", () => { loadCustomersFromDB(); });
+    async function addVehicle(){
+      const vin=$('v_vin').value.trim(), make=$('v_make').value.trim(), model=$('v_model').value.trim(),
+            year=Number($('v_year').value), price=Number($('v_price').value), status=$('v_status').value;
+      if(!(make&&model&&year&&price)){ alert('Fill make, model, year, price'); return; }
+      try{
+        const { error } = await db.from('vehicles').insert([{ vin, make, model, year, price, status, service_status:'pending', days_in_stock:0 }]);
+        if(error) throw error;
+        await loadInventoryFromDB(); renderInventory(); populateVehicleDropdowns(); closeVehicleForm();
+        addActivity('🚗',`New vehicle: ${year} ${make} ${model}`);
+        ['v_vin','v_make','v_model','v_year','v_price'].forEach(id=>$(id).value='');
+      }catch(e){ alert('Could not save vehicle: '+(e.message||e)); }
+    }
+    async function deleteVehicle(id){
+      if(!confirm('Delete this vehicle?')) return;
+      try{ await db.from('vehicles').delete().eq('id', id); }catch(_){}
+      inventory = inventory.filter(v=>String(v.id)!==String(id)); renderInventory(); populateVehicleDropdowns();
+    }
+
+    async function submitServiceOrder(){
+      const vehicleId=$('svc_vehicle').value, type=$('svc_type').value, priority=$('svc_priority').value, notes=$('svc_notes').value.trim();
+      if(!vehicleId){ alert('Pick a vehicle'); return; }
+      const v=inventory.find(x=>String(x.id)===String(vehicleId));
+      const status = priority==='urgent' ? 'in-progress' : 'pending';
+      const payload = { order_no:`SO-${Date.now()}`, vehicle:v?.vehicle||'Unknown', vehicle_id:v?.id||null, customer:'Walk-in', service_type:type, technician:'Unassigned', status, cost:Math.floor(Math.random()*500)+100, notes, priority };
+      try{
+        const { error } = await db.from('service_orders').insert([payload]);
+        if(error) throw error;
+        await loadServiceFromDB(); renderService(); closeServiceForm();
+        addActivity('🔧',`Service order ${payload.order_no} created`);
+      }catch(e){ alert('Could not save service order: '+(e.message||e)); }
+    }
+
+    /* ---------- AI ---------- */
+    function addChatMessage(role, html){
+      const box=$('chatBox'); const div=document.createElement('div');
+      div.className=(role==='user'?'user':'assistant');
+      div.style.alignSelf = role==='user'?'flex-end':'flex-start';
+      div.style.background = role==='user'?'linear-gradient(135deg,var(--accent-primary),var(--accent-tertiary))':'var(--bg-quaternary)';
+      div.style.color = role==='user'?'#fff':'#fff'; div.style.border='1px solid var(--border)';
+      div.style.padding='12px'; div.style.borderRadius='12px'; div.innerHTML=html;
+      box.appendChild(div); box.scrollTop=box.scrollHeight;
+    }
+    function updateAIStatus(){
+      const k=$('aiApiKey').value.trim(); aiApiKey = k||null;
+      $('aiDot').style.background = aiApiKey?'var(--success)':'var(--error)';
+      $('aiText').textContent = aiApiKey?'AI Status: Connected':'AI Status: API Key Required';
+    }
+    function updateOpenPhoneStatus(){ openphoneApiKey=$('openphoneApiKey').value.trim(); }
+    function saveAIConfig(){ updateAIStatus(); updateOpenPhoneStatus(); alert('Saved'); }
+
+    async function callOpenAI(prompt){
+      if(!aiApiKey) throw new Error('No AI API key set');
+      const payload={
+        model:'gpt-4o-mini',
+        temperature:0.2,
+        messages:[
+          {role:'system',content:'You are TVC Auto AI. Be concise.'},
+          {role:'user',content:`DATA\nCustomers: ${JSON.stringify(customers.slice(0,30))}\nInventory: ${JSON.stringify(inventory.slice(0,30))}\nService: ${JSON.stringify(serviceOrders.slice(0,30))}\n\nQUESTION: ${prompt}`}
+        ]
+      };
+      const r=await fetch('https://api.openai.com/v1/chat/completions',{method:'POST',headers:{'Content-Type':'application/json','Authorization':'Bearer '+aiApiKey},body:JSON.stringify(payload)});
+      if(!r.ok){ throw new Error('OpenAI error '+r.status+': '+(await r.text())); }
+      const j=await r.json(); return j.choices?.[0]?.message?.content?.trim()||'(no response)';
+    }
+
+    async function processAI(text){
+      const t=(text||'').toLowerCase().trim(); const go=(id)=>showPage(id,findNav(id));
+      const ensure=async()=>{ if(customers.length===0) await loadCustomersFromDB(); };
+
+      if (/(show|open|go to)\s+(customers?|inventory|service|dashboard|chat|terminal|ai)/.test(t)){
+        const map={customer:'customers',customers:'customers',inventory:'inventory',service:'service',dashboard:'dashboard',chat:'chat',terminal:'chat',ai:'chat'};
+        const key=t.match(/(customers?|inventory|service|dashboard|chat|terminal|ai)/)[1];
+        go(map[key]); if(map[key]==='customers'){ await ensure(); addChatMessage('assistant',`Opened Customers. Total <b>${customers.length}</b>.`);} else addChatMessage('assistant',`Opened <b>${map[key]}</b>.`); return true;
+      }
+      let m=t.match(/^(search|find)\s+(customers?|customer)\s+(for\s+)?(.+)/);
+      if(m&&m[4]){ const q=m[4].trim(); await ensure(); go('customers'); $('customerSearch').value=q; filterCustomers(); const n=[...document.querySelectorAll('#customerRows tr')].filter(r=>r.style.display!=='none').length; addChatMessage('assistant',`Customer search "<b>${q}</b>": <b>${n}</b>.`); return true; }
+      m=t.match(/^(view|open|show)\s+customer\s+(.+)/);
+      if(m&&m[2]){ const q=m[2].trim(); await ensure(); go('customers'); const c=customers.find(x=>(`${x.firstName} ${x.lastName}`).toLowerCase().includes(q.toLowerCase())); if(c){ viewCustomer(c.id); addChatMessage('assistant',`Opening <b>${c.firstName} ${c.lastName}</b>.`);} else addChatMessage('assistant',`No customer for "<b>${q}</b>".`); return true; }
+      m=t.match(/^(search|find)\s+inventory\s+(for\s+)?(.+)/);
+      if(m&&m[3]){ const q=m[3].trim(); go('inventory'); $('invFilter').value=q; filterInventory(); const n=[...document.querySelectorAll('#invRows tr')].filter(r=>r.style.display!=='none').length; addChatMessage('assistant',`Inventory search "<b>${q}</b>": <b>${n}</b>.`); return true; }
+
+      return false;
+    }
+
+    async function sendMessage(){
+      const i=$('chatInput'); const msg=i.value.trim(); if(!msg) return; addChatMessage('user',msg); i.value='';
+      const handled=await processAI(msg);
+      if(!handled){
+        if(!aiApiKey){ addChatMessage('assistant','ℹ️ No AI key set. Local commands still work.'); return; }
+        try{ const out=await callOpenAI(msg); addChatMessage('assistant',out); }catch(e){ addChatMessage('assistant','❌ '+(e.message||e)); }
+      }
+    }
+    async function testAIConnection(){
+      try{ if(!$('aiApiKey').value.trim()){ alert('Paste your OpenAI key first'); return; } aiApiKey=$('aiApiKey').value.trim(); const ok=await callOpenAI('Reply with OK.'); addChatMessage('assistant','✅ AI connected: '+ok); updateAIStatus(); }
+      catch(e){ alert('AI test failed: '+(e.message||e)); }
+    }
+
+    /* ---------- VOICE ---------- */
+    function initVoice(){
+      const SR=window.SpeechRecognition||window.webkitSpeechRecognition;
+      if(!SR){ console.warn('No Web Speech API'); return; }
+      recognition=new SR(); recognition.lang='en-US'; recognition.interimResults=true; recognition.continuous=true;
+      recognition.onresult=(e)=>{ let final=''; for(let i=e.resultIndex;i<e.results.length;i++){ const tr=e.results[i][0].transcript; if(e.results[i].isFinal) final+=tr; } if(final.trim()){ addChatMessage('user','🎙️ '+final.trim()); processAI(final.trim()); } };
+      recognition.onerror=(e)=>{ console.warn('voice error',e.error); if(e.error==='not-allowed') alert('Allow microphone'); };
+      recognition.onend=()=>{ if(isListening) try{ recognition.start(); }catch{}; updateVoiceBtn(); };
+    }
+    function updateVoiceBtn(){ const b=$('voiceBtn'); b.textContent=isListening?'🎙️ Listening… (tap to stop)':'🎤 Voice'; }
+    function startVoice(){ if(!recognition){ alert('Use Chrome/Edge for voice'); return; } try{ recognition.start(); isListening=true; updateVoiceBtn(); addActivity('🎙️','Voice on'); }catch{} }
+    function stopVoice(){ if(recognition) try{ recognition.stop(); }catch{} isListening=false; updateVoiceBtn(); addActivity('🎙️','Voice off'); }
+    function toggleVoice(){ isListening?stopVoice():startVoice(); }
+
+    /* ---------- STARTUP ---------- */
+    document.addEventListener('DOMContentLoaded', async ()=>{
+      initVoice();
+      await Promise.all([ loadCustomersFromDB(), loadInventoryFromDB(), loadServiceFromDB() ]);
+      renderCustomers(); renderInventory(); renderService(); renderCalls(); renderEmails();
+      addActivity('✅','Loaded data');
+    });
   </script>
 </body>
 </html>
