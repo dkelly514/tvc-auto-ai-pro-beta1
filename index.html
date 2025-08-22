@@ -590,122 +590,659 @@
     async function refreshData(){ if(window.db) await loadCustomersFromDB(); updateDashboardMetrics(); renderServiceTable(); renderCustomerTable(); renderInventoryTable(); renderCallTable(); renderEmailTable(); addActivity('🔄','Data refreshed','Just now'); alert('All data refreshed successfully!');}
   </script>
 
-  <!-- ============ SUPABASE ============ -->
-  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+ <!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1.0" />
+  <title>TVC Auto AI Pro - Advanced Dealership Intelligence Terminal</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet" />
+  <style>
+    /* ====== THEME ====== */
+    :root {
+      --bg-primary:#0a0a0a; --bg-secondary:#141418; --bg-tertiary:#1e1e24; --bg-quaternary:#28282f; --bg-hover:#32323a;
+      --accent-primary:#8b6914; --accent-secondary:#6b5210; --accent-tertiary:#a57c1e; --accent-glow:rgba(139,105,20,.3); --accent-bright:#b8901f;
+      --text-primary:#f5f5f7; --text-secondary:#a1a1aa; --text-muted:#71717a;
+      --border-color:#27272a; --border-accent:#3f3f46; --glass-bg:rgba(20,20,24,.8); --glass-border:rgba(255,255,255,.1);
+      --success:#10b981; --warning:#f59e0b; --error:#ef4444; --info:#3b82f6;
+      --shadow-sm:0 1px 2px rgba(0,0,0,.5); --shadow-md:0 4px 6px rgba(0,0,0,.3); --shadow-lg:0 10px 15px rgba(0,0,0,.4); --shadow-xl:0 20px 25px rgba(0,0,0,.5);
+    }
+    *{margin:0;padding:0;box-sizing:border-box}
+    body{
+      font-family:'Inter',-apple-system,BlinkMacSystemFont,system-ui,sans-serif;
+      background:linear-gradient(135deg,#0a0a0a 0%,#141418 100%);
+      color:var(--text-primary); line-height:1.5; overflow-x:hidden; font-size:13px; min-height:100vh;
+    }
+    body::before{
+      content:''; position:fixed; inset:0; pointer-events:none; z-index:0;
+      background-image:
+        radial-gradient(circle at 20% 50%, var(--accent-glow) 0%, transparent 50%),
+        radial-gradient(circle at 80% 80%, rgba(16,185,129,.1) 0%, transparent 50%),
+        radial-gradient(circle at 40% 20%, rgba(59,130,246,.05) 0%, transparent 50%);
+    }
+    .terminal-container{display:grid; grid-template-columns:260px 1fr; grid-template-rows:65px 1fr; height:100vh; gap:1px; background:var(--border-color); position:relative; z-index:1;}
+    .top-bar{grid-column:1 / -1; background:var(--glass-bg); backdrop-filter:blur(20px); -webkit-backdrop-filter:blur(20px); border-bottom:1px solid var(--glass-border); display:flex; align-items:center; justify-content:space-between; padding:0 24px; box-shadow:var(--shadow-md);}
+    .logo-section{display:flex; align-items:center; gap:14px}
+    .logo-icon{width:36px;height:36px;border-radius:10px;display:flex;align-items:center;justify-content:center;font-weight:bold;background:linear-gradient(135deg,var(--accent-primary),var(--accent-tertiary)); box-shadow:0 0 20px var(--accent-glow), var(--shadow-md)}
+    .logo-text{font-size:17px;font-weight:700;background:linear-gradient(135deg,var(--text-primary),var(--accent-bright));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
+    .market-data{display:flex;align-items:center;gap:28px;font-size:12px}
+    .market-item{display:flex;align-items:center;gap:8px;padding:6px 12px;background:var(--bg-secondary);border-radius:8px;border:1px solid var(--border-color);transition:.3s}
+    .market-item:hover{transform:translateY(-2px);border-color:var(--accent-primary);box-shadow:0 4px 12px var(--accent-glow)}
+    .market-value{font-weight:600}
+    .market-change{font-weight:500;padding:2px 6px;border-radius:4px;font-size:11px}
+    .positive{color:var(--success);background:rgba(16,185,129,.1)}
+    .negative{color:var(--error);background:rgba(239,68,68,.1)}
+    .top-actions{display:flex;align-items:center;gap:12px}
+    .status-indicator{display:flex;align-items:center;gap:8px;font-size:11px;font-weight:600;color:var(--success);padding:6px 12px;background:rgba(16,185,129,.1);border:1px solid rgba(16,185,129,.3);border-radius:20px}
+    .status-dot{width:6px;height:6px;border-radius:50%;background:var(--success);box-shadow:0 0 10px var(--success)}
+    .btn{padding:9px 18px;border:none;border-radius:8px;font-size:12px;font-weight:600;cursor:pointer;transition:.3s;display:inline-flex;align-items:center;gap:8px}
+    .btn-primary{background:linear-gradient(135deg,var(--accent-primary),var(--accent-tertiary));color:#fff;box-shadow:0 4px 15px var(--accent-glow)}
+    .btn-primary:hover{transform:translateY(-2px)}
+    .btn-secondary{background:var(--bg-quaternary);color:var(--text-secondary);border:1px solid var(--border-accent)}
+    .btn-secondary:hover{background:var(--bg-hover);color:var(--text-primary);transform:translateY(-2px)}
+    .btn-sm{padding:5px 10px;font-size:11px}
+    .btn-glass{background:var(--glass-bg);backdrop-filter:blur(10px);border:1px solid var(--glass-border);color:var(--text-primary)}
+    .sidebar{background:var(--bg-secondary);border-right:1px solid var(--border-color);padding:20px 12px;overflow:auto}
+    .nav-section{margin-bottom:24px}
+    .nav-title{font-size:10px;font-weight:700;color:var(--text-muted);text-transform:uppercase;letter-spacing:1px;margin-bottom:10px;padding:0 12px;display:flex;align-items:center;gap:8px}
+    .nav-title::after{content:'';flex:1;height:1px;background:var(--border-color)}
+    .nav-item{display:flex;align-items:center;gap:12px;padding:10px 14px;border-radius:8px;cursor:pointer;transition:.3s;margin-bottom:4px;font-size:12px;font-weight:500;color:var(--text-secondary)}
+    .nav-item:hover{background:var(--bg-tertiary);color:var(--text-primary);transform:translateX(4px)}
+    .nav-item.active{background:linear-gradient(135deg,var(--accent-primary),var(--accent-secondary));color:#fff;box-shadow:0 4px 15px var(--accent-glow)}
+    .nav-badge{margin-left:auto;background:var(--error);color:#fff;font-size:10px;font-weight:700;padding:2px 7px;border-radius:12px;min-width:18px;text-align:center}
+    .main-content{background:var(--bg-primary);overflow:hidden;display:flex;flex-direction:column}
+    .content-header{background:var(--glass-bg);backdrop-filter:blur(10px);border-bottom:1px solid var(--border-color);padding:16px 24px;display:flex;justify-content:space-between;align-items:center}
+    .content-title{font-size:20px;font-weight:700}
+    .content-body{flex:1;padding:20px;overflow:auto;background:linear-gradient(180deg,transparent,rgba(139,105,20,.02))}
+    .page-content{display:none;animation:fade .4s ease}
+    .page-content.active{display:block}
+    @keyframes fade{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:translateY(0)}}
+    .dashboard-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:20px;margin-bottom:24px}
+    .metric-card{background:var(--bg-secondary);border:1px solid var(--border-color);border-radius:12px;padding:20px;transition:.3s}
+    .metric-card:hover{border-color:var(--accent-primary);background:var(--bg-tertiary);transform:translateY(-4px);box-shadow:0 10px 30px rgba(139,105,20,.2)}
+    .metric-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:16px}
+    .metric-label{font-size:11px;font-weight:600;color:var(--text-muted);text-transform:uppercase}
+    .metric-trend{font-size:11px;font-weight:700;padding:3px 8px;border-radius:6px}
+    .trend-up{background:rgba(16,185,129,.15);color:var(--success);border:1px solid rgba(16,185,129,.3)}
+    .metric-value{font-size:28px;font-weight:800;background:linear-gradient(135deg,var(--text-primary),var(--accent-bright));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
+    .data-table-container{background:var(--bg-secondary);border:1px solid var(--border-color);border-radius:12px;overflow:hidden;margin-bottom:20px;box-shadow:var(--shadow-md)}
+    .table-header{background:var(--bg-tertiary);padding:16px 20px;border-bottom:1px solid var(--border-color);display:flex;justify-content:space-between;align-items:center}
+    .table-title{font-size:15px;font-weight:700}
+    .data-table{width:100%;border-collapse:collapse}
+    .data-table th{background:var(--bg-quaternary);padding:12px 16px;text-align:left;font-size:11px;font-weight:700;color:var(--text-muted);text-transform:uppercase;letter-spacing:.5px;border-bottom:1px solid var(--border-color)}
+    .data-table td{padding:14px 16px;border-bottom:1px solid var(--border-color);font-size:12px}
+    .status-badge{padding:4px 10px;border-radius:6px;font-size:10px;font-weight:700;text-transform:uppercase;display:inline-block}
+    .status-hot{background:rgba(239,68,68,.15);color:var(--error);border:1px solid rgba(239,68,68,.4)}
+    .status-qualified{background:rgba(16,185,129,.15);color:var(--success);border:1px solid rgba(16,185,129,.4)}
+    .status-follow,.status-new{background:rgba(245,158,11,.15);color:var(--warning);border:1px solid rgba(245,158,11,.4)}
+    /* lead score chips */
+    .lead-score{padding:4px 10px;border-radius:20px;font-size:11px;font-weight:700;display:inline-block}
+    .score-high{background:rgba(16,185,129,.15);color:var(--success);border:1px solid rgba(16,185,129,.4)}
+    .score-medium{background:rgba(245,158,11,.15);color:var(--warning);border:1px solid rgba(245,158,11,.4)}
+    .score-low{background:rgba(239,68,68,.15);color:var(--error);border:1px solid rgba(239,68,68,.4)}
+    /* responsive */
+    @media (max-width:1200px){.dashboard-grid{grid-template-columns:repeat(2,1fr)}}
+    @media (max-width:768px){.terminal-container{grid-template-columns:1fr}.sidebar{display:none}.dashboard-grid{grid-template-columns:1fr}}
+  </style>
+</head>
+<body>
+  <div class="terminal-container">
+    <!-- ======= TOP BAR ======= -->
+    <div class="top-bar">
+      <div class="logo-section">
+        <div class="logo-icon">⚡</div>
+        <div class="logo-text">TVC Auto AI Pro</div>
+      </div>
+      <div class="market-data">
+        <div class="market-item"><span>Revenue</span><span class="market-value" id="topBarRevenue">$487K</span><span class="market-change positive" id="topBarRevenueChange">+12%</span></div>
+        <div class="market-item"><span>Leads</span><span class="market-value" id="topBarLeads">0</span><span class="market-change positive" id="topBarLeadsChange">+0</span></div>
+        <div class="market-item"><span>Calls</span><span class="market-value" id="topBarCalls">12</span><span class="market-change positive" id="topBarCallsChange">+3</span></div>
+        <div class="market-item"><span>Service</span><span class="market-value" id="topBarService">8</span><span class="market-change positive" id="topBarServiceChange">+2</span></div>
+      </div>
+      <div class="top-actions">
+        <div class="status-indicator"><div class="status-dot"></div><span>LIVE DATA</span></div>
+        <button class="btn btn-glass" onclick="toggleVoice()">🎤 Voice</button>
+        <button class="btn btn-primary" onclick="showPage('chat', document.querySelector('.nav-item[onclick*=\'chat\']'))">🤖 AI Terminal</button>
+      </div>
+    </div>
+
+    <!-- ======= SIDEBAR ======= -->
+    <div class="sidebar">
+      <div class="nav-section">
+        <div class="nav-title">Overview</div>
+        <div class="nav-item active" onclick="showPage('dashboard', this)"><div class="nav-icon">📊</div>Dashboard</div>
+        <div class="nav-item" onclick="showPage('analytics', this)"><div class="nav-icon">📈</div>Analytics</div>
+      </div>
+
+      <div class="nav-section">
+        <div class="nav-title">Operations</div>
+        <div class="nav-item" onclick="showPage('customers', this)"><div class="nav-icon">👥</div>Customers<div class="nav-badge" id="customerBadge">0</div></div>
+        <div class="nav-item" onclick="showPage('inventory', this)"><div class="nav-icon">🚗</div>Inventory<div class="nav-badge" id="inventoryBadge" style="background:var(--success);">0</div></div>
+        <div class="nav-item" onclick="showPage('service', this)"><div class="nav-icon">🔧</div>Service Center<div class="nav-badge" id="serviceBadge" style="background:var(--warning);">8</div></div>
+        <div class="nav-item" onclick="showPage('photos', this)"><div class="nav-icon">📸</div>Photo Manager<div class="nav-badge" id="photoBadge" style="background:var(--accent-primary);">0</div></div>
+      </div>
+
+      <div class="nav-section">
+        <div class="nav-title">Communication</div>
+        <div class="nav-item" onclick="showPage('calls', this)"><div class="nav-icon">📞</div>Call Center<div class="nav-badge" id="callBadge" style="background:var(--accent-primary);">12</div></div>
+        <div class="nav-item" onclick="showPage('emails', this)"><div class="nav-icon">📧</div>Email Center<div class="nav-badge" id="emailBadge" style="background:var(--success);">5</div></div>
+      </div>
+
+      <div class="nav-section">
+        <div class="nav-title">Intelligence</div>
+        <div class="nav-item" onclick="showPage('vin', this)"><div class="nav-icon">🔍</div>VIN Scanner</div>
+        <div class="nav-item" onclick="showPage('chat', this)"><div class="nav-icon">🤖</div>AI Terminal</div>
+      </div>
+    </div>
+
+    <!-- ======= MAIN ======= -->
+    <div class="main-content">
+      <div class="content-header">
+        <div class="content-title" id="contentTitle">Executive Dashboard</div>
+        <div class="content-actions">
+          <button class="btn btn-glass" onclick="exportData()">📊 Export</button>
+          <button class="btn btn-glass" onclick="refreshData()">🔄 Refresh</button>
+        </div>
+      </div>
+
+      <div class="content-body">
+        <!-- Dashboard -->
+        <div id="dashboard" class="page-content active">
+          <div class="dashboard-grid">
+            <div class="metric-card" onclick="showMetricDetails('revenue')">
+              <div class="metric-header"><div class="metric-label">Total Revenue</div><div class="metric-trend trend-up" id="dashboardRevenueTrend">+12%</div></div>
+              <div class="metric-value" id="dashboardRevenue">$487K</div>
+              <div class="metric-subtitle" id="dashboardRevenueSubtitle">vs $435K last month</div>
+            </div>
+            <div class="metric-card" onclick="showMetricDetails('leads')">
+              <div class="metric-header"><div class="metric-label">Active Leads</div><div class="metric-trend trend-up" id="dashboardLeadsTrend">+33%</div></div>
+              <div class="metric-value" id="dashboardLeads">0</div>
+              <div class="metric-subtitle" id="dashboardLeadsSubtitle">pipeline</div>
+            </div>
+            <div class="metric-card" onclick="showMetricDetails('service')">
+              <div class="metric-header"><div class="metric-label">Service Orders</div><div class="metric-trend trend-up" id="dashboardServiceTrend">+25%</div></div>
+              <div class="metric-value" id="dashboardService">8</div>
+              <div class="metric-subtitle" id="dashboardServiceSubtitle">5 active • 3 pending</div>
+            </div>
+            <div class="metric-card" onclick="showMetricDetails('saleTime')">
+              <div class="metric-header"><div class="metric-label">Avg Sale Time</div><div class="metric-trend trend-up">-7d</div></div>
+              <div class="metric-value" id="dashboardSaleTime">14</div>
+              <div class="metric-subtitle" id="dashboardSaleTimeSubtitle">days (industry: 21d)</div>
+            </div>
+          </div>
+
+          <div class="data-table-container">
+            <div class="table-header"><div class="table-title">Live Activity</div></div>
+            <div id="activityFeedContent" style="max-height:320px; overflow:auto; padding:10px 0 0 0;">
+              <div style="padding:14px 18px; color:var(--text-muted);">System ready.</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Service -->
+        <div id="service" class="page-content">
+          <div class="data-table-container">
+            <div class="table-header">
+              <div class="table-title">Service Work Orders</div>
+              <button class="btn btn-primary" onclick="createServiceOrder()">+ New Service Order</button>
+            </div>
+            <table class="data-table" id="serviceTable">
+              <thead>
+                <tr><th>Order #</th><th>Vehicle</th><th>Customer</th><th>Service Type</th><th>Technician</th><th>Status</th><th>Est. Cost</th><th>Actions</th></tr>
+              </thead>
+              <tbody id="serviceTableBody"></tbody>
+            </table>
+          </div>
+
+          <div id="serviceOrderForm" class="form-container" style="display:none; margin-top:20px;">
+            <div class="table-header" style="margin:0 0 20px 0;"><div class="table-title">Create Service Order</div></div>
+            <div class="form-group"><label class="form-label">Vehicle</label><select id="serviceVehicle" class="form-select"><option value="">Select vehicle...</option></select></div>
+            <div class="form-group"><label class="form-label">Service Type</label><select id="serviceType" class="form-select"><option value="reconditioning">Reconditioning</option><option value="oil-change">Oil Change</option><option value="inspection">Inspection</option><option value="brake-service">Brake Service</option><option value="tire-rotation">Tire Rotation</option><option value="major-repair">Major Repair</option><option value="warranty">Warranty Service</option></select></div>
+            <div class="form-group"><label class="form-label">Priority</label><select id="servicePriority" class="form-select"><option value="normal">Normal</option><option value="high">High</option><option value="urgent">Urgent</option></select></div>
+            <div class="form-group"><label class="form-label">Notes</label><textarea id="serviceNotes" class="form-textarea" rows="4" placeholder="Service notes..."></textarea></div>
+            <button class="btn btn-primary" onclick="submitServiceOrder()" style="width:100%;">Create Order</button>
+            <button class="btn btn-secondary" onclick="closeServiceForm()" style="width:100%; margin-top:10px;">Cancel</button>
+          </div>
+        </div>
+
+        <!-- AI Terminal -->
+        <div id="chat" class="page-content">
+          <div class="form-container" style="margin-bottom:20px;">
+            <div class="table-header" style="margin:0 0 12px 0;"><div class="table-title">AI Configuration</div></div>
+            <div style="display:grid; grid-template-columns:1fr 1fr; gap:16px;">
+              <div class="form-group"><label class="form-label">AI API Key</label><input type="password" id="aiApiKey" class="form-input" placeholder="Enter your AI API key..." onchange="updateAIStatus()"></div>
+              <div class="form-group"><label class="form-label">OpenPhone API Key</label><input type="password" id="openphoneApiKey" class="form-input" placeholder="Enter OpenPhone API key..." onchange="updateOpenPhoneStatus()"></div>
+            </div>
+            <div style="display:flex; gap:10px;"><button class="btn btn-primary" onclick="testAIConnection()">🔗 Test AI</button><button class="btn btn-primary" onclick="testOpenPhoneConnection()">📞 Test OpenPhone</button><button class="btn btn-glass" onclick="saveAIConfig()">💾 Save Configuration</button></div>
+            <div style="margin-top:10px; display:flex; align-items:center; gap:10px;"><div id="aiStatusDot" style="width:10px;height:10px;border-radius:50%;background:var(--error);"></div><div id="aiStatusText">AI Status: API Key Required</div></div>
+          </div>
+
+          <div class="chat-container">
+            <div class="table-header"><div class="table-title">AI Terminal Interface</div><div style="font-size:11px;color:var(--text-muted);">Advanced dealership intelligence</div></div>
+            <div class="chat-messages" id="chatMessages">
+              <div class="chat-message assistant">🤖 <strong>TVC AI Terminal Online</strong><br><br>Ask about service, customers, or inventory.</div>
+            </div>
+            <div style="padding:20px; border-top:1px solid var(--border-color); display:flex; gap:12px; background:var(--bg-tertiary);">
+              <input type="text" id="chatInput" class="form-input" placeholder="Ask for insights..." onkeypress="if(event.key==='Enter') sendMessage()">
+              <button class="btn btn-primary" onclick="sendMessage()">Execute</button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Customers -->
+        <div id="customers" class="page-content">
+          <div class="data-table-container">
+            <div class="table-header">
+              <div class="table-title">Customer Pipeline Management</div>
+              <div style="display:flex; gap:8px; align-items:center;">
+                <input type="text" id="customerSearch" class="form-input" placeholder="Search name, email, or phone..." style="width:280px;" oninput="filterCustomers()" />
+                <button class="btn btn-secondary btn-sm" onclick="document.getElementById('customerSearch').value=''; filterCustomers();">Clear</button>
+                <button class="btn btn-primary" onclick="openCustomerForm()">+ Add Customer</button>
+              </div>
+            </div>
+            <table class="data-table" id="customerTable">
+              <thead>
+                <tr>
+                  <th>Customer</th><th>Contact</th><th>Status</th><th>Lead Score</th><th>Potential Value</th><th>Interest</th><th>Last Contact</th><th>Actions</th>
+                </tr>
+              </thead>
+              <tbody id="customerTableBody">
+                <tr><td colspan="8" style="color:var(--text-muted); padding:16px;">Loading…</td></tr>
+              </tbody>
+            </table>
+          </div>
+
+          <div id="addCustomerForm" class="form-container" style="display:none; margin-top:20px;">
+            <div class="table-header" style="margin:0 0 20px 0;"><div class="table-title">Add New Customer</div></div>
+            <div class="form-group"><label class="form-label">Name</label><input type="text" id="newCustomerName" class="form-input" placeholder="John Smith" required></div>
+            <div class="form-group"><label class="form-label">Address</label><input type="text" id="newCustomerAddress" class="form-input" placeholder="123 Main St, City, ST"></div>
+            <div class="form-group"><label class="form-label">Email</label><input type="email" id="newCustomerEmail" class="form-input" placeholder="john@example.com"></div>
+            <div class="form-group"><label class="form-label">Phone</label><input type="tel" id="newCustomerPhone" class="form-input" placeholder="555-123-4567"></div>
+            <div class="form-group"><label class="form-label">Vehicle of Interest</label><input type="text" id="newCustomerVehicleInterest" class="form-input" placeholder="2024 BMW X5"></div>
+            <div class="form-group"><label class="form-label">Current Vehicle</label><input type="text" id="newCustomerCurrentVehicle" class="form-input" placeholder="2018 Honda Accord"></div>
+            <div class="form-group"><label class="form-label">Budget</label><input type="text" id="newCustomerBudget" class="form-input" placeholder="$50,000–$70,000"></div>
+            <div class="form-group"><label class="form-label">Status</label>
+              <select id="newCustomerStatus" class="form-select">
+                <option value="new">New Inquiry</option><option value="hot">Hot Lead</option><option value="qualified">Qualified</option><option value="follow">Follow Up</option>
+              </select>
+            </div>
+            <button class="btn btn-primary" onclick="addCustomer()" style="width:100%;">Add Customer</button>
+            <button class="btn btn-secondary" onclick="closeCustomerForm()" style="width:100%; margin-top:10px;">Cancel</button>
+          </div>
+        </div>
+
+        <!-- Inventory -->
+        <div id="inventory" class="page-content">
+          <div class="data-table-container">
+            <div class="table-header">
+              <div class="table-title">Vehicle Inventory Management</div>
+              <div style="display:flex; gap:8px;">
+                <input type="text" id="inventoryFilter" class="form-input" placeholder="Filter..." style="width:200px;" onkeyup="filterInventory()">
+                <button class="btn btn-primary" onclick="openVehicleForm()">+ Add Vehicle</button>
+              </div>
+            </div>
+            <table class="data-table" id="inventoryTable">
+              <thead><tr><th>Vehicle</th><th>VIN</th><th>Status</th><th>Price</th><th>Days in Stock</th><th>Service Status</th><th>Actions</th></tr></thead>
+              <tbody id="inventoryTableBody"></tbody>
+            </table>
+          </div>
+
+          <div id="addVehicleForm" class="form-container" style="display:none; margin-top:20px;">
+            <div class="table-header" style="margin:0 0 20px 0;"><div class="table-title">Add New Vehicle</div></div>
+            <div class="form-group"><label class="form-label">VIN</label>
+              <div style="display:flex; gap:8px;"><input type="text" id="newVehicleVIN" class="form-input" placeholder="Enter 17-character VIN" maxlength="17"><button class="btn btn-primary" onclick="decodeVIN()">Decode</button></div>
+            </div>
+            <div class="form-group"><label class="form-label">Make</label><input type="text" id="newVehicleMake" class="form-input" placeholder="Toyota"></div>
+            <div class="form-group"><label class="form-label">Model</label><input type="text" id="newVehicleModel" class="form-input" placeholder="Camry"></div>
+            <div class="form-group"><label class="form-label">Year</label><input type="number" id="newVehicleYear" class="form-input" placeholder="2024"></div>
+            <div class="form-group"><label class="form-label">Price</label><input type="number" id="newVehiclePrice" class="form-input" placeholder="32000"></div>
+            <div class="form-group"><label class="form-label">Status</label>
+              <select id="newVehicleStatus" class="form-select"><option value="available">Available</option><option value="reserved">Reserved</option><option value="sold">Sold</option><option value="incoming">Incoming</option></select>
+            </div>
+            <button class="btn btn-primary" onclick="addVehicle()" style="width:100%;">Add Vehicle</button>
+            <button class="btn btn-secondary" onclick="closeVehicleForm()" style="width:100%; margin-top:10px;">Cancel</button>
+          </div>
+        </div>
+
+        <!-- Photos -->
+        <div id="photos" class="page-content">
+          <div class="form-container">
+            <div class="table-header" style="margin:0 0 16px 0;"><div class="table-title">Vehicle Photo Management</div></div>
+            <div style="display:flex; gap:10px; margin-bottom:16px; flex-wrap:wrap;">
+              <button class="btn btn-primary" onclick="startCamera()">📷 Start Camera</button>
+              <button class="btn btn-secondary" onclick="stopCamera()">⏹️ Stop Camera</button>
+              <button class="btn btn-primary" id="captureBtn" onclick="capturePhoto()" disabled>📸 Capture</button>
+              <input type="file" id="fileInput" accept="image/*" style="display:none" onchange="handleFileUpload(event)">
+              <button class="btn btn-secondary" onclick="document.getElementById('fileInput').click()">📁 Upload</button>
+            </div>
+            <div style="display:flex; gap:16px; align-items:flex-start; flex-wrap:wrap;">
+              <video id="cameraFeed" style="display:none; width:320px; height:240px; background:var(--bg-tertiary); border:2px solid var(--border-accent); border-radius:12px;" autoplay playsinline></video>
+              <canvas id="photoCanvas" style="display:none;"></canvas>
+              <div>
+                <div class="form-group"><label class="form-label">Select Vehicle</label><select id="vehicleSelect" class="form-select"><option value="">Choose vehicle...</option></select></div>
+                <div class="form-group"><label class="form-label">Photo Type</label><select id="photoType" class="form-select"><option value="exterior">Exterior</option><option value="interior">Interior</option><option value="engine">Engine</option><option value="damage">Damage/Issues</option></select></div>
+              </div>
+            </div>
+          </div>
+          <div class="data-table-container">
+            <div class="table-header"><div class="table-title">Photo Gallery</div></div>
+            <div id="photoGallery" style="display:grid; grid-template-columns:repeat(auto-fill, minmax(160px, 1fr)); gap:16px; padding:16px;">
+              <div style="grid-column:1 / -1; text-align:center; color:var(--text-muted); padding:40px;">No photos yet. Use the camera or upload button to add photos.</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Calls -->
+        <div id="calls" class="page-content">
+          <div class="data-table-container">
+            <div class="table-header"><div class="table-title">Call History & Transcripts</div><button class="btn btn-primary" onclick="simulateNewCall()">📞 Simulate Call</button></div>
+            <table class="data-table" id="callTable">
+              <thead><tr><th>Date/Time</th><th>Phone Number</th><th>Customer</th><th>Duration</th><th>Lead Score</th><th>Status</th><th>Actions</th></tr></thead>
+              <tbody id="callTableBody"></tbody>
+            </table>
+          </div>
+        </div>
+
+        <!-- Emails -->
+        <div id="emails" class="page-content">
+          <div class="data-table-container">
+            <div class="table-header"><div class="table-title">Email Campaign History</div><button class="btn btn-primary" onclick="createEmailCampaign()">✉️ New Campaign</button></div>
+            <table class="data-table" id="emailTable">
+              <thead><tr><th>Date</th><th>Recipient</th><th>Subject</th><th>Type</th><th>Status</th><th>Actions</th></tr></thead>
+              <tbody id="emailTableBody"></tbody>
+            </table>
+          </div>
+          <div class="form-container">
+            <div class="table-header" style="margin:0 0 16px 0;"><div class="table-title">Email Templates</div></div>
+            <div class="form-group"><label class="form-label">Template Type</label><select id="templateType" class="form-select"><option value="follow-up">Follow-up</option><option value="service">Service Reminder</option><option value="promotion">Promotion</option></select></div>
+            <div class="form-group"><label class="form-label">Subject</label><input type="text" id="emailSubject" class="form-input" placeholder="Email subject..."></div>
+            <div class="form-group"><label class="form-label">Body</label><textarea id="emailBody" class="form-textarea" rows="6" placeholder="Email content..."></textarea></div>
+            <button class="btn btn-primary" onclick="saveEmailTemplate()">💾 Save Template</button>
+          </div>
+        </div>
+
+        <!-- VIN -->
+        <div id="vin" class="page-content">
+          <div class="form-container">
+            <div class="table-header" style="margin:0 0 20px 0;"><div class="table-title">VIN Intelligence Scanner</div><div style="font-size:11px;color:var(--text-muted);">Powered by NHTSA API</div></div>
+            <div class="form-group"><label class="form-label">Vehicle Identification Number</label><input type="text" id="vinInput" class="form-input" placeholder="Enter 17-character VIN" maxlength="17"></div>
+            <button class="btn btn-primary" onclick="scanVIN()" style="width:100%;">🔍 Decode VIN</button>
+            <div id="vinResult" style="display:none;"><div style="margin-top:20px; background:linear-gradient(135deg, var(--bg-tertiary), var(--bg-quaternary)); border:1px solid var(--accent-primary); border-radius:12px; padding:20px;"><div id="vinData"></div></div></div>
+          </div>
+        </div>
+
+        <!-- Analytics -->
+        <div id="analytics" class="page-content">
+          <div class="dashboard-grid">
+            <div class="metric-card"><div class="metric-header"><div class="metric-label">Revenue Growth</div><div class="metric-trend trend-up">+18.2%</div></div><div class="metric-value">📈</div><div class="metric-subtitle">YoY performance</div></div>
+            <div class="metric-card"><div class="metric-header"><div class="metric-label">Service Revenue</div><div class="metric-trend trend-up">+22%</div></div><div class="metric-value">$47.5K</div><div class="metric-subtitle">This month</div></div>
+            <div class="metric-card"><div class="metric-header"><div class="metric-label">Customer Satisfaction</div><div class="metric-trend trend-up">+2%</div></div><div class="metric-value">96%</div><div class="metric-subtitle">Excellent rating</div></div>
+            <div class="metric-card"><div class="metric-header"><div class="metric-label">Market Share</div><div class="metric-trend trend-up">+1.3%</div></div><div class="metric-value">15.2%</div><div class="metric-subtitle">Regional market</div></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ======= APP SCRIPT ======= -->
   <script>
-    // 1) Configure your Supabase project (keep these values)
-    window.SUPABASE_URL = window.SUPABASE_URL || "https://zpgdsgutiheilshgrnwl.supabase.co";
-    window.SUPABASE_ANON_KEY = window.SUPABASE_ANON_KEY || "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InpwZ2RzZ3V0aWhlaWxzaGdybndsIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTUwMjA3NDMsImV4cCI6MjA3MDU5Njc0M30.LC-ro-E2k_Xb7UK337QP8V2HddpftjV5g1ZsI6D0c8k";
+    /* STATE */
+    let cameraStream=null, isListening=false, currentAIProvider='gemini', aiApiKey=null, openphoneApiKey=null, vehiclePhotos=[];
+    let dashboardMetrics={revenue:{value:487000,change:.12,prevValue:435000},leads:{value:0,change:1,prevValue:0},service:{value:8,change:2,prevValue:6},saleTime:{value:14,change:-7,prevValue:21},calls:{value:12,change:3,prevValue:9}};
+    let customers=[]; window.customers=customers;
 
-    // 2) Create the client
-    window.db = (() => { try { return supabase.createClient(window.SUPABASE_URL, window.SUPABASE_ANON_KEY); } catch(e) { console.warn('Supabase init failed:', e?.message||e); return null; } })();
+    let serviceOrders=[
+      {id:'SO-001',vehicle:'2024 Honda Accord',customer:'John Smith',serviceType:'Oil Change',technician:'Mike Tech',status:'in-progress',cost:85,date:new Date()},
+      {id:'SO-002',vehicle:'2024 BMW X5',customer:'Sarah Johnson',serviceType:'Reconditioning',technician:'Steve Expert',status:'pending',cost:1250,date:new Date()},
+      {id:'SO-003',vehicle:'2024 Toyota Camry',customer:'Mike Wilson',serviceType:'30K Service',technician:'Tom Pro',status:'scheduled',cost:450,date:new Date()},
+    ];
 
-    // 3) Load customers from Supabase into the SAME array the table uses
-    async function loadCustomersFromDB(){
-      if(!window.db) return;
-      try{
-        // attempt to order by created_at (if present)
-        let { data, error } = await window.db
-          .from('customers')
-          .select('id,"ID","Name",name,"Email",email,"Phone",phone,"Vehicle of interest",vehicle_interest,"Current Vehicle/Trade in",current_vehicle,"Budget",budget,"Address",address,created_at')
-          .order('created_at', { ascending:false });
+    let inventory=[
+      {id:101,vehicle:'2024 Toyota Camry',vin:'1HGBH41JXMN109186',status:'available',price:32000,daysInStock:15,serviceStatus:'ready',make:'Toyota',model:'Camry',year:2024},
+      {id:102,vehicle:'2024 Honda Accord',vin:'2HGBH41JXMN109187',status:'sold',price:35000,daysInStock:8,serviceStatus:'completed',make:'Honda',model:'Accord',year:2024},
+      {id:103,vehicle:'2024 Ford F-150',vin:'3HGBH41JXMN109188',status:'reserved',price:45000,daysInStock:21,serviceStatus:'pending',make:'Ford',model:'F-150',year:2024},
+    ];
 
-        // If created_at doesn’t exist, try again without order
-        if(error && /created_at/i.test(error.message)){
-          ({ data, error } = await window.db
-            .from('customers')
-            .select('id,"ID","Name",name,"Email",email,"Phone",phone,"Vehicle of interest",vehicle_interest,"Current Vehicle/Trade in",current_vehicle,"Budget",budget,"Address",address'));
-        }
-        if(error){ console.warn('Load failed:', error.message); return; }
+    let callHistory=[
+      {id:1,dateTime:new Date(Date.now()-2*60*60*1000),phoneNumber:'555-0123',customer:'John Smith',duration:'12:45',leadScore:9,status:'transcribed'},
+      {id:2,dateTime:new Date(Date.now()-4*60*60*1000),phoneNumber:'555-0124',customer:'Sarah Johnson',duration:'8:32',leadScore:8,status:'transcribed'},
+    ];
+    let emailHistory=[
+      {id:1,date:new Date(),recipient:'john@email.com',subject:'Your BMW X5 Inquiry',type:'follow-up',status:'delivered'},
+      {id:2,date:new Date(),recipient:'sarah@email.com',subject:'Tesla Model Y Information',type:'follow-up',status:'opened'},
+    ];
 
-        // Reset and map rows
-        customers.length = 0; // keep reference
-        (data||[]).forEach(row=>{
-          const full=(row["Name"] ?? row.name ?? '').toString().trim();
-          const parts=full.split(/\s+/); const first=parts.shift()||''; const last=parts.join(' ');
-          customers.push({
-            id: row["ID"] ?? row.id,
-            firstName:first, lastName:last,
-            email: row["Email"] ?? row.email ?? '',
-            phone: row["Phone"] ?? row.phone ?? '',
-            vehicleInterest: row["Vehicle of interest"] ?? row.vehicle_interest ?? '',
-            budget: row["Budget"] ?? row.budget ?? '',
-            address: row["Address"] ?? row.address ?? '',
-            currentVehicle: row["Current Vehicle/Trade in"] ?? row.current_vehicle ?? '',
-            status:'new', leadScore:8,
-            value: parseInt(String(row["Budget"] ?? row.budget ?? '').replace(/[^0-9]/g,'')) || 0,
-            lastContact:'—'
-          });
-        });
+    /* INIT */
+    document.addEventListener('DOMContentLoaded', () => {
+      updateDashboardMetrics();
+      renderServiceTable();
+      renderCustomerTable();
+      renderInventoryTable();
+      renderCallTable();
+      renderEmailTable();
+      populateVehicleDropdowns();
+    });
 
-        renderCustomerTable();
-        updateDashboardMetrics();
-        console.info('Loaded customers from Supabase:', customers.length);
-      }catch(e){ console.warn('Load crashed:', e?.message||e); }
+    /* UTILS */
+    const formatCurrency=v=>'$'+Number(v||0).toLocaleString();
+    function getLeadScoreClass(s){if(s>=8)return'score-high';if(s>=6)return'score-medium';return'score-low';}
+    function addActivity(icon,title,time){const feed=document.getElementById('activityFeedContent');if(!feed)return;const item=document.createElement('div');item.style.padding='14px 18px';item.innerHTML=`${icon} ${title} <span style="color:var(--text-muted);float:right">${time}</span>`;feed.prepend(item);while(feed.children.length>10)feed.removeChild(feed.lastChild);}
+
+    /* NAV */
+    function showPage(pageId, el){
+      document.querySelectorAll('.page-content').forEach(p=>p.classList.remove('active'));
+      document.getElementById(pageId)?.classList.add('active');
+      document.querySelectorAll('.nav-item').forEach(i=>i.classList.remove('active'));
+      if(el) el.classList.add('active');
+      const titles={dashboard:'Executive Dashboard',service:'Service Center Operations',customers:'Customer Pipeline',inventory:'Inventory Management',photos:'Photo Manager',vin:'VIN Intelligence',analytics:'Performance Analytics',chat:'AI Terminal',calls:'Call Center Management',emails:'Email Campaign Center'};
+      document.getElementById('contentTitle').textContent=titles[pageId]||'Dashboard';
+      if(pageId==='photos') populateVehicleDropdowns();
     }
 
-    // 4) Add Customer -> insert into Supabase, then reload
+    /* DASHBOARD */
+    function updateDashboardMetrics(){
+      document.getElementById('topBarRevenue').textContent=formatCurrency(dashboardMetrics.revenue.value);
+      document.getElementById('topBarRevenueChange').textContent=`+${dashboardMetrics.revenue.change*100}%`;
+      document.getElementById('topBarLeads').textContent=customers.length;
+      document.getElementById('topBarLeadsChange').textContent=`+${dashboardMetrics.leads.change}`;
+      document.getElementById('topBarCalls').textContent=callHistory.length;
+      document.getElementById('topBarCallsChange').textContent=`+${dashboardMetrics.calls.change}`;
+      document.getElementById('topBarService').textContent=serviceOrders.length;
+      document.getElementById('topBarServiceChange').textContent=`+${dashboardMetrics.service.change}`;
+
+      document.getElementById('dashboardRevenue').textContent=formatCurrency(dashboardMetrics.revenue.value);
+      document.getElementById('dashboardRevenueTrend').textContent=`+${dashboardMetrics.revenue.change*100}%`;
+      document.getElementById('dashboardRevenueSubtitle').textContent=`vs ${formatCurrency(dashboardMetrics.revenue.prevValue)} last month`;
+      document.getElementById('dashboardLeads').textContent=customers.length;
+      const hot=customers.filter(c=>c.status==='hot').length, q=customers.filter(c=>c.status==='qualified').length, f=customers.filter(c=>c.status==='follow').length;
+      document.getElementById('dashboardLeadsSubtitle').textContent=`${hot} hot • ${q} qualified • ${f} follow-up`;
+      document.getElementById('dashboardService').textContent=serviceOrders.length;
+      const active=serviceOrders.filter(o=>o.status==='in-progress').length, pending=serviceOrders.filter(o=>o.status==='pending').length;
+      document.getElementById('dashboardServiceSubtitle').textContent=`${active} active • ${pending} pending`;
+      document.getElementById('dashboardSaleTime').textContent=dashboardMetrics.saleTime.value;
+
+      document.getElementById('customerBadge').textContent=customers.length;
+      document.getElementById('inventoryBadge').textContent=inventory.filter(v=>v.status==='available').length;
+      document.getElementById('serviceBadge').textContent=serviceOrders.length;
+      document.getElementById('callBadge').textContent=callHistory.length;
+      document.getElementById('emailBadge').textContent=emailHistory.length;
+      document.getElementById('photoBadge').textContent=vehiclePhotos.length;
+    }
+    function showMetricDetails(metric){
+      const messages={revenue:`Revenue Analysis: ${formatCurrency(dashboardMetrics.revenue.value)} total, up ${dashboardMetrics.revenue.change*100}% from last month.`,leads:`Lead Analysis: ${customers.length} active leads with average score ${(customers.reduce((s,c)=>s+(c.leadScore||7),0)/(customers.length||1)).toFixed(1)}/10`,service:`Service: ${serviceOrders.length} orders, revenue ${formatCurrency(serviceOrders.reduce((s,o)=>s+o.cost,0))}`,saleTime:`Sales Efficiency: ${dashboardMetrics.saleTime.value} days`};
+      addChatMessage('assistant', messages[metric]||'Analyzing metrics...'); showPage('chat', document.querySelector('.nav-item[onclick*="chat"]'));
+    }
+
+    /* CUSTOMERS */
+    function renderCustomerTable(){
+      const tbody=document.getElementById('customerTableBody'); if(!tbody) return;
+      tbody.innerHTML='';
+      if(!Array.isArray(customers) || customers.length===0){
+        tbody.innerHTML='<tr><td colspan="8" style="color:var(--text-muted); padding:16px;">No customers yet.</td></tr>'; return;
+      }
+      customers.forEach(c=>{
+        const row=tbody.insertRow();
+        row.innerHTML=`
+          <td>${c.firstName||''} ${c.lastName||''}</td>
+          <td>${c.email||''}<br><span style="font-size:11px;">${c.phone||''}</span></td>
+          <td><span class="status-badge status-${c.status||'new'}">${c.status||'new'}</span></td>
+          <td><span class="lead-score ${getLeadScoreClass(c.leadScore||7)}">${c.leadScore||7}</span></td>
+          <td>${formatCurrency(c.value||0)}</td>
+          <td>${c.vehicleInterest||''}<br><span style="font-size:11px;">${c.budget||''}</span></td>
+          <td>${c.lastContact||'—'}</td>
+          <td>
+            <button class="btn btn-sm btn-primary" onclick="viewCustomer('${String(c.id)}')">View</button>
+            <button class="btn btn-sm btn-secondary" onclick="deleteCustomer('${String(c.id)}')">Delete</button>
+          </td>`;
+      });
+    }
+    function filterCustomers(){
+      const q=(document.getElementById('customerSearch')?.value||'').toLowerCase().trim();
+      document.querySelectorAll('#customerTableBody tr').forEach(row=>{
+        const text=row.textContent.toLowerCase(); row.style.display=(!q || text.includes(q))?'':'none';
+      });
+    }
+    function openCustomerForm(){document.getElementById('addCustomerForm').style.display='block'}
+    function closeCustomerForm(){document.getElementById('addCustomerForm').style.display='none'}
+    function viewCustomer(id){const c=customers.find(x=>String(x.id)===String(id)); if(!c){alert('Customer not found');return;}
+      alert(`Customer Details:\n\nName: ${c.firstName||''} ${c.lastName||''}\nEmail: ${c.email||''}\nPhone: ${c.phone||''}\nInterest: ${c.vehicleInterest||''}\nBudget: ${c.budget||''}\nLead Score: ${c.leadScore||'-'}`);}
+    async function deleteCustomer(id){
+      // Try to delete from Supabase (works if you later add a DELETE policy)
+      if (window.db) {
+        try {
+          let { error } = await window.db.from('customers').delete().eq('id', id);
+          if (error && /column "id"/i.test(error.message)) {
+            // your PK might be "ID" instead of "id"
+            ({ error } = await window.db.from('customers').delete().eq('ID', id));
+          }
+        } catch(_) {}
+      }
+      customers = customers.filter(x=>String(x.id)!==String(id));
+      renderCustomerTable(); updateDashboardMetrics();
+    }
+
+    /* INVENTORY */
+    function renderInventoryTable(){
+      const tbody=document.getElementById('inventoryTableBody'); if(!tbody) return;
+      tbody.innerHTML=''; inventory.forEach(v=>{const r=tbody.insertRow(); r.innerHTML=`<td>${v.vehicle}</td><td style="font-family:monospace;font-size:11px;">${v.vin}</td><td><span class="status-badge status-${v.status}">${v.status}</span></td><td>${formatCurrency(v.price)}</td><td>${v.daysInStock}</td><td><span class="status-badge status-${v.serviceStatus==='ready'?'completed':v.serviceStatus}">${v.serviceStatus}</span></td><td><button class="btn btn-sm btn-primary" onclick="viewVehicle(${v.id})">View</button><button class="btn btn-sm btn-secondary" onclick="deleteVehicle(${v.id})">Delete</button></td>`;});
+    }
+    function filterInventory(){const f=document.getElementById('inventoryFilter').value.toLowerCase(); document.querySelectorAll('#inventoryTableBody tr').forEach(r=>{const t=r.textContent.toLowerCase(); r.style.display=t.includes(f)?'':''})}
+    function openVehicleForm(){document.getElementById('addVehicleForm').style.display='block'}
+    function closeVehicleForm(){document.getElementById('addVehicleForm').style.display='none'}
+    function addVehicle(){const vin=newVehicleVIN.value, make=newVehicleMake.value, model=newVehicleModel.value, year=newVehicleYear.value, price=newVehiclePrice.value, status=newVehicleStatus.value;
+      if(make&&model&&year&&price){const v={id:Date.now(),vehicle:`${year} ${make} ${model}`,vin:vin||'PENDING',status,price:parseInt(price),daysInStock:0,serviceStatus:'pending',make,model,year:parseInt(year)}; inventory.push(v); renderInventoryTable(); updateDashboardMetrics(); closeVehicleForm(); addActivity('🚗',`New vehicle: ${v.vehicle}`,'Just now'); newVehicleVIN.value=newVehicleMake.value=newVehicleModel.value=newVehicleYear.value=newVehiclePrice.value='' }}
+    async function decodeVIN(){const vin=newVehicleVIN.value; if(vin.length!==17){alert('Please enter a valid 17-character VIN');return;} try{const r=await fetch(`https://vpic.nhtsa.dot.gov/api/vehicles/decodevin/${vin}?format=json`); const d=await r.json(); const g=v=>d.Results.find(x=>x.Variable===v)?.Value||''; newVehicleMake.value=g('Make'); newVehicleModel.value=g('Model'); newVehicleYear.value=g('Model Year'); alert('VIN decoded successfully!'); }catch(e){alert('Error decoding VIN. Please enter details manually.');}}
+    function viewVehicle(id){const v=inventory.find(x=>x.id===id); if(v) alert(`Vehicle Details:\n\n${v.vehicle}\nVIN: ${v.vin}\nPrice: ${formatCurrency(v.price)}\nStatus: ${v.status}\nDays in Stock: ${v.daysInStock}\nService: ${v.serviceStatus}`)}
+    function deleteVehicle(id){if(confirm('Delete this vehicle?')){inventory=inventory.filter(v=>v.id!==id); renderInventoryTable(); updateDashboardMetrics();}}
+    function populateVehicleDropdowns(){const sel=document.getElementById('vehicleSelect'), serv=document.getElementById('serviceVehicle'); if(sel){sel.innerHTML='<option value="">Choose vehicle...</option>'; inventory.forEach(v=>{const o=document.createElement('option'); o.value=v.id; o.textContent=v.vehicle; sel.appendChild(o);});} if(serv){serv.innerHTML='<option value="">Select vehicle...</option>'; inventory.forEach(v=>{const o=document.createElement('option'); o.value=v.id; o.textContent=v.vehicle; serv.appendChild(o);});}}
+
+    /* PHOTOS */
+    async function startCamera(){try{cameraStream=await navigator.mediaDevices.getUserMedia({video:{facingMode:'environment'}}); const v=document.getElementById('cameraFeed'); v.srcObject=cameraStream; v.style.display='block'; document.getElementById('captureBtn').disabled=false; addActivity('📷','Camera started','Just now');}catch(e){alert('Camera access denied.')}} 
+    function stopCamera(){if(cameraStream){cameraStream.getTracks().forEach(t=>t.stop()); cameraStream=null; const v=document.getElementById('cameraFeed'); v.style.display='none'; document.getElementById('captureBtn').disabled=true; addActivity('📷','Camera stopped','Just now');}}
+    function capturePhoto(){const video=document.getElementById('cameraFeed'); const canvas=document.getElementById('photoCanvas'); const vehicleId=document.getElementById('vehicleSelect').value; const type=document.getElementById('photoType').value; if(!vehicleId){alert('Select a vehicle first');return;} canvas.width=video.videoWidth; canvas.height=video.videoHeight; const ctx=canvas.getContext('2d'); ctx.drawImage(video,0,0); const data=canvas.toDataURL('image/jpeg'); const vehicle=inventory.find(v=>v.id==vehicleId); const photo={id:Date.now(),vehicleId,vehicleName:vehicle.vehicle,type,data,timestamp:new Date()}; vehiclePhotos.push(photo); displayPhotos(); updateDashboardMetrics(); addActivity('📸',`Photo captured: ${vehicle.vehicle}`,'Just now');}
+    function handleFileUpload(e){const file=e.target.files[0]; const vehicleId=document.getElementById('vehicleSelect').value; const type=document.getElementById('photoType').value; if(!vehicleId){alert('Select a vehicle first');return;} if(file){const r=new FileReader(); r.onload=function(x){const vehicle=inventory.find(v=>v.id==vehicleId); const photo={id:Date.now(),vehicleId,vehicleName:vehicle.vehicle,type,data:x.target.result,timestamp:new Date()}; vehiclePhotos.push(photo); displayPhotos(); updateDashboardMetrics(); addActivity('📸',`Photo uploaded: ${vehicle.vehicle}`,'Just now');}; r.readAsDataURL(file);}}
+    function displayPhotos(){const g=document.getElementById('photoGallery'); if(!g)return; if(vehiclePhotos.length===0){g.innerHTML='<div style="grid-column:1 / -1; text-align:center; color:var(--text-muted); padding:40px;">No photos yet. Use the camera or upload button to add photos.</div>'; return;} g.innerHTML=''; vehiclePhotos.forEach(p=>{const d=document.createElement('div'); d.style.position='relative'; d.style.border='2px solid var(--border-accent)'; d.style.borderRadius='12px'; d.style.overflow='hidden'; d.innerHTML=`<img src="${p.data}" alt="${p.type}" style="width:100%;height:100%;object-fit:cover"><div style="position:absolute;bottom:0;left:0;right:0;background:linear-gradient(transparent,rgba(0,0,0,.8));padding:8px;color:#fff;font-size:10px;">${p.vehicleName} — ${p.type}</div><button onclick="deletePhoto(${p.id})" style="position:absolute;top:4px;right:4px;background:var(--error);color:#fff;border:none;border-radius:50%;width:20px;height:20px;cursor:pointer">×</button>`; g.appendChild(d);});}
+    function deletePhoto(id){if(confirm('Delete this photo?')){vehiclePhotos=vehiclePhotos.filter(p=>p.id!==id); displayPhotos(); updateDashboardMetrics();}}
+
+    /* SERVICE */
+    function renderServiceTable(){const tbody=document.getElementById('serviceTableBody'); if(!tbody)return; tbody.innerHTML=''; serviceOrders.forEach(o=>{const r=tbody.insertRow(); r.innerHTML=`<td>${o.id}</td><td>${o.vehicle}</td><td>${o.customer}</td><td>${o.serviceType}</td><td>${o.technician}</td><td><span class="status-badge status-${o.status}">${o.status}</span></td><td>${formatCurrency(o.cost)}</td><td><button class="btn btn-sm btn-primary" onclick="viewServiceOrder('${o.id}')">View</button><button class="btn btn-sm btn-secondary" onclick="updateServiceStatus('${o.id}')">Update</button></td>`;});}
+    function createServiceOrder(){const f=document.getElementById('serviceOrderForm'); if(f){f.style.display='block'; populateVehicleDropdowns();}}
+    function closeServiceForm(){const f=document.getElementById('serviceOrderForm'); if(f) f.style.display='none';}
+    function submitServiceOrder(){const vehicle=serviceVehicle.value, type=serviceType.value, priority=servicePriority.value; if(vehicle&&type){const v=inventory.find(x=>x.id==vehicle)?.vehicle||'Unknown'; const o={id:`SO-${String(serviceOrders.length+1).padStart(3,'0')}`,vehicle:v,customer:'Walk-in',serviceType:type,technician:'Unassigned',status:priority==='urgent'?'in-progress':'pending',cost:Math.floor(Math.random()*500)+100,date:new Date()}; serviceOrders.push(o); renderServiceTable(); closeServiceForm(); addActivity('🔧',`Service order created: ${o.id}`,'Just now'); updateDashboardMetrics();}}
+    function viewServiceOrder(id){const o=serviceOrders.find(x=>x.id===id); if(o) alert(`Service Order ${o.id}\n\nVehicle: ${o.vehicle}\nCustomer: ${o.customer}\nService: ${o.serviceType}\nStatus: ${o.status}\nCost: ${formatCurrency(o.cost)}`)}
+    function updateServiceStatus(id){const o=serviceOrders.find(x=>x.id===id); if(o){const s=['pending','in-progress','completed']; o.status=s[(s.indexOf(o.status)+1)%s.length]; renderServiceTable(); addActivity('🔧',`Service ${id} status: ${o.status}`,'Just now');}}
+
+    /* CALLS / EMAILS */
+    function renderCallTable(){const tbody=document.getElementById('callTableBody'); if(!tbody)return; tbody.innerHTML=''; callHistory.forEach(c=>{const r=tbody.insertRow(); r.innerHTML=`<td>${c.dateTime.toLocaleDateString()}<br><span style="font-size:11px;">${c.dateTime.toLocaleTimeString()}</span></td><td>${c.phoneNumber}</td><td>${c.customer}</td><td>${c.duration}</td><td><span class="lead-score ${getLeadScoreClass(c.leadScore)}">${c.leadScore}</span></td><td><span class="status-badge status-${c.status}">${c.status}</span></td><td><button class="btn btn-sm btn-primary" onclick="viewCallTranscript(${c.id})">Transcript</button><button class="btn btn-sm btn-secondary" onclick="deleteCall(${c.id})">Delete</button></td>`;});}
+    function simulateNewCall(){const c={id:Date.now(),dateTime:new Date(),phoneNumber:'555-'+Math.floor(Math.random()*9000+1000),customer:'New Customer',duration:Math.floor(Math.random()*15)+':'+String(Math.floor(Math.random()*60)).padStart(2,'0'),leadScore:Math.floor(Math.random()*4)+6,status:'transcribed'}; callHistory.unshift(c); renderCallTable(); updateDashboardMetrics(); addActivity('📞','New call received','Just now'); alert('New call simulated successfully!');}
+    function viewCallTranscript(id){const c=callHistory.find(x=>x.id===id); if(c) alert(`Call Transcript\n\nCustomer: ${c.customer}\nPhone: ${c.phoneNumber}\nDuration: ${c.duration}\nLead Score: ${c.leadScore}/10\n\n[Transcript here]`)}
+    function deleteCall(id){if(confirm('Delete this call record?')){callHistory=callHistory.filter(c=>c.id!==id); renderCallTable(); updateDashboardMetrics();}}
+    function renderEmailTable(){const tbody=document.getElementById('emailTableBody'); if(!tbody)return; tbody.innerHTML=''; emailHistory.forEach(e=>{const r=tbody.insertRow(); r.innerHTML=`<td>${e.date.toLocaleDateString()}<br><span style="font-size:11px;">${e.date.toLocaleTimeString()}</span></td><td>${e.recipient}</td><td>${e.subject}</td><td><span class="status-badge status-${e.type}">${e.type}</span></td><td><span class="status-badge status-${e.status}">${e.status}</span></td><td><button class="btn btn-sm btn-primary" onclick="viewEmail(${e.id})">View</button><button class="btn btn-sm btn-secondary" onclick="deleteEmail(${e.id})">Delete</button></td>`;});}
+    function createEmailCampaign(){const subject=prompt('Email subject:'); if(subject){const e={id:Date.now(),date:new Date(),recipient:'all@customers.com',subject,type:'campaign',status:'sent'}; emailHistory.unshift(e); renderEmailTable(); updateDashboardMetrics(); addActivity('📧','Email campaign sent','Just now'); alert('Email campaign created!');}}
+    function saveEmailTemplate(){const s=emailSubject.value,b=emailBody.value; if(s&&b){alert('Email template saved successfully!'); addActivity('💾','Email template saved','Just now');}}
+    function viewEmail(id){const e=emailHistory.find(x=>x.id===id); if(e) alert(`Email Details\n\nTo: ${e.recipient}\nSubject: ${e.subject}\nType: ${e.type}\nStatus: ${e.status}`)}
+    function deleteEmail(id){if(confirm('Delete this email?')){emailHistory=emailHistory.filter(e=>e.id!==id); renderEmailTable(); updateDashboardMetrics();}}
+
+    /* VIN + CHAT + MISC */
+    async function scanVIN(){const vin=vinInput.value; if(vin.length!==17){alert('Please enter a valid 17-character VIN');return;} const wrap=document.getElementById('vinResult'), box=document.getElementById('vinData'); box.innerHTML='<div style="text-align:center;">🔍 Decoding VIN...</div>'; wrap.style.display='block'; try{const r=await fetch(`https://vpic.nhtsa.dot.gov/api/vehicles/decodevin/${vin}?format=json`); const d=await r.json(); const g=v=>d.Results.find(x=>x.Variable===v)?.Value||'N/A'; box.innerHTML=`<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:20px;"><div><div style="font-size:10px;color:var(--text-muted);text-transform:uppercase;">Make</div><div style="font-size:14px;font-weight:600;">${g('Make')}</div></div><div><div style="font-size:10px;color:var(--text-muted);text-transform:uppercase;">Model</div><div style="font-size:14px;font-weight:600;">${g('Model')}</div></div><div><div style="font-size:10px;color:var(--text-muted);text-transform:uppercase;">Year</div><div style="font-size:14px;font-weight:600;">${g('Model Year')}</div></div><div><div style="font-size:10px;color:var(--text-muted);text-transform:uppercase;">Body Type</div><div style="font-size:14px;font-weight:600;">${g('Body Class')}</div></div><div><div style="font-size:10px;color:var(--text-muted);text-transform:uppercase;">Engine</div><div style="font-size:14px;font-weight:600;">${g('Engine Model')}</div></div><div><div style="font-size:10px;color:var(--text-muted);text-transform:uppercase;">Manufacturer</div><div style="font-size:14px;font-weight:600;">${g('Manufacturer Name')}</div></div></div>`; addActivity('🔍','VIN decoded successfully','Just now'); }catch(e){box.innerHTML='<div style="color:var(--error); text-align:center;">Error decoding VIN</div>';}}
+    function addChatMessage(type,html){const box=document.getElementById('chatMessages'); const d=document.createElement('div'); d.className=`chat-message ${type}`; d.innerHTML=html; box.appendChild(d); box.scrollTop=box.scrollHeight;}
+    function sendMessage(){const i=document.getElementById('chatInput'); const m=i.value.trim(); if(!m) return; addChatMessage('user',m); i.value=''; setTimeout(()=>{addChatMessage('assistant',`Processing with ${currentAIProvider.toUpperCase()}…`);},600);}
+    function toggleVoice(){alert('Voice demo: enable in Chrome/Edge if needed.');}
+    function testAIConnection(){alert('AI connection test (demo)'); addChatMessage('assistant','✅ AI connection OK');}
+    function updateAIStatus(){const k=document.getElementById('aiApiKey').value; const dot=document.getElementById('aiStatusDot'); const txt=document.getElementById('aiStatusText'); if(k && k.length>10){aiApiKey=k; dot.style.background='var(--success)'; txt.textContent='AI Status: Connected';}else{aiApiKey=null; dot.style.background='var(--error)'; txt.textContent='AI Status: API Key Required';}}
+    function updateOpenPhoneStatus(){const k=openphoneApiKey=document.getElementById('openphoneApiKey').value; alert(k && k.length>10 ? 'OpenPhone ready' : 'Enter OpenPhone key');}
+    function testOpenPhoneConnection(){if(!openphoneApiKey){alert('Please enter OpenPhone API key first');return;} addChatMessage('assistant','✅ OpenPhone API connected successfully');}
+    function saveAIConfig(){updateAIStatus(); updateOpenPhoneStatus(); alert('Configuration saved'); addActivity('🔧','AI configuration saved','Just now');}
+
+    /* EXPORT / REFRESH */
+    function exportData(){alert(`Exporting data…\n\nCustomers: ${customers.length}\nInventory: ${inventory.length}\nService Orders: ${serviceOrders.length}\nRevenue: ${formatCurrency(dashboardMetrics.revenue.value)}`); addActivity('📊','Data exported','Just now');}
+    async function refreshData(){ if(window.db) await loadCustomersFromDB(); updateDashboardMetrics(); renderServiceTable(); renderCustomerTable(); renderInventoryTable(); renderCallTable(); renderEmailTable(); addActivity('🔄','Data refreshed','Just now'); alert('All data refreshed successfully!');}
+  </script>
+
+  <!-- ======= SUPABASE (FIXED) ======= -->
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script>
+    // 1) Connect to Supabase
+    const SUPABASE_URL = "https://zpgdsgutiheilshgrnwl.supabase.co";
+    const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InpwZ2RzZ3V0aWhlaWxzaGdybndsIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTUwMjA3NDMsImV4cCI6MjA3MDU5Njc0M30.LC-ro-E2k_Xb7UK337QP8V2HddpftjV5g1ZsI6D0c8k";
+    const db = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+    window.db = db;
+
+    // 2) Map DB row -> UI object
+    function mapRowToCustomer(row){
+      const full = (row["Name"] ?? row.name ?? "").toString().trim();
+      const [first, ...rest] = full.split(/\s+/);
+      const last = rest.join(" ");
+      const budgetStr = String(row["Budget"] ?? row.budget ?? "");
+      const numeric = parseInt(budgetStr.replace(/[^0-9]/g, "")) || 0;
+      return {
+        id: row.id ?? row.ID ?? row.uuid ?? row["ID"] ?? Date.now(),
+        firstName:first||"", lastName:last||"",
+        email: row["Email"] ?? row.email ?? "",
+        phone: row["Phone"] ?? row.phone ?? "",
+        vehicleInterest: row["Vehicle of interest"] ?? row.vehicle_interest ?? "",
+        budget: row["Budget"] ?? row.budget ?? "",
+        address: row["Address"] ?? row.address ?? "",
+        currentVehicle: row["Current Vehicle/Trade in"] ?? row.current_vehicle ?? "",
+        status:"new", leadScore:8, value:numeric, lastContact:"—"
+      };
+    }
+
+    // 3) Read customers
+    async function loadCustomersFromDB(){
+      try{
+        let query = db.from("customers").select("*");
+        // Try ordering by created_at if the column exists
+        let { data, error } = await query.order("created_at", { ascending:false });
+        if (error) { ({ data, error } = await db.from("customers").select("*")); }
+        if (error) throw error;
+
+        window.customers.length = 0;
+        (data||[]).forEach(r => window.customers.push(mapRowToCustomer(r)));
+
+        if (typeof renderCustomerTable === "function") renderCustomerTable();
+        if (typeof updateDashboardMetrics === "function") updateDashboardMetrics();
+        console.info("Supabase → loaded customers:", window.customers.length);
+      }catch(e){
+        console.error("loadCustomersFromDB failed:", e);
+        alert("Could not load customers from Supabase (check policies and console).");
+      }
+    }
+
+    // 4) Create customer (single, correct version)
     async function addCustomer(){
-     // === REPLACE your entire addCustomer() with this version ===
-async function addCustomer() {
-  const name  = (document.getElementById('newCustomerName')?.value || '').trim();
-  const address  = (document.getElementById('newCustomerAddress')?.value || '').trim();
-  const email = (document.getElementById('newCustomerEmail')?.value || '').trim();
-  const phone = (document.getElementById('newCustomerPhone')?.value || '').trim();
-  const vehicleInterest = (document.getElementById('newCustomerVehicleInterest')?.value || '').trim();
-  const currentVehicle  = (document.getElementById('newCustomerCurrentVehicle')?.value || '').trim();
-  const budget = (document.getElementById('newCustomerBudget')?.value || '').trim();
-  const statusEl = document.getElementById('newCustomerStatus');
+      const name  = (document.getElementById("newCustomerName")?.value || "").trim();
+      const address  = (document.getElementById("newCustomerAddress")?.value || "").trim();
+      const email = (document.getElementById("newCustomerEmail")?.value || "").trim();
+      const phone = (document.getElementById("newCustomerPhone")?.value || "").trim();
+      const vehicleInterest = (document.getElementById("newCustomerVehicleInterest")?.value || "").trim();
+      const currentVehicle  = (document.getElementById("newCustomerCurrentVehicle")?.value || "").trim();
+      const budget = (document.getElementById("newCustomerBudget")?.value || "").trim();
 
-  if (!name) { alert('Please enter a name'); return; }
-  if (!window.db) { alert('Database client not ready'); return; }
+      if (!name) { alert("Please enter a name"); return; }
 
-  // Build a row that matches your table's columns exactly (including spaces)
-  const row = {
-    ["Name"]: name,
-    ["Address"]: address,
-    ["Email"]: email,
-    ["Phone"]: phone,
-    ["Vehicle of interest"]: vehicleInterest,
-    ["Current Vehicle/Trade in"]: currentVehicle,
-    ["Budget"]: budget
-  };
-
-  // Try to write to Supabase. If it fails, show a clear error and STOP.
-  const { data, error } = await window.db
-    .from('customers')
-    .insert([row])
-    .select(); // get the inserted row back (optional, but useful)
-
-  if (error) {
-    console.error('Supabase insert failed:', error);
-    alert('❌ Could not save to Supabase: ' + (error.message || error));
-    return;
-  }
-
-  // Insert succeeded → reload from DB so the table shows real stored data
-  await loadCustomersFromDB();
-
-  // Clear the form
-  for (const id of [
-    'newCustomerName','newCustomerAddress','newCustomerEmail','newCustomerPhone',
-    'newCustomerVehicleInterest','newCustomerCurrentVehicle','newCustomerBudget'
-  ]) {
-    const el = document.getElementById(id);
-    if (el) el.value = '';
-  }
-  if (statusEl) statusEl.value = 'new';
-
-  // Close the form and log activity
-  if (typeof closeCustomerForm === 'function') closeCustomerForm();
-  if (typeof addActivity === 'function') addActivity('👤', `New customer: ${name}`, 'Just now');
-}
-// === END replacement ===
- }
-
-      let ok=false;
-      if(window.db){
-        const { error } = await window.db.from('customers').insert([{
+      try {
+        const { error } = await db.from("customers").insert([{
           ["Name"]: name,
           ["Address"]: address,
           ["Email"]: email,
@@ -714,7 +1251,29 @@ async function addCustomer() {
           ["Current Vehicle/Trade in"]: currentVehicle,
           ["Budget"]: budget
         }]);
-        if(error){ console.warn('Supabase insert failed:', error.message); }
+
+        if (error) throw error;
+
+        await loadCustomersFromDB();
+
+        // Clear & close form
+        ["newCustomerName","newCustomerAddress","newCustomerEmail","newCustomerPhone","newCustomerVehicleInterest","newCustomerCurrentVehicle","newCustomerBudget"].forEach(id => { const el=document.getElementById(id); if(el) el.value=""; });
+        const statusEl=document.getElementById("newCustomerStatus"); if(statusEl) statusEl.value="new";
+        if (typeof closeCustomerForm === "function") closeCustomerForm();
+        if (typeof addActivity === "function") addActivity("👤", `New customer: ${name}`, "Just now");
+      } catch(e) {
+        const msg = /row level|rls/i.test(String(e.message)) ? "RLS policy is blocking INSERT. Add an anon INSERT policy." : (e.message || e);
+        console.error("Insert failed:", e);
+        alert("Could not save to Supabase: " + msg);
+      }
+    }
+
+    // 5) Auto-load from DB on first paint
+    document.addEventListener("DOMContentLoaded", () => { loadCustomersFromDB(); });
+  </script>
+</body>
+</html>
+warn('Supabase insert failed:', error.message); }
         else { ok=true; }
       }
 
