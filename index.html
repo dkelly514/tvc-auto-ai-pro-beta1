@@ -646,16 +646,62 @@
 
     // 4) Add Customer -> insert into Supabase, then reload
     async function addCustomer(){
-      const name  = (document.getElementById('newCustomerName')?.value||'').trim();
-      const address  = (document.getElementById('newCustomerAddress')?.value||'').trim();
-      const email = (document.getElementById('newCustomerEmail')?.value||'').trim();
-      const phone = (document.getElementById('newCustomerPhone')?.value||'').trim();
-      const vehicleInterest = (document.getElementById('newCustomerVehicleInterest')?.value||'').trim();
-      const currentVehicle  = (document.getElementById('newCustomerCurrentVehicle')?.value||'').trim();
-      const budget = (document.getElementById('newCustomerBudget')?.value||'').trim();
-      const status = document.getElementById('newCustomerStatus')?.value || 'new';
+     // === REPLACE your entire addCustomer() with this version ===
+async function addCustomer() {
+  const name  = (document.getElementById('newCustomerName')?.value || '').trim();
+  const address  = (document.getElementById('newCustomerAddress')?.value || '').trim();
+  const email = (document.getElementById('newCustomerEmail')?.value || '').trim();
+  const phone = (document.getElementById('newCustomerPhone')?.value || '').trim();
+  const vehicleInterest = (document.getElementById('newCustomerVehicleInterest')?.value || '').trim();
+  const currentVehicle  = (document.getElementById('newCustomerCurrentVehicle')?.value || '').trim();
+  const budget = (document.getElementById('newCustomerBudget')?.value || '').trim();
+  const statusEl = document.getElementById('newCustomerStatus');
 
-      if(!name){ alert('Please enter a name'); return; }
+  if (!name) { alert('Please enter a name'); return; }
+  if (!window.db) { alert('Database client not ready'); return; }
+
+  // Build a row that matches your table's columns exactly (including spaces)
+  const row = {
+    ["Name"]: name,
+    ["Address"]: address,
+    ["Email"]: email,
+    ["Phone"]: phone,
+    ["Vehicle of interest"]: vehicleInterest,
+    ["Current Vehicle/Trade in"]: currentVehicle,
+    ["Budget"]: budget
+  };
+
+  // Try to write to Supabase. If it fails, show a clear error and STOP.
+  const { data, error } = await window.db
+    .from('customers')
+    .insert([row])
+    .select(); // get the inserted row back (optional, but useful)
+
+  if (error) {
+    console.error('Supabase insert failed:', error);
+    alert('❌ Could not save to Supabase: ' + (error.message || error));
+    return;
+  }
+
+  // Insert succeeded → reload from DB so the table shows real stored data
+  await loadCustomersFromDB();
+
+  // Clear the form
+  for (const id of [
+    'newCustomerName','newCustomerAddress','newCustomerEmail','newCustomerPhone',
+    'newCustomerVehicleInterest','newCustomerCurrentVehicle','newCustomerBudget'
+  ]) {
+    const el = document.getElementById(id);
+    if (el) el.value = '';
+  }
+  if (statusEl) statusEl.value = 'new';
+
+  // Close the form and log activity
+  if (typeof closeCustomerForm === 'function') closeCustomerForm();
+  if (typeof addActivity === 'function') addActivity('👤', `New customer: ${name}`, 'Just now');
+}
+// === END replacement ===
+ }
 
       let ok=false;
       if(window.db){
